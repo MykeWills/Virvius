@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+Virvius/Assets/Scenes/SampleScene.unity filter=lfs diff=lfs merge=lfs -text
+virvius/Assets/Video/Intro.mp4 filter=lfs diff=lfs merge=lfs -text
+virvius/Assets/Video/PreviewVideo.mp4 filter=lfs diff=lfs merge=lfs -text
