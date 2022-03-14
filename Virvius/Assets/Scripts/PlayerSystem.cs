@@ -214,7 +214,7 @@ public class PlayerSystem : MonoBehaviour
     [SerializeField]
     private Text[] aAmtText = new Text[4];
     [SerializeField]
-    private Sprite[] flashSprites = new Sprite[2];
+    private Sprite[] flashSprites = new Sprite[4];
     [SerializeField]
     private Image[] enviromentUIActiveImage = new Image[3];
     [Space]
@@ -823,8 +823,8 @@ public class PlayerSystem : MonoBehaviour
         }
         else
         {
-            if (isDamaged) spriteIndex = powerupSystem.powerEnabled[5] ? 5 : 1;
-            else spriteIndex = powerupSystem.powerEnabled[4] ? 3 : 0; ;
+            if (isDamaged) spriteIndex = powerupSystem.powerEnabled[5] ? 3 : 1;
+            else spriteIndex = powerupSystem.powerEnabled[4] ? 2 : 0; ;
             if (flashUI.sprite != flashSprites[spriteIndex])
                 flashUI.sprite = flashSprites[spriteIndex];
 

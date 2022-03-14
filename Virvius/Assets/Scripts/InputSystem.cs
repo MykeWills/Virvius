@@ -591,8 +591,8 @@ public class InputSystem : MonoBehaviour
                 }
                 if (!overTilt)
                 {
-                    if (inputX > 0.2f) tiltAngle = -2;
-                    else if (inputX < -0.2f) tiltAngle = 2;
+                    if (inputX > 0.3f) tiltAngle = -3;
+                    else if (inputX < -0.3f) tiltAngle = 3;
                     else tiltAngle = 0;
                     Vector3 headRot = new Vector3(0, 0, tiltAngle);
                     Quaternion rot = Quaternion.Euler(headRot);
@@ -733,9 +733,9 @@ public class InputSystem : MonoBehaviour
     }
     public void DamageAnimation()
     {
-        SetVibration(0, 1, 0.2f);
-        SetVibration(1, 1, 0.2f);
-        RecoilEffect(0, 0, -2, 120);
+        SetVibration(0, 2, 0.2f);
+        SetVibration(1, 2, 0.2f);
+        RecoilEffect(0, 0, -7.5f, 180);
     }
     private void EstimatePlayerVelocity_InvokeRepeating()
     {

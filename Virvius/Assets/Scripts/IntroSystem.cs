@@ -89,7 +89,7 @@ public class IntroSystem : MonoBehaviour
     {
         if (!flashScreen) return;
         if (!flashStartShot.enabled) flashStartShot.enabled = true;
-        flashTimer += time * (!switchFlash ? 10 : -1f); 
+        flashTimer += time * (!switchFlash ? 10 : -0.001f); 
         flashTimer = Mathf.Clamp01(flashTimer);
         flashStartShot.color = new Color(flashStartShot.color.r, flashStartShot.color.g, flashStartShot.color.b, flashTimer);
         if(flashTimer == 0 || flashTimer == 1)

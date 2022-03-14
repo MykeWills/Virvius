@@ -643,7 +643,12 @@ public class OptionsSystem : MonoBehaviour
         "Technical Chaos",
         "Dark Omen",
     };
-
+    private string[] resolutionIDs = new string[3]
+    {
+        "SD ",
+        "HD ",
+        "UHD "
+    };
     [SerializeField]
     private AudioClip[] musicTracks = new AudioClip[7];
     [HideInInspector]
@@ -2000,7 +2005,11 @@ public class OptionsSystem : MonoBehaviour
     {
         stringBuilderFps.Clear();
         fpsCount = (1 / unScaledDTime);
-        stringBuilderFps.Append(screenSize + Screen.currentResolution.width + " X " + Screen.currentResolution.height + " "+ Screen.currentResolution.refreshRate + "HZ " + fpsLabel + Mathf.Round(fpsCount));
+        int rID = 0;
+        if (Screen.currentResolution.width < 1280 && Screen.currentResolution.height < 720) rID = 0;
+        else if ((Screen.currentResolution.width > 1279 && Screen.currentResolution.width < 1921) && Screen.currentResolution.height > 719 && Screen.currentResolution.height <= 1080) rID = 1;
+        else rID = 2;
+        stringBuilderFps.Append(resolutionIDs[rID] + screenSize + Screen.currentResolution.width + " X " + Screen.currentResolution.height + " "+ Screen.currentResolution.refreshRate + "HZ" + fpsLabel + Mathf.Round(fpsCount));
         return stringBuilderFps.ToString();
     }
     public void ShowFPS()
