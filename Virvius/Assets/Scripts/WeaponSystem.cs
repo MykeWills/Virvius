@@ -16,7 +16,6 @@ public class WeaponSystem : MonoBehaviour
     //===================================[PRIVATE FIELDS]======================================//
     //========================================================================================//
     //[Class Access]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-    private StringBuilder aimSB = new StringBuilder();
     [SerializeField]
     private AudioSystem audioSystem;
     [SerializeField]
@@ -298,6 +297,18 @@ public class WeaponSystem : MonoBehaviour
     [SerializeField]
     private AudioClip[] rocketLoadSfx = new AudioClip[3];
     [Space]
+    [Header("Rail Gun Specific ================================")]
+    [SerializeField]
+    private Transform[] railEmitters = new Transform[1];
+    [SerializeField]
+    private MeshRenderer[] railMuzzle = new MeshRenderer[1];
+    [SerializeField]
+    private ParticleSystem[] railSmoke = new ParticleSystem[1];
+    [SerializeField]
+    private Light[] railLight = new Light[1];
+    [SerializeField]
+    private AudioClip[] railLoadSfx = new AudioClip[1];
+    [Space]
     [Header("Photon Specific ================================")]
     [SerializeField]
     private Transform photonBarrel;
@@ -363,7 +374,7 @@ public class WeaponSystem : MonoBehaviour
         defaultWeaponAmmo = new int[10] { 0, 25, 50, 25, 75, 5, 2, 0, 50, 0 };
         weaponAmmo = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         weaponMaxAmmo = new int[10] { 0, 100, 150, 100, 300, 50, 20, 30, 200, 100 };
-        AutoSelectWeapon(6);
+        AutoSelectWeapon(0);
     }
     private void Update()
     {
@@ -449,7 +460,7 @@ public class WeaponSystem : MonoBehaviour
             case WeaponType.MiniGun: weaponIndex = 4; weaponEmitter = minigunEmitters; break;
             case WeaponType.GrenadeLauncher: weaponIndex = 5; weaponEmitter = grenadeLauncherEmitters; break;
             case WeaponType.RocketLauncher: weaponIndex = 6; weaponEmitter = rocketEmitters; break;
-            case WeaponType.RailGun: weaponIndex = 7; break;
+            case WeaponType.RailGun: weaponIndex = 7; weaponEmitter = railEmitters; break;
             case WeaponType.PhotonCannon: weaponIndex = 8; weaponEmitter = photonEmitter; break;
             case WeaponType.MSigma: weaponIndex = 9; break;
         }
@@ -470,7 +481,7 @@ public class WeaponSystem : MonoBehaviour
         //ROCKETLAUNCHER-----------------------------------------------------------------------------------
         for (int m = 0; m < 3; m++) { if (rocketMuzzle[m].enabled) rocketMuzzle[m].enabled = false; }
         //RAILGUN------------------------------------------------------------------------------------------
-        //if (railgunMuzzle[0].enabled) railgunMuzzle[0].enabled = false;
+        if (railMuzzle[0].enabled) railMuzzle[0].enabled = false;
         //PHOTONCANNON-------------------------------------------------------------------------------------
         if (photonMuzzle[0].enabled) photonMuzzle[0].enabled = false;
         //MSIGMA-------------------------------------------------------------------------------------------
@@ -490,7 +501,7 @@ public class WeaponSystem : MonoBehaviour
         //ROCKETLAUNCHER-----------------------------------------------------------------------------------
         for (int s = 0; s < 3; s++) { if (rocketSmoke[s].isPlaying) rocketSmoke[s].Stop(); }
         //RAILGUN------------------------------------------------------------------------------------------
-        //if (railgunSmoke[0].isPlaying) railgunSmoke[0].Stop();
+        if (railSmoke[0].isPlaying) railSmoke[0].Stop();
         //PHOTONCANNON-------------------------------------------------------------------------------------
         if (photonSmoke[0].isPlaying) photonSmoke[0].Stop();
         //MSIGMA-------------------------------------------------------------------------------------------
@@ -512,7 +523,7 @@ public class WeaponSystem : MonoBehaviour
         //ROCKETLAUNCHER-----------------------------------------------------------------------------------
         for (int l = 0; l < 3; l++) { if (rocketLight[l].enabled) rocketLight[l].enabled = false; }
         //RAILGUN------------------------------------------------------------------------------------------
-        //if (railgunLight[0].enabled) railgunLight[0].enabled = false;
+        if (railLight[0].enabled) railLight[0].enabled = false;
         //PHOTONCANNON-------------------------------------------------------------------------------------
         if (photonLight[0].enabled) photonLight[0].enabled = false;
         //MSIGMA-------------------------------------------------------------------------------------------
@@ -802,6 +813,18 @@ public class WeaponSystem : MonoBehaviour
                     //switch to grenadelauncher = downgrade to the previous weapon
                     if (weaponObtained[5] && weaponAmmo[5] > 0)
                         AutoSelectWeapon(5);
+                    else
+                    {
+                        AutoSelectWeapon(CheckWeaponAvailable() ? CheckWeaponAvailableID(true) : 0);
+                    }
+                    break;
+                }
+            //Railgun
+            case 7:
+                {
+                    //switch to grenadelauncher = downgrade to the previous weapon
+                    if (weaponObtained[6] && weaponAmmo[6] > 0)
+                        AutoSelectWeapon(6);
                     else
                     {
                         AutoSelectWeapon(CheckWeaponAvailable() ? CheckWeaponAvailableID(true) : 0);
@@ -1532,6 +1555,24 @@ public class WeaponSystem : MonoBehaviour
                         FireWeaponType(wType);
                         break;
                     }
+                case WeaponType.RailGun:
+                    {
+                        if (noAmmoHolstered) return;
+                        if (bobSystem[weaponIndex].isRecoiling) return;
+                        inputSystem.RecoilEffect(-3, 0, 0, 40);
+                        bobSystem[weaponIndex].isRecoiling = true;
+                        isShooting = true;
+                        gunFlash = true;
+
+                        if (powerupSystem.powerEnabled[0])
+                        {
+                            audioSystem.PlayAudioSource(powerupSystem.powerSound[0], 1, 1f, 128);
+                            audioSystem.PlayAudioSource(weaponSfx, 1, 0.5f, 150);
+                        }
+                        else audioSystem.PlayAudioSource(weaponSfx, 1, 1f, 128);
+                        FireWeaponType(wType);
+                        break;
+                    }
                 case WeaponType.PhotonCannon:
                     {
 
@@ -1724,6 +1765,18 @@ public class WeaponSystem : MonoBehaviour
                     {
                         if (rocketSmoke[s].gameObject.activeInHierarchy) rocketSmoke[s].gameObject.SetActive(false);
                         if (!rocketSmoke[s].gameObject.activeInHierarchy) rocketSmoke[s].gameObject.SetActive(true);
+                    }
+                    duration = powerupSystem.powerEnabled[0] ? 1.3f : 1f;
+                    inputSystem.SetVibration(1, 1f, duration);
+                    break;
+                }
+            case WeaponType.RailGun:
+                {
+                    SetupBullet(weaponEmitter[0], 100000);
+                    for (int s = 0; s < railSmoke.Length; s++)
+                    {
+                        if (railSmoke[s].gameObject.activeInHierarchy) railSmoke[s].gameObject.SetActive(false);
+                        if (!railSmoke[s].gameObject.activeInHierarchy) railSmoke[s].gameObject.SetActive(true);
                     }
                     duration = powerupSystem.powerEnabled[0] ? 1.3f : 1f;
                     inputSystem.SetVibration(1, 1f, duration);
@@ -1981,12 +2034,34 @@ public class WeaponSystem : MonoBehaviour
                     }
                     break;
                 }
+            case WeaponType.RailGun:
+                {
+                    for (int m = 0; m < 1; m++)
+                    {
+                        railMuzzle[m].enabled = true;
+                        railLight[m].enabled = optionsSystem.showFlashEffects;
+                    }
+                    gunflashTimer -= time;
+                    gunflashTimer = Mathf.Clamp(gunflashTimer, 0.0f, 0.05f);
+                    if (gunflashTimer == 0.0f)
+                    {
+                        for (int m = 0; m < 1; m++)
+                        {
+                            railMuzzle[m].transform.Rotate(0, 30, 0);
+                            railMuzzle[m].enabled = false;
+                            railLight[m].enabled = false;
+                        }
+                        gunFlash = false;
+                        gunflashTimer = gunflashTime;
+                    }
+                    break;
+                }
             case WeaponType.PhotonCannon:
                 {
                     for (int m = 0; m < 1; m++)
                     {
                         photonMuzzle[m].enabled = true;
-                        photonMuzzle[m].enabled = optionsSystem.showFlashEffects;
+                        photonLight[m].enabled = optionsSystem.showFlashEffects;
                     }
                     gunflashTimer -= time;
                     gunflashTimer = Mathf.Clamp(gunflashTimer, 0.0f, 0.05f);

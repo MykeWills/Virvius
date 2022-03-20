@@ -3,3 +3,4 @@
 Virvius/Assets/Scenes/SampleScene.unity filter=lfs diff=lfs merge=lfs -text
 virvius/Assets/Video/Intro.mp4 filter=lfs diff=lfs merge=lfs -text
 virvius/Assets/Video/PreviewVideo.mp4 filter=lfs diff=lfs merge=lfs -text
+Virvius/Assets/Editor/x64/Bakery/cudnn64_7.dll filter=lfs diff=lfs merge=lfs -text

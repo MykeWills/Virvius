@@ -457,14 +457,14 @@ public class CommandSystem : MonoBehaviour
                     //full ammo
                     for (int a = 1; a < 10; a++)
                     {
-                        if (a != 0 && a != 7 && a != 9)
+                        if (a != 0 && a != 9)
                             weaponSystem.GetAmmo(a, weaponSystem.weaponMaxAmmo[a]);
                     }
                     //all guns
                     for (int w = 0; w < 10; w++)
                     {
                         //temporary until all weapons are designed...
-                        if (w == 7 || w == 9)
+                        if (w == 9)
                             weaponSystem.weaponObtained[w] = false;
                         else weaponSystem.weaponObtained[w] = true;
                     }
@@ -499,7 +499,7 @@ public class CommandSystem : MonoBehaviour
                         for (int w = 0; w < 10; w++)
                         {
                             //temporary until all weapons are designed...
-                            if (w == 7 || w == 9)
+                            if (w == 9)
                                 weaponSystem.weaponObtained[w] = false;
                             else weaponSystem.weaponObtained[w] = true;
                         }
@@ -513,7 +513,7 @@ public class CommandSystem : MonoBehaviour
                         if (valConversion == null) return; 
                         int val = valConversion.Value;
                         //temporary until all weapons are designed...
-                        if (val == 7 || val == 9) { SendCommandError(11); return; }
+                        if (val == 9) { SendCommandError(11); return; }
                         else
                         {  
                             //set the second container to store the final output message to user
@@ -536,7 +536,7 @@ public class CommandSystem : MonoBehaviour
                         //apply cheatcode parameter
                         for (int a = 1; a < 10; a++)
                         {
-                            if (a != 0 && a != 7 && a != 9)
+                            if (a != 0 && a != 9)
                                 weaponSystem.GetAmmo(a, weaponSystem.defaultWeaponAmmo[a]);
                         }
                         AudioSystem.audioSystem.PlayAudioSource(inputSfx[1], 1, 1, 128);
@@ -549,7 +549,7 @@ public class CommandSystem : MonoBehaviour
                         //apply cheatcode parameter
                         for (int a = 1; a < 10; a++)
                         {
-                            if (a != 0 && a != 7 && a != 9)
+                            if (a != 0 && a != 9)
                                 weaponSystem.GetAmmo(a, weaponSystem.weaponMaxAmmo[a]);
                         }
                         AudioSystem.audioSystem.PlayAudioSource(inputSfx[1], 1, 1, 128);
