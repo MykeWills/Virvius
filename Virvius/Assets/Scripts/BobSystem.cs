@@ -110,7 +110,7 @@ public class BobSystem : MonoBehaviour
                     float curBobSpeed = inputSystem.isRunning ? bobSpeed * 1.35f : bobSpeed;
                     float bobSpeedModule = environmentSystem.headUnderWater ? curBobSpeed / 4 : curBobSpeed;
                     float X = HolsteredWeapon() ? weaponSystem.holsteredPos[weaponSystem.weaponIndex].x : bobVectors[bobIndex].x;
-                    float Y = HolsteredWeapon() ? weaponSystem.holsteredPos[weaponSystem.weaponIndex].y : bobVectors[bobIndex].y;
+                    //float Y = HolsteredWeapon() ? weaponSystem.holsteredPos[weaponSystem.weaponIndex].y : bobVectors[bobIndex].y;
                     float Z = HolsteredWeapon() ? weaponSystem.holsteredPos[weaponSystem.weaponIndex].z : bobVectors[bobIndex].z;
                     Vector3 newBobValue = new Vector3(X, bobVectors[bobIndex].y, Z);
                     transform.localPosition = MoveTowards(newBobValue, bobSpeedModule * (Mathf.Abs(inputSystem.inputX / 2) + Mathf.Abs(inputSystem.inputY)) * inputModifyFactor);

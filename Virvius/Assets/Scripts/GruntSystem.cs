@@ -209,7 +209,7 @@ public class GruntSystem : MonoBehaviour
                     //rocket
                     case 5: if (health <= (maxHealth / 4)) MutilateEnemy(); else dmgAmt = Random.Range(10f, 15); break;
                     //railgun
-                    case 6: dmgAmt = Random.Range(30.75f, 41.01f); break;
+                    case 6: if (health <= (maxHealth / 4)) MutilateEnemy(); else dmgAmt = Random.Range(30.75f, 41.01f); break;
                     //photon
                     case 7: dmgAmt = Random.Range(3.60f, 5.1f); break;
                     //Sigma
@@ -234,7 +234,7 @@ public class GruntSystem : MonoBehaviour
                     }
                     else
                     {
-                        collision.gameObject.SetActive(false);
+                        if(tags[t] != "RailBullet") collision.gameObject.SetActive(false);
                     }
                 }
                 return;

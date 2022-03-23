@@ -75,7 +75,7 @@ public class DinSubSystem : MonoBehaviour
                     }
                     else
                     {
-                        collision.gameObject.SetActive(false);
+                        if (tags[t] != "RailBullet") collision.gameObject.SetActive(false);
                     }
                 }
                 return;

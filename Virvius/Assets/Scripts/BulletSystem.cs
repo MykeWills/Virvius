@@ -82,7 +82,7 @@ public class BulletSystem : MonoBehaviour
     {
         string currentTag = collision.gameObject.tag;
         isCollided = true;
-        if (transform.tag == "PhotonBullet")
+        if (transform.tag == "PhotonBullet" || transform.tag == "RailBullet")
             sparkType = SparkType.plasma;
         else
         {
@@ -91,9 +91,9 @@ public class BulletSystem : MonoBehaviour
         }
         switch (currentTag)
         {
-            case "Enemy": isCollided = false; sparkType = SparkType.blood; EnableSpark(); transform.gameObject.SetActive(false); return;
-            case "DinEnemy": isCollided = false; sparkType = SparkType.blood; EnableSpark(); transform.gameObject.SetActive(false); return;
-            case "Secret": isCollided = false; if (CheckSecretOpen(collision)) { transform.gameObject.SetActive(false); return; }                          sparkType = SparkType.blood; EnableSpark(); transform.gameObject.SetActive(false); return;
+            case "Enemy": isCollided = false; sparkType = SparkType.blood; EnableSpark(); if (transform.tag != "RailBullet") transform.gameObject.SetActive(false); return;
+            case "DinEnemy": isCollided = false; sparkType = SparkType.blood; EnableSpark(); if (transform.tag != "RailBullet") transform.gameObject.SetActive(false); return;
+            case "Secret": isCollided = false; if (CheckSecretOpen(collision)) { transform.gameObject.SetActive(false); return; } sparkType = SparkType.blood; EnableSpark(); transform.gameObject.SetActive(false); return;
             case "Player": isCollided = false; transform.gameObject.SetActive(false); return;
             //case "Water": isCollided = false; sparkType = SparkType.water; EnableSpark(); transform.gameObject.SetActive(false); return;
             //case "Acid": isCollided = false; sparkType = SparkType.acid; EnableSpark(); transform.gameObject.SetActive(false); return;
@@ -206,6 +206,7 @@ public class BulletSystem : MonoBehaviour
             case "MinigunBullet": lifeTime = 5; break;
             case "GrenadeBullet": lifeTime = 5; break;
             case "RocketBullet": lifeTime = 10; break;
+            case "RailBullet": lifeTime = 2; break;
             case "PhotonBullet": lifeTime = 2; break;
         }
         holeSystem.SetupHole(lifeTime);
@@ -228,6 +229,7 @@ public class BulletSystem : MonoBehaviour
             case "MinigunBullet": holeType = HoleType.bullet;  break;
             case "GrenadeBullet": holeType = HoleType.bullet;  break;
             case "RocketBullet": holeType = HoleType.bullet;  break;
+            case "RailBullet": holeType = HoleType.plasma; break;
             case "PhotonBullet": holeType = HoleType.plasma; break;
         }
         switch (holeType)

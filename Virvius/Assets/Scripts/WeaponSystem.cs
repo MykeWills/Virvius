@@ -119,6 +119,7 @@ public class WeaponSystem : MonoBehaviour
     private int selectionIndex = 1;
     private int keyIndex = 1;
     private int weaponID = 0;
+    private int handID = 0;
     //[public Access (Non Inspector)]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
     [HideInInspector]
     public bool[] weaponEquipped;
@@ -147,7 +148,7 @@ public class WeaponSystem : MonoBehaviour
         WeaponType.PhotonCannon,
         WeaponType.MSigma
 };
-    [HideInInspector]
+    //[HideInInspector]
     public Vector3[] holsteredReturnPos = new Vector3[10];
     //[HideInInspector]
     public Vector3[] holsteredPos = new Vector3[10];
@@ -307,7 +308,23 @@ public class WeaponSystem : MonoBehaviour
     [SerializeField]
     private Light[] railLight = new Light[1];
     [SerializeField]
-    private AudioClip[] railLoadSfx = new AudioClip[1];
+    private GameObject railWeaponCoil;
+    [SerializeField]
+    private GameObject railCoilPrefab;
+    [SerializeField]
+    private Transform railCoilPool;
+    [SerializeField]
+    private Renderer railShieldRend;
+    [SerializeField]
+    private float railShieldTime = 0;
+    private Color[] shieldColors = new Color[2]
+    {
+        new Color(0, 1f, 2.5f, 1),
+        new Color(2, 0, 0, 1)
+    };
+    private float railShieldTimer = 0;
+    private bool railShot = false;
+
     [Space]
     [Header("Photon Specific ================================")]
     [SerializeField]
@@ -371,7 +388,7 @@ public class WeaponSystem : MonoBehaviour
         // Set the default weapon for the game
         weaponObtained = new bool[10] { true, false, false, false, false, false, false, false, false, false };
         weaponEquipped = new bool[10] { false, false, false, false, false, false, false, false, false, false };
-        defaultWeaponAmmo = new int[10] { 0, 25, 50, 25, 75, 5, 2, 0, 50, 0 };
+        defaultWeaponAmmo = new int[10] { 0, 25, 50, 25, 75, 5, 2, 4, 50, 0 };
         weaponAmmo = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         weaponMaxAmmo = new int[10] { 0, 100, 150, 100, 300, 50, 20, 30, 200, 100 };
         AutoSelectWeapon(0);
@@ -381,19 +398,40 @@ public class WeaponSystem : MonoBehaviour
         if (gameSystem.BlockedAttributesActive()) return;
         if (playerSystem.isDead) return;
         time = Time.deltaTime * powerupSystem.BPowerMultiplier;
-        LoadRockets();
         AutoSelect(weaponID);
         SelectWeapon();
         KeyboardSelectWeapon();
-        if (switchingWeapon) return;
         TiltWeapon();
         HolsterWeapon();
         GunFlash(wType);
         ShootWeapon();
         MinigunBarrel();
         GrenadeLauncherDrum();
+        LoadRockets();
+        RestoreWeaponCoil();
         PhotonBarrel();
        
+    }
+    public void SelectWeaponHand(int index)
+    {
+        handID = index;
+        SetFOVAdjustment();
+    }
+    private void RestoreWeaponCoil()
+    {
+        if (wType != WeaponType.RailGun) return;
+        if (!railShot) return;
+        if (!railWeaponCoil.activeInHierarchy) railWeaponCoil.SetActive(true);
+        railShieldTimer -= time;
+        railShieldTimer = Mathf.Clamp(railShieldTimer, 0, railShieldTime);
+        if (!railShieldRend.materials[0].IsKeywordEnabled("_Emission")) railShieldRend.materials[0].EnableKeyword("_Emission");
+        railShieldRend.materials[0].SetColor("_EmissionColor", Color.Lerp(shieldColors[0], shieldColors[1], railShieldTimer) * 2);
+        if (railShieldTimer == 0)
+        {
+          
+            railShieldTimer = railShieldTime;
+            railShot = false;
+        }
     }
     //========================================================================================//
     //====================================[GAME FUNCTIONS]====================================//
@@ -427,6 +465,7 @@ public class WeaponSystem : MonoBehaviour
         bobSystem[weaponIndex].resetBobSystem(weaponList[weaponIndex]);
         weapons[weaponIndex].transform.localPosition = holsteredReturnPos[weaponIndex];
         weapons[weaponIndex].transform.localRotation = Quaternion.identity;
+       
         isHolstered = false;
         isWeaponMovementFinished = true;
         holsterActive = false;
@@ -438,6 +477,7 @@ public class WeaponSystem : MonoBehaviour
             revUp = false;
             powerSoundTimer = 0;
         }
+      
         else if (wType == WeaponType.PhotonCannon)
         {
             for (int sr = 0; sr < 4; sr++)
@@ -466,7 +506,15 @@ public class WeaponSystem : MonoBehaviour
         }
         ammoIsEmpty = false;
 
-
+        SelectWeaponHand(optionsSystem.handIndex);
+        if (wType == WeaponType.RailGun)
+        {
+            railShot = false;
+            railShieldTimer = railShieldTime;
+            railShieldRend.materials[0].SetColor("_EmissionColor", shieldColors[0] * 2);
+            if (railWeaponCoil.activeInHierarchy) railWeaponCoil.SetActive(false);
+            railWeaponCoil.SetActive(true);
+        }
         // Make sure all muzzle images a shut off.
         //SHOTGUN------------------------------------------------------------------------------------------
         if (shotgunMuzzle[0].enabled) shotgunMuzzle[0].enabled = false;
@@ -580,13 +628,12 @@ public class WeaponSystem : MonoBehaviour
         // Apply current weapon name to the ammo banner on the UI game screen.
 
         weaponName[versionID].text = weaponNames[weaponIndex];
-        if (ammo != weaponAmmo[val])
-            ammo = weaponAmmo[val];
+        ammo = weaponAmmo[val];
         ApplyWeaponThemeColor();
         if (commandSystem == null) commandSystem = CommandSystem.commandSystem;
         if (!powerupSystem.powerEnabled[3] && !commandSystem.masterCodesActive[1])
         {
-            if (!ammoIsEmpty && ammo <= 0)
+            if (ammo < 1)
             {
                 beginReving = false;
                 if (wType == WeaponType.MiniGun)
@@ -700,7 +747,11 @@ public class WeaponSystem : MonoBehaviour
     {
         float fov = optionsSystem.fieldOfView;
         float adj = Map(fov, 60, 120, 0, max);
-        return new Vector3(0, 0.225f, adj);
+        
+        float[] handPos = new float[3] { 0, 1.5f, -1.5f };
+        if (weaponIndex == 0) handID = 0;
+        else handID = optionsSystem.handIndex;
+        return new Vector3(handPos[handID], 0.225f, adj);
     }
     public void SetFOVAdjustment()
     {
@@ -926,6 +977,7 @@ public class WeaponSystem : MonoBehaviour
         ammoIsEmpty = false;
         noAmmoActive = false;
         beginReving = false;
+        beginShafting = false;
         gunflashTimer = gunflashTime;
         gunFlash = false;
         for (int bs = 0; bs < 10; bs++)
@@ -1225,7 +1277,7 @@ public class WeaponSystem : MonoBehaviour
     {
         // disregard if photon is not equipped
         if (!weaponEquipped[8]) return;
-        
+        if (weaponAmmo[8] < 1) return;
         for (int sr = 0; sr < 4; sr++)
         {
             if (currentRotation[sr] != (beginShafting ? Quaternion.Euler(shaftEndRotations[sr]) : shaftStartRotations[sr]))
@@ -1397,13 +1449,49 @@ public class WeaponSystem : MonoBehaviour
         newTiltPosition = new Vector3(clampX, clampY, 0);
         transform.localPosition = Vector3.Lerp(transform.localPosition, newTiltPosition, tiltSpeed * Time.deltaTime);
     }
+    private void CheckAmmo()
+    {
+        int val = (weaponIndex == 3) ? 1 : weaponIndex;
+        ammo = weaponAmmo[val];
+        if (commandSystem == null) commandSystem = CommandSystem.commandSystem;
+        if (!powerupSystem.powerEnabled[3] && !commandSystem.masterCodesActive[1])
+        {
+            if (ammo < 1)
+            {
+                beginShafting = false;
+                beginReving = false;
+                powerSoundTimer = 0;
+                loadRockets = false;
+                ammoIsEmpty = true;
+                noAmmoHolstered = false;
+                return;
+            }
+            else
+            {
+                if (wType == WeaponType.RocketLauncher) LaunchRockets();
+                ammoIsEmpty = false;
+                isHolstered = false;
+            }
+        }
+        else
+        {
+            if (wType == WeaponType.RocketLauncher)
+            {
+                LaunchRockets();
+            }
+            ammoIsEmpty = false;
+            isHolstered = false;
+        }
+    }
     private void ShootWeapon()
     {
+        if (switchingWeapon) return;
         // disable shoot if weapon is holstered
         if (holsterActive || noAmmoHolstered) return;
         // shoot the weapon with [RT]
         if (inputSystem.inputPlayer.GetButton("RT"))
         {
+            CheckAmmo();
             // check to see if current weapon ammo is empty first
             AudioClip weaponSfx = environmentSystem.headUnderWater ? noAmmoSound[1] : noAmmoSound[0];
             // if ammo is already empty and player is not [Berserk] or [Sword] equipped
@@ -1559,11 +1647,10 @@ public class WeaponSystem : MonoBehaviour
                     {
                         if (noAmmoHolstered) return;
                         if (bobSystem[weaponIndex].isRecoiling) return;
-                        inputSystem.RecoilEffect(-3, 0, 0, 40);
+                        inputSystem.RecoilEffect(-5, 0, 0, 45);
                         bobSystem[weaponIndex].isRecoiling = true;
                         isShooting = true;
                         gunFlash = true;
-
                         if (powerupSystem.powerEnabled[0])
                         {
                             audioSystem.PlayAudioSource(powerupSystem.powerSound[0], 1, 1f, 128);
@@ -1773,6 +1860,9 @@ public class WeaponSystem : MonoBehaviour
             case WeaponType.RailGun:
                 {
                     SetupBullet(weaponEmitter[0], 100000);
+                    if (railWeaponCoil.activeInHierarchy) railWeaponCoil.SetActive(false);
+                    railShieldRend.materials[0].SetColor("_EmissionColor", shieldColors[1] * 2);
+                    railShot = true;
                     for (int s = 0; s < railSmoke.Length; s++)
                     {
                         if (railSmoke[s].gameObject.activeInHierarchy) railSmoke[s].gameObject.SetActive(false);
@@ -1900,10 +1990,21 @@ public class WeaponSystem : MonoBehaviour
         //Turn on the bullet
         bullet.SetActive(true);
         //kill the bullet after lifetime (seconds)
-        if (wType != WeaponType.GrenadeLauncher)
+        switch (wType)
         {
-            if(bullet.TryGetComponent(out BulletSystem bulletSystem))
-                bulletSystem.SetupLifeTime(5);
+            case WeaponType.GrenadeLauncher: if (bullet.TryGetComponent(out BulletSystem bulletSystem)) bulletSystem.SetupLifeTime(5); break;
+            case WeaponType.RailGun: 
+                {
+                    GameObject railCoil = AccessRailCoil();
+                    //Set the coil position to match the weapons emitter
+                    railCoil.transform.position = emitter.position;
+                    //Set the coil Rotation to match the weapons emitter
+                    railCoil.transform.rotation = emitter.rotation;
+                    //Turn on the coil
+                    railCoil.SetActive(true);
+                    break;
+                }
+
         }
         //Add force to the bullet
         rb.AddForce(emitter.transform.forward * bulletForce);
@@ -2091,6 +2192,21 @@ public class WeaponSystem : MonoBehaviour
         {
             GameObject newBullet = Instantiate(bulletPrefab, bulletPool);
             return newBullet;
+        }
+        else
+            return null;
+    }
+    private GameObject AccessRailCoil()
+    {
+        for (int b = 0; b < railCoilPool.childCount; b++)
+        {
+            if (!railCoilPool.GetChild(b).gameObject.activeInHierarchy)
+                return railCoilPool.GetChild(b).gameObject;
+        }
+        if (GameSystem.expandBulletPool)
+        {
+            GameObject newCoild = Instantiate(railCoilPrefab, railCoilPool);
+            return newCoild;
         }
         else
             return null;

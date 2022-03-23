@@ -63,6 +63,7 @@ TagManager:
   - MSigma
   - Railgun
   - NuclearCrate
+  - RailBullet
   layers:
   - Default
   - TransparentFX

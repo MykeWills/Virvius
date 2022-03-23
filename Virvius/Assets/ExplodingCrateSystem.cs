@@ -21,10 +21,11 @@ public class ExplodingCrateSystem : MonoBehaviour
     private GameObject viewableCrate;
     private ContactPoint contactPoint;
 
-    private string[] collisionTags = new string[6]
+    private string[] collisionTags = new string[7]
     {
         "Player",
         "Enemy",
+        "DinEnemy",
         "ObstacleExplosive",
         "GrenadeBullet",
         "RocketBullet",

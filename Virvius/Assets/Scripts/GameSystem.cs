@@ -329,6 +329,7 @@ public class GameSystem : MonoBehaviour
             optionsSystem.autoAIndex = optionData.autoAIndex;
             optionsSystem.autoSIndex = optionData.autoSIndex;
             optionsSystem.cameraBIndex = optionData.cameraBIndex;
+            optionsSystem.handIndex = optionData.handIndex;
             optionsSystem.switchNewIndex = optionData.switchNewIndex;
             optionsSystem.switchEmptyIndex = optionData.switchEmptyIndex;
             optionsSystem.weaponMoveIndex = optionData.weaponBIndex;
@@ -411,6 +412,7 @@ public class GameSystem : MonoBehaviour
         optionData.autoAIndex = optionsSystem.autoAIndex;
         optionData.autoSIndex = optionsSystem.autoSIndex;
         optionData.cameraBIndex = optionsSystem.cameraBIndex;
+        optionData.handIndex = optionsSystem.handIndex;
         optionData.switchNewIndex = optionsSystem.switchNewIndex;
         optionData.switchEmptyIndex = optionsSystem.switchEmptyIndex;
         optionData.weaponBIndex = optionsSystem.weaponMoveIndex;
@@ -491,6 +493,7 @@ public struct OptionData
     public int autoAIndex;
     public int autoSIndex;
     public int cameraBIndex;
+    public int handIndex;
     public int switchNewIndex;
     public int switchEmptyIndex;
     public int weaponBIndex;

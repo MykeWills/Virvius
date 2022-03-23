@@ -124,11 +124,11 @@ public class OptionsSystem : MonoBehaviour
     [SerializeField]
     private Text[] gameWindowTElements;
     [SerializeField]
-    private Button[] gameWindowContent = new Button[7];
+    private Button[] gameWindowContent = new Button[8];
     [SerializeField]
     private Text[] gameContentSubText;
-    private bool[] gameHighlightedContent = new bool[7];
-    private string[] gameHighlightedMessages = new string[7]
+    private bool[] gameHighlightedContent = new bool[8];
+    private string[] gameHighlightedMessages = new string[8]
     {
         "Change game difficulty.",
         "Enable/disable weapon auto aim.",
@@ -136,7 +136,8 @@ public class OptionsSystem : MonoBehaviour
         "Enable/disable camera bobbing.",
         "Enable/disable weapon auto switching on pickup.",
         "Enable/disable weapon auto switching when out of ammo.",
-        "Enable/disable weapon auto centering."
+        "Enable/disable weapon auto centering.",
+        "Change players dominate weapon hand.",
     };
     [Space]
 
@@ -294,6 +295,17 @@ public class OptionsSystem : MonoBehaviour
     public bool cameraBobbing = true;
     [HideInInspector]
     public int cameraBIndex = 1;
+    //WEAPONHAND~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    [HideInInspector]
+    public int handIndex = 0;
+    private string[] handSubText = new string[3]
+    {
+        "CENTER",
+        "RIGHT",
+        "LEFT"
+    };
+    [HideInInspector]
+    public bool[] handActive = new bool[3] { false, false, false };
     //SWITCHWEAPONNEW~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     [HideInInspector]
     public bool autoSwitchNew = false;
@@ -842,6 +854,8 @@ public class OptionsSystem : MonoBehaviour
                             case 5: switchEmptyIndex = RunContentAction(switchEmptyIndex, 1); SetAutoSwitchEmpty(); break;
                             //WEAPONBOB
                             case 6: weaponMoveIndex = RunContentAction(weaponMoveIndex, 1); SetWeaponMovement(); break;
+                            //WEAPONHAND
+                            case 7: handIndex = RunContentAction(handIndex, 2); SetWeaponHand(); break;
                         }
                         break;
                     }
@@ -1095,6 +1109,9 @@ public class OptionsSystem : MonoBehaviour
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~CAMERABOBBING
         cameraBIndex = 1;
         SetCameraBobbing();
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~WEAPONHAND
+        handIndex = 1;
+        SetWeaponHand();
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~AUTOSWITCHNEW
         switchNewIndex = 1;
         SetAutoSwitchNew();
@@ -1335,6 +1352,8 @@ public class OptionsSystem : MonoBehaviour
             SetAutoSave();
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~CAMERABOBBING
             SetCameraBobbing();
+            //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~WEAPONHAND
+            SetWeaponHand();
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~AUTOSWITCHNEW
             SetAutoSwitchNew();
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~AUTOSWITCHEMPTY
@@ -1711,7 +1730,7 @@ public class OptionsSystem : MonoBehaviour
         highlightedMessage.text = InstantMessages();
     }
     //====================================================================
-    //=======================ControlMethods===============================
+    //=======================GameMethods==================================
     //==================================================================== 
     public void SetDifficulty()
     {
@@ -1768,6 +1787,31 @@ public class OptionsSystem : MonoBehaviour
         cameraBobbing = !cameraBobbing;
         cameraBIndex = cameraBobbing ? 1 : 0;
         gameContentSubText[3].text = ONOFFSubText(cameraBobbing);
+    }
+    //--------------------------------------------------------------------
+    public void SetWeaponHand()
+    {
+        for (int wh = 0; wh < 3; wh++)
+        {
+            if (handIndex == wh) handActive[wh] = true;
+            else handActive[wh] = false;
+        }
+        if (weaponSystem == null) weaponSystem = WeaponSystem.weaponSystem;
+        weaponSystem.SelectWeaponHand(handIndex);
+        gameContentSubText[7].text = handSubText[handIndex];
+    }
+    public void ApplyWeaponHand()
+    {
+        handIndex++;
+        if (handIndex > 2) handIndex = 0;
+        for (int d = 0; d < handActive.Length; d++)
+        {
+            if (d == handIndex) handActive[d] = true;
+            else handActive[d] = false;
+        }
+        if (weaponSystem == null) weaponSystem = WeaponSystem.weaponSystem;
+        weaponSystem.SelectWeaponHand(handIndex);
+        gameContentSubText[7].text = handSubText[handIndex];
     }
     //--------------------------------------------------------------------
     public void SetAutoSwitchNew()
