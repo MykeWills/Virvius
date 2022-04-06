@@ -9,8 +9,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: title 3
   m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
-  m_ShaderKeywords: _ALPHABLEND_ON _EMISSION _NORMALMAP
-  m_LightmapFlags: 1
+  m_ShaderKeywords: _ALPHABLEND_ON _NORMALMAP
+  m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 3000
@@ -39,11 +39,11 @@ Material:
     - _EmissionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 0.5, y: 0.5}
-        m_Offset: {x: 0, y: 0}
+        m_Offset: {x: 0, y: 7.26}
     - _MainTex:
         m_Texture: {fileID: 2800000, guid: 72f708a04aa1cbc4c98da3143fe74aef, type: 3}
         m_Scale: {x: 0.5, y: 0.5}
-        m_Offset: {x: 0, y: 0}
+        m_Offset: {x: 0, y: 7.26}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -62,9 +62,9 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 10
     - _GlossMapScale: 1
-    - _Glossiness: 0.568
+    - _Glossiness: 0.717
     - _GlossyReflections: 1
-    - _Metallic: 0.48
+    - _Metallic: 0
     - _Mode: 2
     - _OcclusionStrength: 1
     - _Parallax: 0.02
@@ -74,6 +74,6 @@ Material:
     - _UVSec: 0
     - _ZWrite: 0
     m_Colors:
-    - _Color: {r: 0, g: 1, b: 0.2688694, a: 1}
-    - _EmissionColor: {r: 0.0993236, g: 0.2264151, b: 0.114669435, a: 1}
+    - _Color: {r: 0.36658785, g: 1, b: 0, a: 0.9372549}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
