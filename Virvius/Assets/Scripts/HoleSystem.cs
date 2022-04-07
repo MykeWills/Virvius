@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class HoleSystem : MonoBehaviour
 {
@@ -43,8 +41,8 @@ public class HoleSystem : MonoBehaviour
     }
     public void HeatDissipate()
     {
-        if (!holeActive && !isHot)
-            return;
+        if (!holeActive) return;
+        if (!isHot) return;
         heatTimer -= Time.deltaTime;
         float clamp = Mathf.Clamp(heatTimer, 0, 1);
         meshRend.material.SetColor("_EmissionColor", Color.Lerp(orgHoleColor, hotHoleColor * 3, clamp));
@@ -61,6 +59,6 @@ public class HoleSystem : MonoBehaviour
         fadePercentage = Mathf.Clamp(fadePercentage, 0.0f, 1.0f);  // make sure you're in 0..100% 
         Color fadeColor = new Color(meshRend.material.color.r, meshRend.material.color.g, meshRend.material.color.b, fadePercentage) ;
         meshRend.material.SetColor("_Color", fadeColor);
-        if (fadePercentage == 0.0f) { isFading = false; gameObject.SetActive(false); }
+        if (fadePercentage == 0.0f) { isFading = false; isHot = false; gameObject.SetActive(false); }
     }
 }

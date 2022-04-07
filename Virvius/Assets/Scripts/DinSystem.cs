@@ -103,6 +103,7 @@ public class DinSystem : MonoBehaviour
     private float elapsed = 0.0f;
     private bool updateNextPosition = false;
     private bool allowMovement = true;
+    private float playerDistance = 0;
     //-------------------------------------------------------------------------------------------------------
     //---------------------------------UNITY-----------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------------
@@ -137,6 +138,8 @@ public class DinSystem : MonoBehaviour
         if (gameSystem.BlockedAttributesActive()) return;
         // if the enemy is dead disregard all
         if (isDead) return;
+        playerDistance = Vector3.Magnitude(transform.position - PlayerPosition());
+        if (playerDistance > 300) return;
         time = Time.deltaTime;
         // if the player is dead make the enemy return to org state
         if ((playerSystem.isDead && curState != orgState) || commandSystem.masterCodesActive[2] && curState != orgState) 
@@ -188,7 +191,6 @@ public class DinSystem : MonoBehaviour
     }
     private void ActiveState(State state)
     {
-        float playerDistance = Vector3.Magnitude(transform.position - PlayerPosition());
         anim.SetFloat("Speed", 1.5f);
         if (!allowMovement)
         {

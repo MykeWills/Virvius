@@ -49,7 +49,7 @@ public class WeaponSystem : MonoBehaviour
         "Horus\nLauncher",
         "Helix\nRailgun",
         "Photon\nCannon",
-        "M_Sigma\nX_800",
+        "M_Sigma\nX_1800",
         "Damnation\nBlade"
    };
     private string[] aimTags = new string[3]
@@ -85,7 +85,8 @@ public class WeaponSystem : MonoBehaviour
     private LayerMask levelMask;
     private Vector3 holsterRayPoint;
     private Vector3 newTiltPosition;
-    private Quaternion[] currentRotation = new Quaternion[4];
+    private Quaternion[] currentFinRotation = new Quaternion[4];
+    private Quaternion[] currentSigRotation = new Quaternion[2];
     //[Variables]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
     private bool gunFlash = false;
     private bool revUp = false;
@@ -116,6 +117,7 @@ public class WeaponSystem : MonoBehaviour
     private float photonRevDown = 0;
     private bool photonFullSpeed = false;
     private bool photonReady = false;
+    private bool sigmaReady = false;
     private int selectionIndex = 1;
     private int keyIndex = 1;
     private int weaponID = 0;
@@ -346,6 +348,44 @@ public class WeaponSystem : MonoBehaviour
     [SerializeField]
     private GameObject photonParticle;
     [Space]
+    [Header("MSigma Specific ================================")]
+    [SerializeField]
+    private Transform[] sigmaDoors = new Transform[2];
+    private float[] doorOpenSpeed = new float[2] { 0, 0 };
+    private float doorRotationMax = 45;
+    private Vector3[] doorEndRotations;
+    private Quaternion[] doorStartRotations = new Quaternion[2];
+    [SerializeField]
+    private GameObject chargeParticle;
+    [SerializeField]
+    private Light engineLight;
+    [SerializeField]
+    private Transform[] rotationSigBarrels = new Transform[3];
+    [SerializeField]
+    private float[] autoRotationSpeed = new float[3] { 0, 0, 0 };
+    [SerializeField]
+    private float maxChargingSpeed = 200;
+    [SerializeField]
+    private float chargingIncreaseRate = 20;
+    [SerializeField]
+    private float chargingTime = 1;
+    private float chargingTimer = 0;
+    private float chargingIncreaseVal = 0;
+    private bool sigmaCharging = false;
+    private bool sigmaFullCharge = false;
+    [SerializeField]
+    private Transform[] sigmaEmitter = new Transform[1];
+    [SerializeField]
+    private MeshRenderer[] sigmaMuzzle = new MeshRenderer[1];
+    [SerializeField]
+    private ParticleSystem[] sigmaSmoke = new ParticleSystem[1];
+    [SerializeField]
+    private Light[] sigmaLight = new Light[1];
+    [SerializeField]
+    private AudioClip[] sigmaRevSfx = new AudioClip[4];
+    [SerializeField]
+    private GameObject sigmaParticle;
+    [Space]
     [Header("Weapon Array Section ============================")]
     public GameObject[] weapons = new GameObject[10];
     [SerializeField]
@@ -372,10 +412,16 @@ public class WeaponSystem : MonoBehaviour
     }
     public void Start()
     {
+        for(int w = 0; w < weapons.Length; w++)
+        {
+            weapons[w].SetActive(false);
+        }
         levelMask = 1 << LayerMask.NameToLayer("Level");
         gunflashTimer = gunflashTime;
         for (int sr = 0; sr < 4; sr++)
             shaftStartRotations[sr] = photonShafts[sr].localRotation;
+        for (int sr = 0; sr < 2; sr++)
+            doorStartRotations[sr] = sigmaDoors[sr].localRotation;
         shaftEndRotations = new Vector3[4]
         {
             new Vector3(-8, 0, 0),
@@ -383,14 +429,19 @@ public class WeaponSystem : MonoBehaviour
             new Vector3(0, -8, 90),
             new Vector3(0, 8, -90)
         };
+        doorEndRotations = new Vector3[2]
+        {
+            new Vector3(0, 0, -45),
+            new Vector3(0, 0, 45)
+        };
         for (int p = 0; p < holsteredReturnPos.Length; p++)
             holsteredReturnPos[p] = weapons[p].transform.localPosition;
         // Set the default weapon for the game
         weaponObtained = new bool[10] { true, false, false, false, false, false, false, false, false, false };
         weaponEquipped = new bool[10] { false, false, false, false, false, false, false, false, false, false };
-        defaultWeaponAmmo = new int[10] { 0, 25, 50, 25, 75, 5, 2, 4, 50, 0 };
+        defaultWeaponAmmo = new int[10] { 0, 25, 50, 25, 75, 5, 2, 4, 50, 1 };
         weaponAmmo = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        weaponMaxAmmo = new int[10] { 0, 100, 150, 100, 300, 50, 20, 30, 200, 100 };
+        weaponMaxAmmo = new int[10] { 0, 100, 150, 100, 300, 50, 20, 30, 200, 4 };
         AutoSelectWeapon(0);
     }
     private void Update()
@@ -410,7 +461,7 @@ public class WeaponSystem : MonoBehaviour
         LoadRockets();
         RestoreWeaponCoil();
         PhotonBarrel();
-       
+        SigmaRotation();
     }
     public void SelectWeaponHand(int index)
     {
@@ -465,7 +516,7 @@ public class WeaponSystem : MonoBehaviour
         bobSystem[weaponIndex].resetBobSystem(weaponList[weaponIndex]);
         weapons[weaponIndex].transform.localPosition = holsteredReturnPos[weaponIndex];
         weapons[weaponIndex].transform.localRotation = Quaternion.identity;
-       
+     
         isHolstered = false;
         isWeaponMovementFinished = true;
         holsterActive = false;
@@ -478,7 +529,7 @@ public class WeaponSystem : MonoBehaviour
             powerSoundTimer = 0;
         }
       
-        else if (wType == WeaponType.PhotonCannon)
+        else if (type == WeaponType.PhotonCannon)
         {
             for (int sr = 0; sr < 4; sr++)
                 photonShafts[sr].localRotation = shaftStartRotations[sr];
@@ -486,6 +537,17 @@ public class WeaponSystem : MonoBehaviour
             photonBarrel.localRotation = Quaternion.identity;
             photonReady = false;
             beginShafting = false;
+        }
+        else if(wType == WeaponType.MSigma)
+        {
+            audioSystem.PlayAltAudioSource(4, environmentSystem.headUnderWater ? sigmaRevSfx[3] : sigmaRevSfx[2], 1, 1, false, false);
+            chargingTimer = chargingTime;
+            for (int sr = 0; sr < 2; sr++)
+                sigmaDoors[sr].localRotation = doorStartRotations[sr];
+            chargingIncreaseVal = 0;
+            sigmaCharging = false;
+            sigmaFullCharge = false;
+            sigmaReady = false;
         }
         //else if (wType == WeaponType.Unarmed) anim.ResetTrigger("Swing");
         weapons[weaponIndex].SetActive(false);
@@ -502,12 +564,12 @@ public class WeaponSystem : MonoBehaviour
             case WeaponType.RocketLauncher: weaponIndex = 6; weaponEmitter = rocketEmitters; break;
             case WeaponType.RailGun: weaponIndex = 7; weaponEmitter = railEmitters; break;
             case WeaponType.PhotonCannon: weaponIndex = 8; weaponEmitter = photonEmitter; break;
-            case WeaponType.MSigma: weaponIndex = 9; break;
+            case WeaponType.MSigma: weaponIndex = 9; weaponEmitter = sigmaEmitter; break;
         }
         ammoIsEmpty = false;
 
         SelectWeaponHand(optionsSystem.handIndex);
-        if (wType == WeaponType.RailGun)
+        if (type == WeaponType.RailGun)
         {
             railShot = false;
             railShieldTimer = railShieldTime;
@@ -533,7 +595,7 @@ public class WeaponSystem : MonoBehaviour
         //PHOTONCANNON-------------------------------------------------------------------------------------
         if (photonMuzzle[0].enabled) photonMuzzle[0].enabled = false;
         //MSIGMA-------------------------------------------------------------------------------------------
-        //if (mSigmaMuzzle[0].enabled) mSigmaMuzzle[0].enabled = false;
+        if (sigmaMuzzle[0].enabled) sigmaMuzzle[0].enabled = false;
 
         // if smoke particles are active, stop them
         //SHOTGUN------------------------------------------------------------------------------------------
@@ -553,11 +615,9 @@ public class WeaponSystem : MonoBehaviour
         //PHOTONCANNON-------------------------------------------------------------------------------------
         if (photonSmoke[0].isPlaying) photonSmoke[0].Stop();
         //MSIGMA-------------------------------------------------------------------------------------------
-        //if (mSigmaSmoke[0].isPlaying) mSigmaSmoke[0].Stop();
-
+        if (sigmaSmoke[0].isPlaying) sigmaSmoke[0].Stop();
 
         // if gun flash are active, shut off
-
         //SHOTGUN------------------------------------------------------------------------------------------
         if (shotgunLight[0].enabled) shotgunLight[0].enabled = false;
         //SPIKER-------------------------------------------------------------------------------------------
@@ -575,7 +635,7 @@ public class WeaponSystem : MonoBehaviour
         //PHOTONCANNON-------------------------------------------------------------------------------------
         if (photonLight[0].enabled) photonLight[0].enabled = false;
         //MSIGMA-------------------------------------------------------------------------------------------
-        //if (mSigmaLight[0].enabled) mSigmaLight[0].enabled = false;
+        if (sigmaLight[0].enabled) sigmaLight[0].enabled = false;
 
         // Shut off ammo banner if unarmed.
         for (int sp = 0; sp < 4; sp++)
@@ -690,6 +750,8 @@ public class WeaponSystem : MonoBehaviour
         gunflashTimer = gunflashTime;
         gunFlash = false;
         drumSound = false;
+        sigmaCharging = false;
+        sigmaFullCharge = false;
         grenadeLauncherDrum.localRotation = Quaternion.identity;
         for (int bs = 0; bs < 10; bs++)
         {
@@ -882,6 +944,30 @@ public class WeaponSystem : MonoBehaviour
                     }
                     break;
                 }
+            //PhotonCannon
+            case 8:
+                {
+                    //switch to grenadelauncher = downgrade to the previous weapon
+                    if (weaponObtained[7] && weaponAmmo[7] > 0)
+                        AutoSelectWeapon(7);
+                    else
+                    {
+                        AutoSelectWeapon(CheckWeaponAvailable() ? CheckWeaponAvailableID(true) : 0);
+                    }
+                    break;
+                }
+            //MSigma
+            case 9:
+                {
+                    //switch to grenadelauncher = downgrade to the previous weapon
+                    if (weaponObtained[8] && weaponAmmo[8] > 0)
+                        AutoSelectWeapon(8);
+                    else
+                    {
+                        AutoSelectWeapon(CheckWeaponAvailable() ? CheckWeaponAvailableID(true) : 0);
+                    }
+                    break;
+                }
         }
     }
     private void AutoAim(Transform emitter, Vector3 target)
@@ -978,6 +1064,8 @@ public class WeaponSystem : MonoBehaviour
         noAmmoActive = false;
         beginReving = false;
         beginShafting = false;
+        sigmaFullCharge = false;
+        sigmaCharging = false;
         gunflashTimer = gunflashTime;
         gunFlash = false;
         for (int bs = 0; bs < 10; bs++)
@@ -1179,6 +1267,42 @@ public class WeaponSystem : MonoBehaviour
             }
         }
     }
+    private void SigmaRotation()
+    {
+        if (!weaponEquipped[9]) return;
+
+        for (int sr = 0; sr < 2; sr++)
+        {
+            if (currentSigRotation[sr] != (sigmaCharging ? Quaternion.Euler(doorEndRotations[sr]) : doorStartRotations[sr]))
+                currentSigRotation[sr] = sigmaCharging ? Quaternion.Euler(doorEndRotations[sr]) : doorStartRotations[sr];
+            if (sigmaDoors[sr].localRotation != currentSigRotation[sr])
+                sigmaDoors[sr].localRotation = Quaternion.RotateTowards(sigmaDoors[sr].localRotation, currentSigRotation[sr], time * 45);
+            if (sigmaDoors[1].localRotation == Quaternion.Euler(doorEndRotations[1]))
+            {
+                if (sigmaCharging && !sigmaReady) { engineLight.enabled = true; chargeParticle.SetActive(true); sigmaReady = true; }
+            }
+            else if (sigmaDoors[1].localRotation == doorStartRotations[1])
+            {
+                engineLight.enabled = false; chargeParticle.SetActive(false); sigmaReady = false;
+            }
+        }
+        for (int s = 0; s < rotationSigBarrels.Length; s++)
+            rotationSigBarrels[s].Rotate(0, 0, time * (autoRotationSpeed[s] + (!sigmaCharging ? 0 : chargingIncreaseVal)) * 2);
+        if (!sigmaReady) return;
+       
+        if (!sigmaCharging) { if (chargingIncreaseVal > 0) { chargingTimer = 1; sigmaFullCharge = false; chargingIncreaseVal = 0; } return; }
+        chargingTimer -= time;
+        chargingTimer = Mathf.Clamp01(chargingTimer);
+        inputSystem.shakeAmt = (chargingIncreaseRate / 100);
+        if (chargingTimer == 0) 
+        { 
+            chargingIncreaseVal += chargingIncreaseRate;
+            chargingIncreaseVal = Mathf.Clamp(chargingIncreaseVal, 0, maxChargingSpeed);
+            if (chargingIncreaseVal == maxChargingSpeed) sigmaFullCharge = true;
+            inputSystem.shakeAmt = 0;
+            chargingTimer = chargingTime;
+        }
+    }
     private void LoadRockets()
     {
         if (!weaponEquipped[6]) return;
@@ -1280,13 +1404,16 @@ public class WeaponSystem : MonoBehaviour
         if (weaponAmmo[8] < 1) return;
         for (int sr = 0; sr < 4; sr++)
         {
-            if (currentRotation[sr] != (beginShafting ? Quaternion.Euler(shaftEndRotations[sr]) : shaftStartRotations[sr]))
-                currentRotation[sr] = beginShafting ? Quaternion.Euler(shaftEndRotations[sr]) : shaftStartRotations[sr];
-            if (photonShafts[sr].localRotation != currentRotation[sr])
-                photonShafts[sr].localRotation = Quaternion.RotateTowards(photonShafts[sr].localRotation, currentRotation[sr], time * 50);
-            if (photonShafts[3].localRotation == Quaternion.Euler(shaftEndRotations[3]))
+            if (currentFinRotation[sr] != (beginShafting ? Quaternion.Euler(shaftEndRotations[sr]) : shaftStartRotations[sr]))
+                currentFinRotation[sr] = beginShafting ? Quaternion.Euler(shaftEndRotations[sr]) : shaftStartRotations[sr];
+            if (photonShafts[sr].localRotation != currentFinRotation[sr])
+                photonShafts[sr].localRotation = Quaternion.RotateTowards(photonShafts[sr].localRotation, currentFinRotation[sr], time * 50);
+            if (!photonReady)
             {
-                if (beginShafting && !photonReady) photonReady = true;
+                if (photonShafts[3].localRotation == Quaternion.Euler(shaftEndRotations[3]))
+                {
+                    if (beginShafting) photonReady = true;
+                }
             }
         }
         if (!photonReady) return;
@@ -1295,7 +1422,7 @@ public class WeaponSystem : MonoBehaviour
         float theta = time * barrelPhotonRate * downVal;
         photonBarrel.Rotate(Vector3.forward, -theta);
         if (downVal == 1 && !photonFullSpeed) { photonFullSpeed = true; }
-        else if (downVal == 0 && photonFullSpeed) { photonFullSpeed = false;  beginShafting = false;}
+        else if (downVal == 0 && photonFullSpeed) { photonFullSpeed = false;  beginShafting = false; photonReady = false; }
     }
     private void GrenadeLauncherDrum()
     {
@@ -1662,7 +1789,6 @@ public class WeaponSystem : MonoBehaviour
                     }
                 case WeaponType.PhotonCannon:
                     {
-
                         if (noAmmoHolstered) return;
                         if (!beginShafting) { audioSystem.PlayAudioSource(environmentSystem.headUnderWater ? photonRevSfx[3] : photonRevSfx[2], 1, 1, 128); beginShafting = true; }
                         if (photonFullSpeed)
@@ -1688,7 +1814,39 @@ public class WeaponSystem : MonoBehaviour
                         }
                         break;
                     }
-                    // add the rest of weapons later
+                case WeaponType.MSigma:
+                    {
+
+                        if (noAmmoHolstered) return;
+                        if (!sigmaCharging) 
+                        {
+                            if (!bobSystem[weaponIndex].isRecoiling) { inputSystem.SetScreenShakeEffect(0, 4); audioSystem.PlayAltAudioSource(4, environmentSystem.headUnderWater ? sigmaRevSfx[3] : sigmaRevSfx[2], 1, 1, false, true); sigmaCharging = true; }
+                        }
+                        if (sigmaFullCharge)
+                        {
+                            if (powerupSystem.powerEnabled[0])
+                            {
+                                powerSoundTimer -= time;
+                                powerSoundTimer = Mathf.Clamp(powerSoundTimer, 0, powerSoundTime);
+                                if (powerSoundTimer == 0)
+                                {
+                                    powerSoundTimer = powerSoundTime;
+                                    audioSystem.PlayAudioSource(powerupSystem.powerSound[0], 1, 1f, 128);
+                                }
+                            }
+                            if (bobSystem[weaponIndex].isRecoiling) return;
+                            inputSystem.RecoilEffect(-1, 0, 0, 50);
+                            bobSystem[weaponIndex].isRecoiling = true;
+                            isShooting = true;
+                            gunFlash = true;
+                            audioSystem.PlayAudioSource(weaponSfx, 1, powerupSystem.powerEnabled[0] ? 0.5f : 1, 128);
+                            FireWeaponType(wType);
+                            sigmaCharging = false;
+                            sigmaFullCharge = false;
+                            chargeParticle.SetActive(false);
+                        }
+                        break;
+                    }
             }
         }
         else if (inputSystem.inputPlayer.GetButtonUp("RT"))
@@ -1697,12 +1855,18 @@ public class WeaponSystem : MonoBehaviour
             noAmmoActive = false;
             beginReving = false;
             beginShafting = false;
+            sigmaCharging = false;
             if (wType == WeaponType.MiniGun)
                 powerSoundTimer = 0;
             if (wType == WeaponType.PhotonCannon)
             {
                 if(!photonParticle.activeInHierarchy) photonParticle.SetActive(true);
                 audioSystem.PlayAudioSource(environmentSystem.headUnderWater ? photonRevSfx[1] : photonRevSfx[0], 1, 1, 128);
+            }
+            else if (wType == WeaponType.MSigma)
+            {
+                inputSystem.SetScreenShakeEffect(0, 0);
+                audioSystem.PlayAltAudioSource(4, environmentSystem.headUnderWater ? sigmaRevSfx[1] : sigmaRevSfx[0], 1, 1, false, true);
             }
             else if (wType == WeaponType.Unarmed)
             {
@@ -1888,6 +2052,16 @@ public class WeaponSystem : MonoBehaviour
                     inputSystem.SetVibration(1, 1f, duration);
                     break;
                 }
+            case WeaponType.MSigma:
+                {
+                    SetupBullet(weaponEmitter[0], 5000);
+                    inputSystem.SetScreenShakeEffect(5, 1.5f);
+                    if (sigmaSmoke[0].gameObject.activeInHierarchy) sigmaSmoke[0].gameObject.SetActive(false);
+                    if (!sigmaSmoke[0].gameObject.activeInHierarchy) sigmaSmoke[0].gameObject.SetActive(true);
+                    duration = powerupSystem.powerEnabled[0] ? 0.6f : 0.4f;
+                    inputSystem.SetVibration(1, 4f, duration);
+                    break;
+                }
         }
         if (weaponIndex == 3) 
         { 
@@ -1997,7 +2171,8 @@ public class WeaponSystem : MonoBehaviour
                 {
                     GameObject railCoil = AccessRailCoil();
                     //Set the coil position to match the weapons emitter
-                    railCoil.transform.position = emitter.position;
+                    Vector3 coilPos = new Vector3(emitter.position.x, emitter.position.y + 0.5f, emitter.position.z);
+                    railCoil.transform.position = coilPos;
                     //Set the coil Rotation to match the weapons emitter
                     railCoil.transform.rotation = emitter.rotation;
                     //Turn on the coil
@@ -2173,6 +2348,28 @@ public class WeaponSystem : MonoBehaviour
                             photonMuzzle[m].transform.Rotate(0, 30, 0);
                             photonMuzzle[m].enabled = false;
                             photonLight[m].enabled = false;
+                        }
+                        gunFlash = false;
+                        gunflashTimer = gunflashTime;
+                    }
+                    break;
+                }
+            case WeaponType.MSigma:
+                {
+                    for (int m = 0; m < 1; m++)
+                    {
+                        sigmaMuzzle[m].enabled = true;
+                        sigmaLight[m].enabled = optionsSystem.showFlashEffects;
+                    }
+                    gunflashTimer -= time;
+                    gunflashTimer = Mathf.Clamp(gunflashTimer, 0.0f, 0.05f);
+                    if (gunflashTimer == 0.0f)
+                    {
+                        for (int m = 0; m < 1; m++)
+                        {
+                            sigmaMuzzle[m].transform.Rotate(0, 30, 0);
+                            sigmaMuzzle[m].enabled = false;
+                            sigmaLight[m].enabled = false;
                         }
                         gunFlash = false;
                         gunflashTimer = gunflashTime;

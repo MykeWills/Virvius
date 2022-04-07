@@ -110,6 +110,12 @@ public class InputSystem : MonoBehaviour
     private Vector3 twoPointPosition;
     private bool twoPoint = false;
     private float twoPointReturnRate;
+    [HideInInspector]
+    public float shakeAmt = 0.5f;
+    [SerializeField]
+    private float shakeTime = 1;
+    private float shakeTimer = 0;
+    private bool isShaking = false;
     //[public Access (Non Inspector)]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
     [HideInInspector]
     public Vector3 moveDirection = Vector3.zero;
@@ -221,6 +227,7 @@ public class InputSystem : MonoBehaviour
             BobHeadMaster();
         }
         IsOffGround();
+        ScreenShakeEffect();
     }
 
     public bool IsOffGround()
@@ -733,9 +740,10 @@ public class InputSystem : MonoBehaviour
     }
     public void DamageAnimation()
     {
+        if (isShaking) return;
         SetVibration(0, 2, 0.2f);
         SetVibration(1, 2, 0.2f);
-        RecoilEffect(0, 0, -7.5f, 180);
+        RecoilEffect(0, 0, -7.5f, 150);
     }
     private void EstimatePlayerVelocity_InvokeRepeating()
     {
@@ -846,6 +854,30 @@ public class InputSystem : MonoBehaviour
         head.GetChild(0).localRotation = rot;
         tiltReturnRate = returnRate;
         overTilt = true;
+    }
+    private void RumbleEffect(float strength)
+    {
+        head.GetChild(0).localPosition = Vector3.zero + Random.insideUnitSphere * strength / 2;
+    }
+    private void ScreenShakeEffect()
+    {
+        if (!isShaking) return;
+        RumbleEffect(shakeAmt);
+        shakeTimer -= time;
+        shakeTimer = Mathf.Clamp(shakeTimer, 0, shakeTime);
+        if (shakeTimer == 0)
+        {
+            head.GetChild(0).localPosition = Vector3.zero;
+            isShaking = false;
+            shakeAmt = 0;
+        }
+    }
+    public void SetScreenShakeEffect(float strength, float duration)
+    {
+        shakeAmt = strength;
+        shakeTime = duration;
+        shakeTimer = shakeTime;
+        isShaking = true;
     }
     public void AnimationEffect(Vector3 one, float returnRate, float returnRate2)
     {

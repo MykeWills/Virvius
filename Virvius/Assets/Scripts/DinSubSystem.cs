@@ -54,7 +54,7 @@ public class DinSubSystem : MonoBehaviour
                     //photon
                     case 7: dmgAmt = Random.Range(3.60f, 5.1f); break;
                     //Sigma
-                    case 8: dmgAmt = Random.Range(100, 200); break;
+                    case 8: dinSystem.MutilateEnemy(); break;
                     //Obstacle
                     case 9: dmgAmt = 2; break;
                     //MiniRocket
@@ -75,7 +75,7 @@ public class DinSubSystem : MonoBehaviour
                     }
                     else
                     {
-                        if (tags[t] != "RailBullet") collision.gameObject.SetActive(false);
+                        if (tags[t] != "RailBullet" && tags[t] != "SigmaBullet") collision.gameObject.SetActive(false);
                     }
                 }
                 return;

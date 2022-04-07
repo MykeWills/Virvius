@@ -492,6 +492,31 @@ public class BobSystem : MonoBehaviour
                     }
                     break;
                 }
+            case WeaponSystem.WeaponType.MSigma:
+                {
+                    if (!lerpFinished[0])
+                    {
+                        // Move the gun forward to end
+                        transform.localPosition = Vector3.MoveTowards(transform.localPosition, lerpPosition, time * rate[0]);
+                        if (transform.localPosition == weaponEndPosition && !lerpAhead[0])
+                            lerpAhead[0] = true;
+                        // Move the gun back to start
+                        else if (transform.localPosition == WeaponStartPosition() && lerpAhead[0])
+                        {
+                            lerpAhead[0] = false;
+                            lerpFinished[0] = true;
+                        }
+                    }
+                    // when finished animating, ready to fire the gun
+                    else if (lerpFinished[0] && clamp == 0)
+                    {
+                        isRecoiling = false;
+                        weaponReloadTime = weaponReloadRate;
+                        for (int l = 0; l < lerpFinished.Length; l++)
+                            lerpFinished[l] = false;
+                    }
+                    break;
+                }
         }
     }
     public void resetBobSystem(WeaponSystem.WeaponType type)
@@ -539,6 +564,10 @@ public class BobSystem : MonoBehaviour
                     break;
                 }
             case WeaponSystem.WeaponType.PhotonCannon:
+                {
+                    break;
+                } 
+            case WeaponSystem.WeaponType.MSigma:
                 {
                     break;
                 }

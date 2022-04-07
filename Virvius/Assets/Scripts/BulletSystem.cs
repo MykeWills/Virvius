@@ -17,7 +17,7 @@ public class BulletSystem : MonoBehaviour
     private Transform[] holePool;
     //assignment field that becomes the active pool
     private Transform currentPool;
-    private enum HoleType { bullet, spike, plasma }
+    private enum HoleType { bullet, spike, plasma, sigma }
     public enum SparkType { spark, blood, plasma, water, acid, lava }
     private HoleType holeType;
     [HideInInspector]
@@ -82,7 +82,7 @@ public class BulletSystem : MonoBehaviour
     {
         string currentTag = collision.gameObject.tag;
         isCollided = true;
-        if (transform.tag == "PhotonBullet" || transform.tag == "RailBullet")
+        if (transform.tag == "PhotonBullet" || transform.tag == "RailBullet" || transform.tag == "SigmaBullet")
             sparkType = SparkType.plasma;
         else
         {
@@ -91,8 +91,8 @@ public class BulletSystem : MonoBehaviour
         }
         switch (currentTag)
         {
-            case "Enemy": isCollided = false; sparkType = SparkType.blood; EnableSpark(); if (transform.tag != "RailBullet") transform.gameObject.SetActive(false); return;
-            case "DinEnemy": isCollided = false; sparkType = SparkType.blood; EnableSpark(); if (transform.tag != "RailBullet") transform.gameObject.SetActive(false); return;
+            case "Enemy": isCollided = false; sparkType = SparkType.blood; EnableSpark(); if (transform.tag != "RailBullet" && transform.tag != "SigmaBullet") transform.gameObject.SetActive(false); return;
+            case "DinEnemy": isCollided = false; sparkType = SparkType.blood; EnableSpark(); if (transform.tag != "RailBullet" && transform.tag != "SigmaBullet") transform.gameObject.SetActive(false); return;
             case "Secret": isCollided = false; if (CheckSecretOpen(collision)) { transform.gameObject.SetActive(false); return; } sparkType = SparkType.blood; EnableSpark(); transform.gameObject.SetActive(false); return;
             case "Player": isCollided = false; transform.gameObject.SetActive(false); return;
             //case "Water": isCollided = false; sparkType = SparkType.water; EnableSpark(); transform.gameObject.SetActive(false); return;
@@ -206,6 +206,7 @@ public class BulletSystem : MonoBehaviour
             case "MinigunBullet": lifeTime = 5; break;
             case "GrenadeBullet": lifeTime = 5; break;
             case "RocketBullet": lifeTime = 10; break;
+            case "SigmaBullet": lifeTime = 10; break;
             case "RailBullet": lifeTime = 2; break;
             case "PhotonBullet": lifeTime = 2; break;
         }
@@ -231,12 +232,14 @@ public class BulletSystem : MonoBehaviour
             case "RocketBullet": holeType = HoleType.bullet;  break;
             case "RailBullet": holeType = HoleType.plasma; break;
             case "PhotonBullet": holeType = HoleType.plasma; break;
+            case "SigmaBullet": holeType = HoleType.sigma; break;
         }
         switch (holeType)
         {
             case HoleType.bullet: holeIndex = 0; break;
             case HoleType.spike: holeIndex = 1; break;
             case HoleType.plasma: holeIndex = 2; break;
+            case HoleType.sigma: holeIndex = 3; break;
         }
         currentPool = holePool[holeIndex]; 
         currentHole = holePrefab[holeIndex];

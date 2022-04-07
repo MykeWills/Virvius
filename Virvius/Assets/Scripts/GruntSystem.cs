@@ -122,7 +122,7 @@ public class GruntSystem : MonoBehaviour
     private float randomSpeed = 0;
     private Vector3 chasePosition;
     private Vector3 originalPosition;
-
+    private float playerDistance = 0;
     //goldenPath
     public Transform target;
     private NavMeshPath path;
@@ -164,6 +164,8 @@ public class GruntSystem : MonoBehaviour
     {
         if (gameSystem.BlockedAttributesActive()) return;
         if (isDead) return;
+        playerDistance = Vector3.Magnitude(transform.position - PlayerPosition());
+        if (playerDistance > 300) return;
         time = Time.deltaTime;
         if ((playerSystem.isDead && curState != orgState) || commandSystem.masterCodesActive[2] && curState != orgState) 
         { 
@@ -176,7 +178,6 @@ public class GruntSystem : MonoBehaviour
             playerFound = false;
             playerVisible = false;
         }
-       
         CheckPath();
         LineOfSight();
         ActiveState(curState);
@@ -234,7 +235,7 @@ public class GruntSystem : MonoBehaviour
                     }
                     else
                     {
-                        if(tags[t] != "RailBullet") collision.gameObject.SetActive(false);
+                        if(tags[t] != "RailBullet" && tags[t] != "SigmaBullet") collision.gameObject.SetActive(false);
                     }
                 }
                 return;
@@ -281,7 +282,7 @@ public class GruntSystem : MonoBehaviour
     }
     private void ActiveState(State state)
     {
-        float playerDistance = Vector3.Magnitude(transform.position - PlayerPosition());
+       
         if (!allowMovement) FreezeMovement();
         switch (state)
         {

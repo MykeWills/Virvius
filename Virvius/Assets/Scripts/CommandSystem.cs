@@ -455,19 +455,9 @@ public class CommandSystem : MonoBehaviour
                     //full health
                     playerSystem.RecoverHealth(100, true);
                     //full ammo
-                    for (int a = 1; a < 10; a++)
-                    {
-                        if (a != 0 && a != 9)
-                            weaponSystem.GetAmmo(a, weaponSystem.weaponMaxAmmo[a]);
-                    }
+                    for (int a = 1; a < 10; a++) weaponSystem.GetAmmo(a, weaponSystem.weaponMaxAmmo[a]);
                     //all guns
-                    for (int w = 0; w < 10; w++)
-                    {
-                        //temporary until all weapons are designed...
-                        if (w == 9)
-                            weaponSystem.weaponObtained[w] = false;
-                        else weaponSystem.weaponObtained[w] = true;
-                    }
+                    for (int w = 0; w < 10; w++) weaponSystem.weaponObtained[w] = true;
                     weaponSystem.AutoSelectWeapon(8);
                     textLabel.color = Color.red;
                     AudioSystem.audioSystem.PlayAudioSource(inputSfx[2], 1, 1, 128);
@@ -496,14 +486,8 @@ public class CommandSystem : MonoBehaviour
                         //set the second container to store the final output message to user
                         sb[1].Append(sb[3].ToString() + " [All Weapons Enabled]");
                         //apply cheatcode parameter
-                        for (int w = 0; w < 10; w++)
-                        {
-                            //temporary until all weapons are designed...
-                            if (w == 9)
-                                weaponSystem.weaponObtained[w] = false;
-                            else weaponSystem.weaponObtained[w] = true;
-                        }
-                        weaponSystem.AutoSelectWeapon(8);
+                        for (int w = 0; w < 10; w++) weaponSystem.weaponObtained[w] = true;
+                        weaponSystem.AutoSelectWeapon(9);
                         AudioSystem.audioSystem.PlayAudioSource(inputSfx[1], 1, 1, 128);
                     }
                     else
@@ -512,17 +496,12 @@ public class CommandSystem : MonoBehaviour
                         int? valConversion = StringConversionChecker(sb[2].ToString(), weaponNames.Length - 1);
                         if (valConversion == null) return; 
                         int val = valConversion.Value;
-                        //temporary until all weapons are designed...
-                        if (val == 9) { SendCommandError(11); return; }
-                        else
-                        {  
-                            //set the second container to store the final output message to user
-                            sb[1].Append(sb[3].ToString() + " [" + weaponNames[val] + " Enabled]");
-                            //apply cheatcode parameter
-                            if (!weaponSystem.weaponObtained[val]) weaponSystem.weaponObtained[val] = true;
-                            weaponSystem.AutoSelectWeapon(val);
-                            AudioSystem.audioSystem.PlayAudioSource(inputSfx[1], 1, 1, 128);
-                        }
+                        //set the second container to store the final output message to user
+                        sb[1].Append(sb[3].ToString() + " [" + weaponNames[val] + " Enabled]");
+                        //apply cheatcode parameter
+                        if (!weaponSystem.weaponObtained[val]) weaponSystem.weaponObtained[val] = true;
+                        weaponSystem.AutoSelectWeapon(val);
+                        AudioSystem.audioSystem.PlayAudioSource(inputSfx[1], 1, 1, 128);
                     }
                     break;
                 }
@@ -534,11 +513,7 @@ public class CommandSystem : MonoBehaviour
                         //set the second container to store the final output message to user
                         sb[1].Append(sb[3].ToString() + " [All Ammo Enabled]");
                         //apply cheatcode parameter
-                        for (int a = 1; a < 10; a++)
-                        {
-                            if (a != 0 && a != 9)
-                                weaponSystem.GetAmmo(a, weaponSystem.defaultWeaponAmmo[a]);
-                        }
+                        for (int a = 1; a < 10; a++) weaponSystem.GetAmmo(a, weaponSystem.defaultWeaponAmmo[a]);
                         AudioSystem.audioSystem.PlayAudioSource(inputSfx[1], 1, 1, 128);
                     }
                     //MAXAMMO
@@ -547,11 +522,7 @@ public class CommandSystem : MonoBehaviour
                         //set the second container to store the final output message to user
                         sb[1].Append(sb[3].ToString() + " [Max Ammo Enabled]");
                         //apply cheatcode parameter
-                        for (int a = 1; a < 10; a++)
-                        {
-                            if (a != 0 && a != 9)
-                                weaponSystem.GetAmmo(a, weaponSystem.weaponMaxAmmo[a]);
-                        }
+                        for (int a = 1; a < 10; a++) weaponSystem.GetAmmo(a, weaponSystem.weaponMaxAmmo[a]);
                         AudioSystem.audioSystem.PlayAudioSource(inputSfx[1], 1, 1, 128);
                     }
                     //INDIVIDUALAMMO
@@ -562,7 +533,7 @@ public class CommandSystem : MonoBehaviour
                         if (valConversion == null) return; 
                         int val = valConversion.Value;
                         //temporary until all weapons are designed...
-                        if (val == 0 || val == 7 || val == 9) { SendCommandError(11); return; }
+                        if (val == 0) { SendCommandError(11); return; }
                         else
                         {
                             //set the second container to store the final output message to user
