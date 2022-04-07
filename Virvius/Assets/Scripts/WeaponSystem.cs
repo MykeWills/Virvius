@@ -351,8 +351,6 @@ public class WeaponSystem : MonoBehaviour
     [Header("MSigma Specific ================================")]
     [SerializeField]
     private Transform[] sigmaDoors = new Transform[2];
-    private float[] doorOpenSpeed = new float[2] { 0, 0 };
-    private float doorRotationMax = 45;
     private Vector3[] doorEndRotations;
     private Quaternion[] doorStartRotations = new Quaternion[2];
     [SerializeField]
@@ -1347,7 +1345,7 @@ public class WeaponSystem : MonoBehaviour
         //================================================================================================
         //Prepare weapon loading animation when rockets are shot==========================================
         //================================================================================================
-        //Reset the barrel Rotation
+        if (loadRockets) return;
         
         //turn on the buffer
         isBuffering = true;

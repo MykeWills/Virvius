@@ -161,7 +161,7 @@ public class BulletSystem : MonoBehaviour
   
     private void EnableHole()
     {
-        if (transform.tag == "Untagged" || transform.tag == "GrenadeBullet" || transform.tag == "RocketBullet") return;
+        if (transform.tag == "Untagged" || transform.tag == "GrenadeBullet" || transform.tag == "RocketBullet" || transform.tag == "SigmaBullet") return;
 
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;

@@ -129,6 +129,7 @@ public class PlayerSystem : MonoBehaviour
     private float[] fadeEnviroTime = new float[4] { 1, 1, 1, 1 };
     private float flashTime = 0.3f;
     private float flashTimer;
+    private float flashSigmaTimer;
     private float health = 100;
     private float armor = 0;
     private float reviverTime = 1;
@@ -172,7 +173,9 @@ public class PlayerSystem : MonoBehaviour
     [HideInInspector]
     public bool isDamaged = false;
     [HideInInspector]
-    public bool isFlashUI = false;
+    public bool isFlashUI = false;    
+    [HideInInspector]
+    public bool isFlashSigmaUI = false;
     [HideInInspector]
     public bool isDead = false;
     //========================================================================================//
@@ -195,6 +198,8 @@ public class PlayerSystem : MonoBehaviour
     public Image crosshair;
     [SerializeField]
     private Image flashUI;
+    [SerializeField]
+    private Image flashSigmaUI;
     [SerializeField]
     private Image[] hBanner = new Image[2];
     [SerializeField]
@@ -337,6 +342,7 @@ public class PlayerSystem : MonoBehaviour
         Reviver();
         Handler();
         ScreenFlash();
+        SigmaFlash();
         HitCapping();
         if (health  < 1)
             KillPlayer();
@@ -846,6 +852,25 @@ public class PlayerSystem : MonoBehaviour
         isFlashUI = active;
         flashTimer = flashTime;
         colorChangeVal = 0;
+    }
+
+    private void SigmaFlash()
+    {
+        if (!isFlashSigmaUI) return;
+        if (!flashSigmaUI.enabled) flashSigmaUI.enabled = true;
+        flashSigmaTimer += time;
+        flashSigmaTimer = Mathf.Clamp(flashSigmaTimer, 0.0f, 1.5f);
+        flashSigmaUI.color = Color.Lerp(Color.white, new Color(1, 1, 1, 0), flashSigmaTimer * 2);
+        if (flashSigmaTimer == 1.5f )
+        {
+            SetSigmaFlash(false);
+        }
+    }
+    public void SetSigmaFlash(bool active)
+    {
+        if (active) { if (!optionsSystem.showFlashEffects) return; }
+        isFlashSigmaUI = active;
+        flashSigmaTimer = 0;
     }
     public void DisplayDeathMessage()
     {

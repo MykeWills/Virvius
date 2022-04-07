@@ -185,6 +185,10 @@ public class GruntSystem : MonoBehaviour
         LookAtPlayerShooting();
         GunFlash();
     }
+    private void FixedUpdate()
+    {
+        
+    }
     private void OnCollisionEnter(Collision collision)
     {
         if (tagSb.Length > 0) tagSb.Clear();
@@ -262,6 +266,12 @@ public class GruntSystem : MonoBehaviour
         //else if (optionsSystem.difficultyActive[2]) diffRange = Random.Range(20, 26);
         //else if (optionsSystem.difficultyActive[3]) diffRange = Random.Range(25, 31);
         return diffRange;
+    }
+    private float CheckLinkSpeed(float currentSpeed)
+    {
+        if (!navAgent.isOnOffMeshLink) return currentSpeed;
+        currentSpeed = curSpeed / 2;
+        return currentSpeed;
     }
     public void EngagePlayer()
     {
@@ -344,7 +354,7 @@ public class GruntSystem : MonoBehaviour
                     stateIndex = 2;
                     SetAnimation();
                     //set the animation speed based on movement speed;
-                    SetAnimationSpeed(curSpeed/1.25f);
+                    SetAnimationSpeed(curSpeed /1.25f);
                     //if the current Speed doesnt already equal the random value grab a random destination on the nav mesh based on the player radius
                     if (curSpeed != randomSpeed)
                     {
@@ -620,7 +630,7 @@ public class GruntSystem : MonoBehaviour
         navAgent.enabled = true;
         navAgent.autoBraking = false;
         navAgent.autoRepath = active;
-        navAgent.speed = active ? curSpeed : 0;
+        navAgent.speed = active ? CheckLinkSpeed(curSpeed) : 0;
         navAgent.angularSpeed = active ? 300 : 0;
         navAgent.stoppingDistance = stop;
   
