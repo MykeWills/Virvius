@@ -3,7 +3,6 @@
 public class KillTrigger : MonoBehaviour
 {
     private PlayerSystem playerSystem;
-    private CraneDropSystem craneDrop;
     public enum Type { Kill, Damage, Mutilate }
     [SerializeField]
     private Type killType;
@@ -53,7 +52,7 @@ public class KillTrigger : MonoBehaviour
             {
                 case Type.Damage: playerSystem.Damage(damageAmount); break;
                 case Type.Kill: playerSystem.Damage(999); break;
-                case Type.Mutilate: playerSystem.MutilatePlayer(); break;
+                case Type.Mutilate: playerSystem.overKill = true; playerSystem.Damage(999); break;
             }
             boxPoint = Vector3.zero;
             playerPoint = Vector3.zero;
@@ -78,7 +77,7 @@ public class KillTrigger : MonoBehaviour
 
                 case Type.Damage: playerSystem.Damage(damageAmount); break;
                 case Type.Kill: playerSystem.Damage(999); break;
-                case Type.Mutilate: playerSystem.MutilatePlayer(); break;
+                case Type.Mutilate: playerSystem.overKill = true; playerSystem.Damage(999); break;
             }
         }
     }
@@ -96,7 +95,7 @@ public class KillTrigger : MonoBehaviour
                     {
                         case Type.Damage: playerSystem.Damage(damageAmount); break;
                         case Type.Kill: playerSystem.Damage(999); break;
-                        case Type.Mutilate: playerSystem.MutilatePlayer(); break;
+                        case Type.Mutilate: playerSystem.overKill = true; playerSystem.Damage(999); break;
                     }
                 }
             }

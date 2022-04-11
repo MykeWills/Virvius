@@ -52,7 +52,7 @@ public class CommandSystem : MonoBehaviour
     };
     private string[] alphabet = new string[26] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" };
     private string errorText = "_Invalid Command:/";
-    private string[] errorMessages = new string[18]
+    private string[] errorMessages = new string[19]
     {
         "",
         " { Please Choose 1 [On] / 0 [OFF]. }",
@@ -71,7 +71,8 @@ public class CommandSystem : MonoBehaviour
         " { Color Grading is disabled, use [_colorgrade=1] to re-enable. }",
         " { Please Choose Range From [0-100]. }",
         " { Please Choose Range From [0-11]. }",
-        " { Please Choose Range From [1-100]. }"
+        " { Please Choose Range From [1-100]. }",
+        " { Please Choose Range From [60-120]. }"
 
     };
     private string[] cheatcodes = new string[71]
@@ -257,15 +258,15 @@ public class CommandSystem : MonoBehaviour
                 if (!gameSystem.isPaused) gameSystem.GameMouseActive(false, CursorLockMode.Locked);
             }
         }
-        else if (Input.GetKeyDown(KeyCode.Return) && !submit)
+       
+        if (Input.GetKeyUp(KeyCode.BackQuote) || Input.GetKeyUp(KeyCode.Return)) submit = false;
+        if (!commandOpen) return;
+        if (Input.GetKeyDown(KeyCode.Return) && !submit)
         {
             if (inputField.text == null) return;
             SubmitInput();
-            
             submit = true;
         }
-        if (Input.GetKeyUp(KeyCode.BackQuote) || Input.GetKeyUp(KeyCode.Return)) submit = false;
-        if (!commandOpen) return;
         if (Input.GetKeyDown(KeyCode.F12) && !superUserEnabled)
         {
             superUserEnabled = true;
@@ -1529,10 +1530,10 @@ public class CommandSystem : MonoBehaviour
     private int? FOVConversionChecker(string message, int maxCodeIDLength, int minCodeIDLength)
     {
         //convert [VALUE] string to an integer
-        if (!int.TryParse(message, out int parsable)) { SendCommandError(13); return null; }
+        if (!int.TryParse(message, out int parsable)) { SendCommandError(18); return null; }
         int? val = parsable;
         //return error if value is higher or lower than parameter value
-        if (val > maxCodeIDLength || val < minCodeIDLength) { SendCommandError(13); return null; }
+        if (val > maxCodeIDLength || val < minCodeIDLength) { SendCommandError(18); return null; }
         return val;
     }
     private int? GCSettingsConversionChecker(string message)

@@ -11,7 +11,7 @@ public class WeaponSystem : MonoBehaviour
     public static WeaponSystem weaponSystem;
     public static WeaponType wType;
     public static int spikerBarrelIndex = 0;
-    public float max;
+    public float[] max = new float[2];
     //========================================================================================//
     //===================================[PRIVATE FIELDS]======================================//
     //========================================================================================//
@@ -358,11 +358,11 @@ public class WeaponSystem : MonoBehaviour
     [SerializeField]
     private Light engineLight;
     [SerializeField]
-    private Transform[] rotationSigBarrels = new Transform[3];
+    private Transform[] rotationSigBarrels = new Transform[22];
     [SerializeField]
-    private float[] autoRotationSpeed = new float[3] { 0, 0, 0 };
+    private float[] autoRotationSpeed = new float[2] { 0, 0};
     [SerializeField]
-    private float maxChargingSpeed = 200;
+    private float maxChargingSpeed = 300;
     [SerializeField]
     private float chargingIncreaseRate = 20;
     [SerializeField]
@@ -433,7 +433,7 @@ public class WeaponSystem : MonoBehaviour
             new Vector3(0, 0, 45)
         };
         for (int p = 0; p < holsteredReturnPos.Length; p++)
-            holsteredReturnPos[p] = weapons[p].transform.localPosition;
+            weapons[p].transform.localPosition = holsteredReturnPos[p];
         // Set the default weapon for the game
         weaponObtained = new bool[10] { true, false, false, false, false, false, false, false, false, false };
         weaponEquipped = new bool[10] { false, false, false, false, false, false, false, false, false, false };
@@ -803,11 +803,11 @@ public class WeaponSystem : MonoBehaviour
         if (weaponIndex > 0) return true;
         else return false;
     }
-    private Vector3 FOVAdjustment(float max)
+    private Vector3 FOVAdjustment(float[] max)
     {
+        float[] minMax = new float[2] { max[0], max[1] };
         float fov = optionsSystem.fieldOfView;
-        float adj = Map(fov, 60, 120, 0, max);
-        
+        float adj = Map(fov, 60, 120, minMax[0], minMax[1]);
         float[] handPos = new float[3] { 0, 1.5f, -1.5f };
         if (weaponIndex == 0) handID = 0;
         else handID = optionsSystem.handIndex;
@@ -1284,14 +1284,20 @@ public class WeaponSystem : MonoBehaviour
                 engineLight.enabled = false; chargeParticle.SetActive(false); sigmaReady = false;
             }
         }
-        for (int s = 0; s < rotationSigBarrels.Length; s++)
-            rotationSigBarrels[s].Rotate(0, 0, time * (autoRotationSpeed[s] + (!sigmaCharging ? 0 : chargingIncreaseVal)) * 2);
+        for (int s = 0; s < rotationSigBarrels.Length - 1; s++)
+        {
+            float charge = !sigmaCharging ? 0 : chargingIncreaseVal;
+            float rotationSpeed = autoRotationSpeed[s] + charge;
+            float rotationTime = time * rotationSpeed;
+            rotationSigBarrels[s].Rotate(0, 0, (rotationTime * 3));
+        }
         if (!sigmaReady) return;
        
         if (!sigmaCharging) { if (chargingIncreaseVal > 0) { chargingTimer = 1; sigmaFullCharge = false; chargingIncreaseVal = 0; } return; }
         chargingTimer -= time;
+        inputSystem.SetVibration(1, chargingIncreaseVal / 100, !sigmaCharging ? 0 : 4);
         chargingTimer = Mathf.Clamp01(chargingTimer);
-        inputSystem.shakeAmt = (chargingIncreaseRate / 100);
+        inputSystem.shakeAmt = ((chargingIncreaseRate / 100) * 2);
         if (chargingTimer == 0) 
         { 
             chargingIncreaseVal += chargingIncreaseRate;
@@ -1977,15 +1983,12 @@ public class WeaponSystem : MonoBehaviour
                 {
                     for (int e = 0; e < minigunEmitters.Length; e++)
                     {
-                        float[] rng = new float[2] { Random.Range(-1, 2), Random.Range(-1, 2) };
-                        float[] rot = new float[2] { Random.Range(-5, 6), Random.Range(-5, 6) };
+                        float[] rng = new float[2] { Random.Range(-0.25f, 0.26f), Random.Range(-0.25f, 0.26f) };
+                        float[] rot = new float[2] { Random.Range(-1, 2), Random.Range(-1, 2) };
                         weaponEmitter[e].localPosition = new Vector3(rng[0], rng[1], 0);
                         weaponEmitter[e].localRotation = Quaternion.Euler(new Vector3(rot[0], rot[1], 0));
                     }
-                    SetupBullet(weaponEmitter[Random.Range(0, 3)], 50000) ;
-                    SetupBullet(weaponEmitter[Random.Range(3, 6)], 50000) ;
-                    SetupBullet(weaponEmitter[Random.Range(6, 9)], 50000) ;
-                    SetupBullet(weaponEmitter[Random.Range(9, minigunEmitters.Length)], 50000) ;
+                    SetupBullet(weaponEmitter[Random.Range(0, minigunEmitters.Length)], 50000) ;
                     Vector3 reset = Vector3.zero;
                     weaponEmitter[0].parent.localRotation = Quaternion.Euler(reset);
 
@@ -2164,7 +2167,12 @@ public class WeaponSystem : MonoBehaviour
         //kill the bullet after lifetime (seconds)
         switch (wType)
         {
-            case WeaponType.GrenadeLauncher: if (bullet.TryGetComponent(out BulletSystem bulletSystem)) bulletSystem.SetupLifeTime(5); break;
+            case WeaponType.GrenadeLauncher: 
+                { 
+                    if (bullet.TryGetComponent(out BulletSystem bulletSystem)) 
+                        bulletSystem.SetupLifeTime(5); 
+                    break; 
+                }
             case WeaponType.RailGun: 
                 {
                     GameObject railCoil = AccessRailCoil();
@@ -2176,6 +2184,12 @@ public class WeaponSystem : MonoBehaviour
                     //Turn on the coil
                     railCoil.SetActive(true);
                     break;
+                }
+            case WeaponType.MSigma: 
+                { 
+                    if (bullet.TryGetComponent(out BulletSystem bulletSystem)) 
+                        bulletSystem.SetupLifeTime(10); 
+                    break; 
                 }
 
         }

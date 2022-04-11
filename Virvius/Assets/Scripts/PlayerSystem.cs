@@ -31,13 +31,14 @@ public class PlayerSystem : MonoBehaviour
     private CommandSystem commandSystem;
     private InputSystem inputSystem;
     private OptionsSystem optionsSystem;
-    private GoreSystem goreSystem;
     //[Child Access]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
     [SerializeField]
     private Transform head;
     //[Strings & Messages]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
     private StringBuilder sb = new StringBuilder();
     private StringBuilder msgSb = new StringBuilder();
+    [HideInInspector]
+    public bool overKill = false;
     private string[] keyName = new string[3]
     {
         "blue",
@@ -186,7 +187,7 @@ public class PlayerSystem : MonoBehaviour
     [SerializeField]
     private Transform originParent;
     [SerializeField]
-    private Transform goreExplode;
+    private GameObject goreExplode;
     [Space]
     [Header("Player UI")]
     [SerializeField]
@@ -325,8 +326,6 @@ public class PlayerSystem : MonoBehaviour
         ApplyPlayerHealthAndArmor();
         rainRenderer = rainEffect.GetComponent<Renderer>();
         rainRenderer.material.shader = Shader.Find("Unlit/Rain");
-        goreSystem = goreExplode.GetComponent<GoreSystem>();
-        goreSystem.ResetGore();
         collisionPoint = playerCollisionPoint();
     }
     //[Game Loop]-----------------------------------------------------------------------------//
@@ -573,8 +572,8 @@ public class PlayerSystem : MonoBehaviour
                                      optionsSystem.difficultyActive[2] ? 21 :
                                      optionsSystem.difficultyActive[3] ? 26 : 1;
             int rndDamage = Random.Range(1, rangeMultiplier);
+            if (health < rndDamage + 1) overKill = true;
             Damage(rndDamage);
-
             collision.gameObject.SetActive(false);
         }
         if (collision.gameObject.CompareTag("DinEnemy") && !isHit)
@@ -584,6 +583,7 @@ public class PlayerSystem : MonoBehaviour
                                      optionsSystem.difficultyActive[2] ? 21 :
                                      optionsSystem.difficultyActive[3] ? 26 : 1;
             int rndDamage = Random.Range(1, rangeMultiplier);
+            if (health < rndDamage + 1) overKill = true;
             Damage(rndDamage);
             playerImpact.AddImpact(-transform.forward, impactForce);
             isHit = true;
@@ -595,6 +595,7 @@ public class PlayerSystem : MonoBehaviour
                                     optionsSystem.difficultyActive[2] ? 9 :
                                     optionsSystem.difficultyActive[3] ? 11 : 1;
             int rndDamage = Random.Range(1, rangeMultiplier);
+            if (health < rndDamage + 1) overKill = true;
             Damage(rndDamage);
         }
         if (collision.gameObject.CompareTag("GrenadeBullet"))
@@ -604,8 +605,8 @@ public class PlayerSystem : MonoBehaviour
                 if (grenadeSystem.isDetonated)
                 {
                     suicideDamage = true;
-                    if (health <= 25) MutilatePlayer();
-                    else { Damage(25); playerImpact.AddImpact(-transform.forward, impactForce); }
+                    if (health < 26) overKill = true;
+                    Damage(25); playerImpact.AddImpact(-transform.forward, impactForce);
                 }
             }
         }
@@ -616,8 +617,8 @@ public class PlayerSystem : MonoBehaviour
                 if (rocketSystem.isDetonated)
                 {
                     suicideDamage = true;
-                    if (health <= 25) MutilatePlayer();
-                    else { Damage(25); playerImpact.AddImpact(-transform.forward, impactForce); }
+                    if (health < 26) overKill = true;
+                    Damage(25); playerImpact.AddImpact(-transform.forward, impactForce);
                 }
             }
         }
@@ -628,8 +629,20 @@ public class PlayerSystem : MonoBehaviour
                 if (rocketSubSystem.isDetonated)
                 {
                     suicideDamage = true;
-                    if (health <= 25) MutilatePlayer();
-                    else { Damage(15); playerImpact.AddImpact(-transform.forward, impactForce); }
+                    if (health < 16) overKill = true;
+                    Damage(15); playerImpact.AddImpact(-transform.forward, impactForce);
+                }
+            }
+        }
+        if (collision.gameObject.CompareTag("SigmaBullet"))
+        {
+            if (collision.gameObject.TryGetComponent(out SigmaSystem sigmaSystem))
+            {
+                if (sigmaSystem.isDetonated)
+                {
+                    suicideDamage = true;
+                    if (health < 51) overKill = true;
+                    Damage(50); playerImpact.AddImpact(-transform.forward, impactForce * 2);
                 }
             }
         }
@@ -1101,6 +1114,7 @@ public class PlayerSystem : MonoBehaviour
         SetFlash(true);
         if (powerupSystem.powerEnabled[5]) return;
         inputSystem.DamageAnimation();
+        inputSystem.SetScreenShakeEffect(Random.Range(1f, 2), 0.175f);
         if (!environmentSystem.isDrowning)
         {
             if (environmentSystem.environmentDamage)
@@ -1137,19 +1151,20 @@ public class PlayerSystem : MonoBehaviour
     public void MutilatePlayer()
     {
         if (commandSystem.masterCodesActive[0]) return;
-        Damage(999);
-        goreSystem.ExplodeGore();
+        goreExplode.transform.position = transform.position;
+        goreExplode.SetActive(true);
     }
     public void SetupNewLevel()
     {
-        if (goreSystem == null) goreSystem = goreExplode.GetComponent<GoreSystem>();
-        goreSystem.ResetGore();
         messageSystem.EraseMessages();
         inputSystem.ResetInputSystem();
         weaponSystem.ResetWeaponSystem();
         powerupSystem.ResetPowerupSystem();
         UIVersion(versionIndex);
         HUD.SetActive(true);
+        overKill = false;
+        SetSigmaFlash(false);
+        if (flashSigmaUI.enabled) flashSigmaUI.enabled = false;
         //=======================================================
         characterController.enabled = false;
         fallDamage = false;
@@ -1227,8 +1242,6 @@ public class PlayerSystem : MonoBehaviour
         if (!isDead) return;
         if (inputSystem.inputPlayer.GetButtonUp("Start") && isDead || inputSystem.inputPlayer.GetButtonUp("Select") && isDead)
         {
-            if (goreSystem == null) goreSystem = goreExplode.GetComponent<GoreSystem>();
-            goreSystem.ResetGore();
             messageSystem.EraseMessages();
             inputSystem.ResetInputSystem();
             weaponSystem.ResetWeaponSystem();
@@ -1239,6 +1252,9 @@ public class PlayerSystem : MonoBehaviour
             //=======================================================
             characterController.enabled = false;
             fallDamage = false;
+            overKill = false;
+            SetSigmaFlash(false);
+            if (flashSigmaUI.enabled) flashSigmaUI.enabled = false;
             transform.SetParent(originParent);
             gameSystem.SetPlayerScenePosition(gameSystem.sceneIndex);
             isDamaged = false;
@@ -1306,11 +1322,14 @@ public class PlayerSystem : MonoBehaviour
     private void KillPlayer()
     {
         if (commandSystem.masterCodesActive[0]) return;
+        if (overKill) { MutilatePlayer(); overKill = false; }
         isDead = true;
         HUD.SetActive(false);
         flashUI.enabled = false;
         crosshair.enabled = false;
         powerupSystem.ResetPowerupSystem();
+        SetSigmaFlash(false);
+        if (flashSigmaUI.enabled) flashSigmaUI.enabled = false;
         DisplayDeathMessage();
         weaponSystem.ShutOffMinigunSound();
         if (environmentSystem.environmentIndex == 0)
@@ -1383,7 +1402,6 @@ public class PlayerSystem : MonoBehaviour
         GL.Clear(true, true, Color.clear);
         RenderTexture.active = rt;
     }
- 
     private float Map(float value, float inMin, float inMax, float outMin, float outMax)
     {
         return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;

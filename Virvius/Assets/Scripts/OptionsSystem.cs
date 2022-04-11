@@ -2315,8 +2315,10 @@ public class OptionsSystem : MonoBehaviour
         if (fieldOfView > 120) fieldOfView = 60f;
         gameCamera.fieldOfView = fieldOfView;
         clipCamera.fieldOfView = fieldOfView;
-      videoContentSubText[5].text = FormatValuesOne(fieldOfView);
+        videoContentSubText[5].text = FormatValuesOne(fieldOfView);
         videoContentSlider[0].fillAmount = Map(fieldOfView, 60, 120, 0, 1);
+        if (weaponSystem == null) weaponSystem = WeaponSystem.weaponSystem;
+        weaponSystem.SetFOVAdjustment();
     }
     public void SetBloom(float value)
     {

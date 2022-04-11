@@ -35702,7 +35702,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57f24a4aaa0761b45ba25e7e5108e2c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UID: -1989787513
+  UID: 2141087268
   color: {r: 1, g: 0.703978, b: 0, a: 1}
   intensity: 5
   shadowSpread: 0.05
@@ -61840,6 +61840,10 @@ PrefabInstance:
     - target: {fileID: 1885816653436743475, guid: a3dcf1ba468229440b9214ffb3853699, type: 3}
       propertyPath: m_Name
       value: GoreExplode
+      objectReference: {fileID: 0}
+    - target: {fileID: 1885816653436743475, guid: a3dcf1ba468229440b9214ffb3853699, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1885816653504273284, guid: a3dcf1ba468229440b9214ffb3853699, type: 3}
       propertyPath: m_Mesh

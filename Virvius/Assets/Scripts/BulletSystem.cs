@@ -93,8 +93,28 @@ public class BulletSystem : MonoBehaviour
         {
             case "Enemy": isCollided = false; sparkType = SparkType.blood; EnableSpark(); if (transform.tag != "RailBullet" && transform.tag != "SigmaBullet") transform.gameObject.SetActive(false); return;
             case "DinEnemy": isCollided = false; sparkType = SparkType.blood; EnableSpark(); if (transform.tag != "RailBullet" && transform.tag != "SigmaBullet") transform.gameObject.SetActive(false); return;
-            case "Secret": isCollided = false; if (CheckSecretOpen(collision)) { transform.gameObject.SetActive(false); return; } sparkType = SparkType.blood; EnableSpark(); transform.gameObject.SetActive(false); return;
-            case "Player": isCollided = false; transform.gameObject.SetActive(false); return;
+            case "Secret":
+                {
+                    isCollided = false;
+                    if (CheckSecretOpen(collision))
+                    {
+                        if (transform.tag != "SigmaBullet")
+                            transform.gameObject.SetActive(false);
+                        return;
+                    }
+                    sparkType = SparkType.blood;
+                    EnableSpark();
+                    if (transform.tag != "SigmaBullet")
+                        transform.gameObject.SetActive(false);
+                    return;
+                }
+            case "Player":
+                {
+                    isCollided = false;
+                    if (transform.tag != "SigmaBullet")
+                        transform.gameObject.SetActive(false); 
+                    return;
+                }
             //case "Water": isCollided = false; sparkType = SparkType.water; EnableSpark(); transform.gameObject.SetActive(false); return;
             //case "Acid": isCollided = false; sparkType = SparkType.acid; EnableSpark(); transform.gameObject.SetActive(false); return;
             //case "Lava": isCollided = false; sparkType = SparkType.lava; EnableSpark(); transform.gameObject.SetActive(false); return;

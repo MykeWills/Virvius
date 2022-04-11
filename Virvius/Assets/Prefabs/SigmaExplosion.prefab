@@ -9950,8 +9950,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   explosionFxs:
-  - {fileID: 8300000, guid: 9a71451f94f1bdf438f7823d7fe083c5, type: 3}
-  - {fileID: 8300000, guid: cc129b7c013a2b847bfcf674150d7a16, type: 3}
+  - {fileID: 8300000, guid: 6e1db1401450b7f45a8792dd7afe5335, type: 3}
+  - {fileID: 8300000, guid: 72a99fe6958d0a24fa439581e5a9573b, type: 3}
 --- !u!1 &3775521817650719369
 GameObject:
   m_ObjectHideFlags: 0

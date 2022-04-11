@@ -9850,7 +9850,7 @@ Light:
   m_BounceIntensity: 0
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 6.81e-43, y: 4.712689e+29, z: 6.81e-43, w: 1624711}
+  m_BoundingSphereOverride: {x: -1.49e-43, y: 1e-45, z: 5.3e-44, w: 1.1754945e-38}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
@@ -9900,7 +9900,7 @@ GameObject:
   - component: {fileID: 6666565975075428793}
   - component: {fileID: 1731219019172245426}
   - component: {fileID: 8458287380885102283}
-  m_Layer: 10
+  m_Layer: 19
   m_Name: SigmaBullet
   m_TagString: SigmaBullet
   m_Icon: {fileID: 0}
@@ -9936,8 +9936,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDetonated: 0
-  blastRadius: 100
-  explosionSpeed: 200
+  blastRadius: 70
+  explosionSpeed: 140
   bulletEffect: {fileID: 1037328976792948428}
   explosionObject: {fileID: 6165856480140768436}
   smokeParticle: {fileID: 3292196753006927057}
@@ -15145,6 +15145,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 547342959422502484, guid: 2bb3c70df1bf5ea4eb26cc1eafd1ee10, type: 3}
+      propertyPath: activeWaveTime
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 664640751435091415, guid: 2bb3c70df1bf5ea4eb26cc1eafd1ee10, type: 3}
       propertyPath: MaxDistance
       value: 400
@@ -15153,9 +15157,41 @@ PrefabInstance:
       propertyPath: MinDistance
       value: 200
       objectReference: {fileID: 0}
+    - target: {fileID: 918299505735413174, guid: 2bb3c70df1bf5ea4eb26cc1eafd1ee10, type: 3}
+      propertyPath: simulationSpeed
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 1461775291447475151, guid: 2bb3c70df1bf5ea4eb26cc1eafd1ee10, type: 3}
       propertyPath: m_Name
       value: SigmaExplosion
+      objectReference: {fileID: 0}
+    - target: {fileID: 1461775291447475151, guid: 2bb3c70df1bf5ea4eb26cc1eafd1ee10, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4080933343016481306, guid: 2bb3c70df1bf5ea4eb26cc1eafd1ee10, type: 3}
+      propertyPath: simulationSpeed
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4376321342650327374, guid: 2bb3c70df1bf5ea4eb26cc1eafd1ee10, type: 3}
+      propertyPath: m_BoundingSphereOverride.w
+      value: 1e-45
+      objectReference: {fileID: 0}
+    - target: {fileID: 4376321342650327374, guid: 2bb3c70df1bf5ea4eb26cc1eafd1ee10, type: 3}
+      propertyPath: m_BoundingSphereOverride.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4376321342650327374, guid: 2bb3c70df1bf5ea4eb26cc1eafd1ee10, type: 3}
+      propertyPath: m_BoundingSphereOverride.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4376321342650327374, guid: 2bb3c70df1bf5ea4eb26cc1eafd1ee10, type: 3}
+      propertyPath: m_BoundingSphereOverride.z
+      value: -0.02
+      objectReference: {fileID: 0}
+    - target: {fileID: 7811769170438378410, guid: 2bb3c70df1bf5ea4eb26cc1eafd1ee10, type: 3}
+      propertyPath: simulationSpeed
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2bb3c70df1bf5ea4eb26cc1eafd1ee10, type: 3}

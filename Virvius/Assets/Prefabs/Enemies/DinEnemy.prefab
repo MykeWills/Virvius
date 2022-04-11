@@ -13427,6 +13427,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: GoreExplode
       objectReference: {fileID: 0}
+    - target: {fileID: 1885816653436743475, guid: a3dcf1ba468229440b9214ffb3853699, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1885816653504273284, guid: a3dcf1ba468229440b9214ffb3853699, type: 3}
       propertyPath: m_Mesh
       value: 

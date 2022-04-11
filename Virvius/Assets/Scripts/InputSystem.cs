@@ -743,7 +743,7 @@ public class InputSystem : MonoBehaviour
         if (isShaking) return;
         SetVibration(0, 2, 0.2f);
         SetVibration(1, 2, 0.2f);
-        RecoilEffect(0, 0, -7.5f, 150);
+        RecoilEffect(0, 0, Random.Range(-5.5f, 5.5f), 120);
     }
     private void EstimatePlayerVelocity_InvokeRepeating()
     {

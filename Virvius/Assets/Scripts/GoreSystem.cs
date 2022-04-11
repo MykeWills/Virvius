@@ -11,29 +11,33 @@ public class GoreSystem : MonoBehaviour
     private float lifeTimer = 0;
     private bool lifeTimeActive = false;
     private float time = 0;
-    private void Start()
+    private void OnEnable()
     {
-        goreBodies = new Rigidbody[transform.childCount];
-        for (int g = 0; g < transform.childCount; g++)
-            goreBodies[g] = transform.GetChild(g).GetComponent<Rigidbody>();
-
-        lifeTimer = lifeTime;
+        ExplodeGore();
+    }
+    private void OnDisable()
+    {
         ResetGore();
     }
     private void Update()
     {
         time = Time.deltaTime;
         LifeTime();
-        
     }
 
     public void ExplodeGore()
     {
         if(audioSystem == null) audioSystem = AudioSystem.audioSystem;
+        if (goreBodies == null) 
+        { 
+            goreBodies = new Rigidbody[transform.childCount];
+            for (int g = 0; g < transform.childCount; g++)
+                goreBodies[g] = transform.GetChild(g).GetComponent<Rigidbody>();
+        }
+        lifeTimer = lifeTime;
         for (int g = 0; g < goreBodies.Length; g++)
         {
             Vector3 size = goreBodies[g].transform.localScale;
-            goreBodies[g].gameObject.SetActive(true);
             float X = Random.Range(-3, 4);
             float Y = Random.Range(-3, 4);
             float Z = Random.Range(-5, -15);
@@ -45,7 +49,6 @@ public class GoreSystem : MonoBehaviour
             if (size.magnitude > 1 && size.magnitude < 1.2f) magnitude = 0.1f;
             else if (size.magnitude >= 1.2) magnitude = 0.25f;
             else magnitude = 0.5f;
-
             goreBodies[g].AddRelativeForce(new Vector3(X, Y, Z) * (explosionForce * Random.Range(magnitude, magnitude * 1.5f)), ForceMode.Impulse);
             goreBodies[g].useGravity = true;
         }
@@ -59,7 +62,6 @@ public class GoreSystem : MonoBehaviour
             goreBodies = new Rigidbody[transform.childCount];
             for (int g = 0; g < transform.childCount; g++)
                 goreBodies[g] = transform.GetChild(g).GetComponent<Rigidbody>();
-
         }
         for (int g = 0; g < goreBodies.Length; g++)
         {
@@ -68,10 +70,10 @@ public class GoreSystem : MonoBehaviour
             goreBodies[g].transform.localRotation = Quaternion.identity;
             goreBodies[g].velocity = Vector3.zero;
             goreBodies[g].angularVelocity = Vector3.zero;
-            goreBodies[g].gameObject.SetActive(false);
         }
         lifeTimer = lifeTime;
         lifeTimeActive = false;
+        gameObject.SetActive(false);
     }
     private void LifeTime()
     {

@@ -10,7 +10,6 @@ public class GruntSystem : MonoBehaviour
     private WeaponSystem weaponSystem;
     private CharacterController characterController;
     private PlayerSystem playerSystem;
-    private GoreSystem goreSystem;
     private AudioSource audioSrc;
     [HideInInspector]
     public NavMeshAgent navAgent;
@@ -139,8 +138,6 @@ public class GruntSystem : MonoBehaviour
         gameSystem = GameSystem.gameSystem;
         powerupSystem = PowerupSystem.powerupSystem;
         commandSystem = CommandSystem.commandSystem;
-        goreSystem = goreExplosion.GetComponent<GoreSystem>();
-       
         audioSrc = GetComponent<AudioSource>();
         boxCollider = GetComponent<BoxCollider>();
         navAgent = GetComponent<NavMeshAgent>();
@@ -159,6 +156,7 @@ public class GruntSystem : MonoBehaviour
         randomSpeed = DifficultyRNDSpeed();
         path = new NavMeshPath();
         elapsed = 0.0f;
+        goreExplosion.SetActive(false);
     }
     void Update()
     {
@@ -837,7 +835,7 @@ public class GruntSystem : MonoBehaviour
             }
             health = 0;
             enemyBody.SetActive(false);
-            goreSystem.ExplodeGore();
+            goreExplosion.SetActive(true);
             isDead = true;
             navAgent.enabled = false;
             boxCollider.enabled = false;
@@ -884,7 +882,7 @@ public class GruntSystem : MonoBehaviour
     public void ResetObject(bool setOrgPos)
     {
         if (anim == null || audioSrc == null) Start();
-        goreSystem.ResetGore();
+        goreExplosion.SetActive(false);
         enemyBody.SetActive(true);
         anim.Rebind();
         stateTimer = 1;
@@ -910,7 +908,6 @@ public class GruntSystem : MonoBehaviour
         randomSpeed = DifficultyRNDSpeed();
         allowMovement = true;
         curSpeed = 0;
-       
         audioSrc.Stop();
         curState = orgState;
         switch (curState)

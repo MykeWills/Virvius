@@ -9,7 +9,6 @@ public class DinSystem : MonoBehaviour
     private OptionsSystem optionsSystem;
     private PowerupSystem powerupSystem;
     private PlayerSystem playerSystem;
-    private GoreSystem goreSystem;
     private AudioSource audioSrc;
     [HideInInspector]
     public NavMeshAgent navAgent;
@@ -114,7 +113,6 @@ public class DinSystem : MonoBehaviour
         gameSystem = GameSystem.gameSystem;
         powerupSystem = PowerupSystem.powerupSystem;
         commandSystem = CommandSystem.commandSystem;
-        goreSystem = goreExplosion.GetComponent<GoreSystem>();
         audioSrc = GetComponent<AudioSource>();
         navAgent = GetComponent<NavMeshAgent>();
         anim = GetComponent<Animator>();
@@ -132,6 +130,7 @@ public class DinSystem : MonoBehaviour
         randomSpeed = DifficultyRNDSpeed();
         path = new NavMeshPath();
         elapsed = 0.0f;
+        goreExplosion.SetActive(false);
     }
     private void Update()
     {
@@ -747,7 +746,7 @@ public class DinSystem : MonoBehaviour
         }
         health = 0;
         enemyBody.SetActive(false);
-        goreSystem.ExplodeGore();
+        goreExplosion.SetActive(true);
         isDead = true;
         navAgent.enabled = false;
     }
@@ -766,7 +765,7 @@ public class DinSystem : MonoBehaviour
     {
         if (anim == null || audioSrc == null) Start();
 
-        goreSystem.ResetGore();
+        goreExplosion.SetActive(false);
         enemyBody.SetActive(true);
         anim.Rebind();
         stateTimer = 1;

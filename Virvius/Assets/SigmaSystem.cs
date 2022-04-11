@@ -3,6 +3,7 @@
 public class SigmaSystem : MonoBehaviour
 {
     private PlayerSystem playerSystem;
+    private InputSystem inputSystem;
     private Rigidbody rb;
     [HideInInspector]
     public bool isDetonated = false;
@@ -36,6 +37,9 @@ public class SigmaSystem : MonoBehaviour
     {
         isDetonated = true;
         if (rb == null) rb = GetComponent<Rigidbody>();
+        if (inputSystem == null) inputSystem = InputSystem.inputSystem;
+        inputSystem.SetScreenShakeEffect(5, 1.25f);
+        inputSystem.SetVibration(0, 3, 1.25f);
         curRadius = 1;
         expandRadius = true;
         sphereCollider.radius = sphereCollider.radius = 0.625f;
