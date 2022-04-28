@@ -44,7 +44,6 @@ public class DinSystem : MonoBehaviour
         40.0f, //Awareness Range
         200.0f //Player Lost Range
     };
-    private float idleSpeed = 0;
     private float walkSpeed = 2.5f;
     private float chaseSpeed = 30;
     public enum State { Idle, Walk, Chase, Attack, Jump, Damage, Death }
@@ -121,7 +120,7 @@ public class DinSystem : MonoBehaviour
         orgState = curState;
         stateTimer = 1;
         maxHealth = health;
-        viewDistance = 150;
+        viewDistance = enemyStateRanges[2] - 1;
         waitTime = Random.Range(1, 5);
         waitTimer = waitTime;
         damageTime = Random.Range(4f, 7);
@@ -141,17 +140,16 @@ public class DinSystem : MonoBehaviour
         if (playerDistance > 300) return;
         time = Time.deltaTime;
         // if the player is dead make the enemy return to org state
-        if ((playerSystem.isDead && curState != orgState) || commandSystem.masterCodesActive[2] && curState != orgState) 
-        { 
+        if ((playerSystem.isDead && curState != orgState) || commandSystem.masterCodesActive[2] && curState != orgState)
+        {
             curState = orgState;
-            playerVisible = false;
             playerFound = false;
+            playerVisible = false;
         }
-           
-        ActiveState(curState);
-        IsDamaged();
         CheckPath();
         LineOfSight();
+        ActiveState(curState);
+        //IsDamaged();
         LookAtPlayerAttack();
     }
     //-------------------------------------------------------------------------------------------------------
@@ -167,36 +165,21 @@ public class DinSystem : MonoBehaviour
     {
         if (optionsSystem == null) optionsSystem = OptionsSystem.optionsSystem;
         float diffRange = Random.Range(15, 26);
-        //if (optionsSystem.difficultyActive[0]) diffRange = Random.Range(10, 16);
-        //else if (optionsSystem.difficultyActive[1]) diffRange = Random.Range(15, 21);
-        //else if (optionsSystem.difficultyActive[2]) diffRange = Random.Range(20, 26);
-        //else if (optionsSystem.difficultyActive[3]) diffRange = Random.Range(25, 31);
         return diffRange * 2.3f;
-    }
-    public void MutilateEnemy()
-    {
-        OverKill();
     }
     public void EngagePlayer()
     {
-        //set the current state to chase. 
-        //navAgent.updatePosition = false;
-        //navAgent.updateRotation = false;
         curState = State.Chase;
         //activate the movement random speed based on difficulty
         randomSpeed = DifficultyRNDSpeed();
         //Enemy has found the player
         FoundPlayer();
+        SetAnimation();
+        ActiveState(curState);
     }
     private void ActiveState(State state)
     {
-        anim.SetFloat("Speed", 1.5f);
-        if (!allowMovement)
-        {
-            if (curSpeed != idleSpeed) curSpeed = idleSpeed;
-            if (navAgent.destination != transform.position) SetNav(transform.position, 0, true);
-            return;
-        }
+        if (!allowMovement) FreezeMovement();
         switch (state)
         {
             case State.Idle:
@@ -220,12 +203,11 @@ public class DinSystem : MonoBehaviour
                 }
             case State.Walk:
                 {
-
                     //Current state at 1
                     stateIndex = 1;
                     SetAnimation();
                     //set the spee to walk
-                    if (curSpeed != walkSpeed) curSpeed = walkSpeed;
+                    curSpeed = walkSpeed;
                     //set the navigation to assigned positions
                     ActiveWaitTimer();
 
@@ -337,21 +319,7 @@ public class DinSystem : MonoBehaviour
 
                     if (!AnimatorIsPlaying("Attack"))
                     {
-                        if (playerDistance <= enemyStateRanges[0])
-                        {
-                            if (playerVisible) { curState = State.Attack; }
-                            else curState = State.Chase;
-                        }
-                        else if (playerDistance > enemyStateRanges[0] && playerDistance <= enemyStateRanges[1])
-                        {
-                            if (playerVisible) { curState = State.Jump; }
-                            else curState = State.Chase;
-                        }
-                        else if (playerDistance > enemyStateRanges[1])
-                        {
-                            curState = State.Walk;
-                            playerFound = false;
-                        }
+                        CheckRadius(playerDistance);
                         updateNextPosition = true;
                         //navAgent.updatePosition = false;
                     }
@@ -371,21 +339,7 @@ public class DinSystem : MonoBehaviour
                     if (navAgent.destination != chasePosition) SetNav(chasePosition, 1, true);
                     if (!AnimatorIsPlaying("Jump"))
                     {
-                        if (playerDistance <= enemyStateRanges[0])
-                        {
-                            if (playerVisible) { curState = State.Attack; }
-                            else curState = State.Chase;
-                        }
-                        else if (playerDistance > enemyStateRanges[0] && playerDistance <= enemyStateRanges[1])
-                        {
-                            if (playerVisible) { curState = State.Jump; }
-                            else curState = State.Chase;
-                        }
-                        else if (playerDistance > enemyStateRanges[2])
-                        {
-                            curState = State.Walk;
-                            playerFound = false;
-                        }
+                        CheckRadius(playerDistance);
                     }
                     break;
                 }
@@ -407,17 +361,6 @@ public class DinSystem : MonoBehaviour
                 }
         }
        
-    }
-    private void SetAnimation()
-    {
-        if (curStateIndex != stateIndex)
-        {
-            currentStateName = StateName();
-            curStateIndex = stateIndex;
-            curAnim = animNames[stateIndex];
-            ActiveAnimation(curAnim);
-        }
-        else if (stateIndex == 4 && !anim.GetCurrentAnimatorStateInfo(0).IsName("Attack")) ActiveAnimation(curAnim);
     }
     private void FreezeMovement()
     {
@@ -444,33 +387,11 @@ public class DinSystem : MonoBehaviour
             randomSpeed = DifficultyRNDSpeed();
         }
 
-        else if (distance > enemyStateRanges[2])
+        else if (distance > 299)
         {
             curState = State.Walk;
             playerFound = false;
             playerVisible = false;
-        }
-    }
-    private void IsDamaged()
-    {
-        if (!isDamaged) return;
-        damageTimer -= time;
-        damageTimer = Mathf.Clamp(damageTimer, 0, damageTime);
-        if (damageTimer == 0)
-        {
-            damageTime = Random.Range(3f, 6);
-            damageTimer = damageTime;
-            isDamaged = false;
-        }
-
-    }
-    public void DMGAnimFinished()
-    {
-        curState = isDead ? State.Death : State.Chase;
-        if (curState == State.Chase)
-        {
-            allowMovement = true;
-            randomSpeed = DifficultyRNDSpeed();
         }
     }
     public void PlayAttackSound()
@@ -483,46 +404,38 @@ public class DinSystem : MonoBehaviour
     }
     private void ActiveWaitTimer()
     {
+        //wait between time before changing the destination
         if (!isWaiting) return;
+        if (curSpeed != 0) curSpeed = 0;
+        if (chasePosition != transform.position) chasePosition = transform.position;
+        if (navAgent.destination != chasePosition) SetNav(chasePosition, 0, false);
+        if (!AnimatorIsPlaying("Idle")) ActiveAnimation("Idle");
         waitTimer -= time;
         waitTimer = Mathf.Clamp(waitTimer, 0, waitTime);
         if (waitTimer == 0)
         {
+            if (!AnimatorIsPlaying("Walk")) ActiveAnimation("Walk");
             waitTime = Random.Range(1, 5);
             waitTimer = waitTime;
             isWaiting = false;
+            //Set the position index
             ChangeDestination(randomizePositions, backTrackPositions);
-            if (navAgent.destination != Destination()) SetNav(Destination(), navStopDist, true);
+            if (chasePosition != Destination()) chasePosition = Destination();
+            if (navAgent.destination != chasePosition) SetNav(chasePosition, 0, true);
+            //Set the assigned position to position index value
         }
     }
     private void NextStateTimer(float distance)
     {
-        //shoot the player after a time.
+        //change state after time is reduced
         stateTimer -= time;
         stateTimer = Mathf.Clamp(stateTimer, 0, 5);
         if (stateTimer == 0)
         {
+            //check the player radius
+            CheckRadius(distance);
+            //reset the state timer
             stateTimer = SetStateTimer();
-            if (distance <= enemyStateRanges[0])
-            {
-                if (playerVisible) { curState = State.Attack; }
-                else curState = State.Chase;
-            }
-            else if (distance > enemyStateRanges[0] && distance <= enemyStateRanges[1])
-            {
-                if (playerVisible) { curState = State.Jump; }
-                else curState = State.Chase;
-            }
-            else if (distance > enemyStateRanges[1] && distance < enemyStateRanges[2])
-            {
-                randomSpeed = DifficultyRNDSpeed(); 
-                curState = State.Chase;
-            }
-            else if (distance > enemyStateRanges[2])
-            {
-                curState = State.Walk;
-                playerFound = false;
-            }
         }
     }
     private float SetStateTimer()
@@ -552,6 +465,17 @@ public class DinSystem : MonoBehaviour
     //-------------------------------------------------------------------------------------------------------
     //---------------------------------ANIMATION-------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------------
+    private void SetAnimation()
+    {
+        if (curStateIndex != stateIndex)
+        {
+            currentStateName = StateName();
+            curStateIndex = stateIndex;
+            curAnim = animNames[stateIndex];
+            ActiveAnimation(curAnim);
+        }
+        else if (stateIndex == 4 && !anim.GetCurrentAnimatorStateInfo(0).IsName("Attack")) ActiveAnimation(curAnim);
+    }
     private void ActiveAnimation(string animation)
     {
         for (int an = 0; an < animNames.Length; an++)
@@ -590,7 +514,7 @@ public class DinSystem : MonoBehaviour
             anim.SetFloat("Speed", speed);
     }
     //-------------------------------------------------------------------------------------------------------
-    //---------------------------------NAVAGATION------------------------------------------------------------
+    //---------------------------------NAVIGATION------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------------
     private void SetNav(Vector3 pos, float distance, bool active)
     {
@@ -622,18 +546,18 @@ public class DinSystem : MonoBehaviour
         Vector3 direction = new Vector3(movePositions[curPositionIndex].localPosition.x, transform.localPosition.y, movePositions[curPositionIndex].localPosition.z);
         return direction;
     }
-    private Vector3 MoveInRadius(float distanceX, float distanceZ)
-    {
-        Vector3[] positions = new Vector3[3]
-        {
-            new Vector3(PlayerPosition().x + distanceX, transform.localPosition.y, PlayerPosition().z + distanceZ),
-            new Vector3(transform.localPosition.x + distanceX, transform.localPosition.y, transform.localPosition.z + distanceX),
-            PlayerPosition()
-        };
-        int rndIndex = 2;
-        Vector3 movePosition = positions[rndIndex];
-        return movePosition;
-    }
+    //private Vector3 MoveInRadius(float distanceX, float distanceZ)
+    //{
+    //    Vector3[] positions = new Vector3[3]
+    //    {
+    //        new Vector3(PlayerPosition().x + distanceX, transform.localPosition.y, PlayerPosition().z + distanceZ),
+    //        new Vector3(transform.localPosition.x + distanceX, transform.localPosition.y, transform.localPosition.z + distanceX),
+    //        PlayerPosition()
+    //    };
+    //    int rndIndex = 2;
+    //    Vector3 movePosition = positions[rndIndex];
+    //    return movePosition;
+    //}
     public Vector3 GetPositionOnNavMesh(Vector3 position)
     {
         NavMeshHit hit;
@@ -643,22 +567,21 @@ public class DinSystem : MonoBehaviour
     private void CheckPath()
     {
         elapsed += time;
-        if (elapsed > 2.0f)
+        if (elapsed > 1.5f)
         {
-            elapsed -= 2.0f;
-            NavMesh.CalculatePath(navAgent.transform.position, chasePosition, NavMesh.AllAreas, path);
+            elapsed -= 1.5f;
+            NavMesh.CalculatePath(transform.position, chasePosition, NavMesh.AllAreas, path);
             updateNextPosition = true;
-           
         }
-        //for (int i = 0; i < path.corners.Length - 1; i++)
-        //Debug.DrawLine(path.corners[i], path.corners[i + 1], Color.red);
+        for (int i = 0; i < path.corners.Length - 1; i++)
+            Debug.DrawLine(path.corners[i], path.corners[i + 1], Color.red);
     }
     private void LineOfSight()
     {
-        if (commandSystem.masterCodesActive[2]) return;
         //If player is dead disregard method
-        if (playerSystem.isDead)
+        if (playerSystem.isDead || commandSystem.masterCodesActive[2])
             return;
+        //if (playerFound) return;
         //distance of the raycast from enemy to player
         distanceVector = PlayerPosition() - transform.position;
         //viewing angle from enemy to player
@@ -672,7 +595,7 @@ public class DinSystem : MonoBehaviour
                 //if the raycast hit the player player is now found, activate shooting if player is within range
                 if (playerHit.collider.gameObject.CompareTag("Player"))
                 {
-                    if(!playerFound)FoundPlayer();
+                    FoundPlayer();
                     playerVisible = true;
                 }
                 else playerVisible = false;
@@ -681,17 +604,14 @@ public class DinSystem : MonoBehaviour
     }
     private void FoundPlayer()
     {
+        if (powerupSystem.powerEnabled[1]) return;
         if (playerFound) return;
         //if invisibility is active player is not found
-        playerFound = powerupSystem.powerEnabled[1] ? false : true;
-        if (playerFound)
-        {
-            waitTime = Random.Range(1, 5);
-            waitTimer = waitTime;
-            isWaiting = false;
-            curState = State.Chase;
-            audioSrc.PlayOneShot(enemySounds[0]);
-        }
+        waitTime = Random.Range(1, 5);
+        waitTimer = waitTime;
+        isWaiting = false;
+        audioSrc.PlayOneShot(enemySounds[0]);
+        playerFound = true;
     }
     private void LookAtPlayerAttack()
     {
@@ -760,6 +680,33 @@ public class DinSystem : MonoBehaviour
         navAgent.enabled = false;
         audioSrc.PlayOneShot(enemySounds[3]);
         ActiveAnimation("Death");
+    }
+    public void MutilateEnemy()
+    {
+        OverKill();
+    }
+    //private void IsDamaged()
+    //{
+    //    if (!isDamaged) return;
+    //    damageTimer -= time;
+    //    damageTimer = Mathf.Clamp(damageTimer, 0, damageTime);
+    //    if (damageTimer == 0)
+    //    {
+    //        damageTime = Random.Range(3f, 6);
+    //        damageTimer = damageTime;
+    //        isDamaged = false;
+    //    }
+
+    //}
+    public void DMGAnimFinished()
+    {
+        curState = isDead ? State.Death : State.Chase;
+        if (curState == State.Chase)
+        {
+            allowMovement = true;
+            randomSpeed = DifficultyRNDSpeed();
+        }
+        isDamaged = false;
     }
     public void ResetObject(bool setOrgPos)
     {

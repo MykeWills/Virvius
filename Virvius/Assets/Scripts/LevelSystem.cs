@@ -15,25 +15,8 @@ public class LevelSystem : MonoBehaviour
     public List<Transform> enemyTargets;
     public CraneDropSystem[] craneDropSystem;
     public ExplodingCrateSystem[] explodingCrateSystems;
+    public ExplodeTrigger[] explodingTriggerSystems;
 
-    //private void Start()
-    //{
-    //    enemyTargets = new List<Transform>(gruntSystems.Length + dinSystems.Length);
-    //}
-    //public void BuildEnemyDatabase()
-    //{
-    //    if (enemyTargets.Count > 0) enemyTargets.Clear();
-    //    for (int gs = 0; gs < gruntSystems.Length; gs++) 
-    //    { 
-    //        if (!gruntSystems[gs].isDead && !enemyTargets.Contains(gruntSystems[gs].transform)) enemyTargets.Add(gruntSystems[gs].transform); 
-    //        else enemyTargets.Remove(gruntSystems[gs].transform); 
-    //    }
-    //    for (int gs = 0; gs < dinSystems.Length; gs++) 
-    //    { 
-    //        if (!dinSystems[gs].isDead && !enemyTargets.Contains(dinSystems[gs].transform)) enemyTargets.Add(dinSystems[gs].transform); 
-    //        else enemyTargets.Remove(dinSystems[gs].transform); 
-    //    }
-    //}
     public void ResetLevel()
     {
         for (int a = 0; a < ambushSystems.Length; a++)
@@ -57,7 +40,9 @@ public class LevelSystem : MonoBehaviour
         for (int a = 0; a < craneDropSystem.Length; a++)
             craneDropSystem[a].ResetObject();  
         for (int a = 0; a < explodingCrateSystems.Length; a++)
-            explodingCrateSystems[a].ResetObject();
+            explodingCrateSystems[a].ResetObject();  
+        for (int a = 0; a < explodingTriggerSystems.Length; a++)
+            explodingTriggerSystems[a].ResetObject();
         ActivateEnvironment();
     }
     public void ActivateEnvironment()

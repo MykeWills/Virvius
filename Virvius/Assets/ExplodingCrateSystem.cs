@@ -2,7 +2,9 @@
 
 public class ExplodingCrateSystem : MonoBehaviour
 {
-    private Rigidbody rb;
+    private enum ObjectType { crate, wall }
+    [SerializeField]
+    private ObjectType objectType;
     [HideInInspector]
     public bool isDetonated = false;
     private float time = 0;
@@ -50,8 +52,9 @@ public class ExplodingCrateSystem : MonoBehaviour
         if (!explosionPrefab.activeInHierarchy)
         {
             explosionPrefab.SetActive(true);
-            sphereCollider.enabled = true;
-
+            if (objectType != ObjectType.wall)
+                sphereCollider.enabled = true;
+            else sphereCollider.enabled = false;
         }
         if (viewableCrate.activeInHierarchy) 
             viewableCrate.SetActive(false);
@@ -89,6 +92,7 @@ public class ExplodingCrateSystem : MonoBehaviour
                 float dist = Vector3.Distance(sphereCollider.bounds.center, contactPoint.point);
                 float ratio = Map(dist, 1, blastRadius, 0, 200);
                 float damage = 200 - ratio;
+                if (objectType == ObjectType.wall) return;
                 if (collision.gameObject.TryGetComponent(out PlayerSystem playerSystem)) playerSystem.Damage(Mathf.FloorToInt(damage));
                 if (collision.gameObject.TryGetComponent(out GruntSystem gruntSystem)) gruntSystem.Damage(damage);
                 if (collision.gameObject.TryGetComponent(out DinSystem dinSystem)) dinSystem.Damage(damage);

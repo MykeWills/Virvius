@@ -59,7 +59,6 @@ public class SpawnSystem : MonoBehaviour
     private bool spawnAllAtOnce = false;    
     [SerializeField]
     private bool randomizePositions = false;
-    private int spawnIndex = 0;
     private int objIndex = 0;
     private int posIndex = 0;
     private bool spawnFinished = false;
@@ -116,9 +115,9 @@ public class SpawnSystem : MonoBehaviour
             case ObjectType.Ammo9: objIndex = 32; break;
             
         }
-        AccessSpawn(objIndex, spawnAmount);
+        AccessSpawn(objIndex);
     }
-    public void AccessSpawn(int index, int amt)
+    public void AccessSpawn(int index)
     {
         //access the spawnobject from pool or instantiate one into pool
         warpEffect.gameObject.SetActive(false);
@@ -129,8 +128,8 @@ public class SpawnSystem : MonoBehaviour
         //Spawn in symetrical order
         else
         {
-            posIndex++;
-            if (posIndex > spawnPoints.Length - 1) posIndex = 0;
+            if (posIndex < spawnPoints.Length)
+                posIndex++;
         }
         //set the position of the spawned object
         if (index < 2)
@@ -170,27 +169,23 @@ public class SpawnSystem : MonoBehaviour
                 if (spawnTimer == 0)
                 {
                     if (playerSystem.isDead) startSpawning = false;
-                    if (spawnIndex == spawnAmount) startSpawning = false;
-                    else
+                    if (objectIndex < spawnAmount) 
                     {
                         spawnTimer = spawnTime;
-                        if (objectIndex > objectType.Length) objectIndex = objectType.Length;
-                        if(objectType[objectIndex] != ObjectType.None)
+                        if (objectType[objectIndex] != ObjectType.None)
                             SpawnObjectType(objectType[objectIndex]);
+                        //Spawns the next item/object in the list
                         objectIndex++;
-                        spawnIndex++;
+                        return;
                     }
+                    startSpawning = false;
                 }
             }
             else if(spawnAllAtOnce)
             {
                 spawnAudioSrcs[posIndex].PlayOneShot(warpSoundSfx);
                 for (int s = 0; s < spawnAmount; s++)
-                {
-                    if (objectIndex > objectType.Length) objectIndex = objectType.Length;
-                    SpawnObjectType(objectType[objectIndex]);
-                    objectIndex++;
-                }
+                    SpawnObjectType(objectType[s]);
                 startSpawning = false;
             }
         }
@@ -226,7 +221,6 @@ public class SpawnSystem : MonoBehaviour
         startSpawning = false;
         spawnFinished = false;
         spawnTimer = spawnTime;
-        spawnIndex = 0;
         posIndex = 0;
         objIndex = 0;
         for (int s = 0; s < 32; s++)

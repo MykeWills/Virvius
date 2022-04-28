@@ -146,7 +146,7 @@ public class GruntSystem : MonoBehaviour
         orgState = curState;
         stateTimer = 1;
         maxHealth = health;
-        viewDistance = 150;
+        viewDistance = enemyStateRanges[2] - 1;
         waitTime = Random.Range(1, 5);
         waitTimer = waitTime;
         stateTimer = SetStateTimer();
@@ -158,7 +158,7 @@ public class GruntSystem : MonoBehaviour
         elapsed = 0.0f;
         goreExplosion.SetActive(false);
     }
-    void Update()
+    private void Update()
     {
         if (gameSystem.BlockedAttributesActive()) return;
         if (isDead) return;
@@ -182,10 +182,6 @@ public class GruntSystem : MonoBehaviour
         //IsDamaged();
         LookAtPlayerShooting();
         GunFlash();
-    }
-    private void FixedUpdate()
-    {
-        
     }
     private void OnCollisionEnter(Collision collision)
     {
@@ -259,10 +255,6 @@ public class GruntSystem : MonoBehaviour
     {
         if (optionsSystem == null) optionsSystem = OptionsSystem.optionsSystem;
         float diffRange = Random.Range(25, 31);
-        //if (optionsSystem.difficultyActive[0]) diffRange = Random.Range(10, 16);
-        //else if (optionsSystem.difficultyActive[1]) diffRange = Random.Range(15, 21);
-        //else if (optionsSystem.difficultyActive[2]) diffRange = Random.Range(20, 26);
-        //else if (optionsSystem.difficultyActive[3]) diffRange = Random.Range(25, 31);
         return diffRange;
     }
     private float CheckLinkSpeed(float currentSpeed)
@@ -290,7 +282,6 @@ public class GruntSystem : MonoBehaviour
     }
     private void ActiveState(State state)
     {
-       
         if (!allowMovement) FreezeMovement();
         switch (state)
         {
@@ -315,7 +306,6 @@ public class GruntSystem : MonoBehaviour
                 }
             case State.Walk:
                 {
-
                     //Current state at 1
                     stateIndex = 1;
                     SetAnimation();
@@ -363,7 +353,6 @@ public class GruntSystem : MonoBehaviour
                         //set the curent move speed to random speed so it doesnt kepp changing destination
                         curSpeed = randomSpeed;
                     }
-
                     if (!lookForPlayer)
                     {
                         if (navAgent.pathStatus == NavMeshPathStatus.PathComplete && updateNextPosition)
@@ -487,7 +476,7 @@ public class GruntSystem : MonoBehaviour
             randomSpeed = DifficultyRNDSpeed(); 
         }
 
-        else if (distance > enemyStateRanges[2])
+        else if (distance > 299)
         {
             curState = State.Walk;
             playerFound = false;
@@ -705,16 +694,14 @@ public class GruntSystem : MonoBehaviour
     }
     private void FoundPlayer()
     {
+        if (powerupSystem.powerEnabled[1]) return;
         if (playerFound) return;
         //if invisibility is active player is not found
-        playerFound = powerupSystem.powerEnabled[1] ? false : true;
-        if (playerFound)
-        {
-            waitTime = Random.Range(1, 5);
-            waitTimer = waitTime;
-            isWaiting = false;
-            audioSrc.PlayOneShot(enemySounds[0]);
-        }
+        waitTime = Random.Range(1, 5);
+        waitTimer = waitTime;
+        isWaiting = false;
+        audioSrc.PlayOneShot(enemySounds[0]);
+        playerFound = true;
     }
     //-------------------------------------------------------------------------------------------------------
     //---------------------------------WEAPON----------------------------------------------------------------

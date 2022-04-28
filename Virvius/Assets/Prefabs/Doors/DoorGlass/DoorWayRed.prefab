@@ -121,7 +121,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 8681a4e712ae5a241ac3369178bd67d1, type: 3}
   - {fileID: 8300000, guid: 8681a4e712ae5a241ac3369178bd67d1, type: 3}
   doorType: 3
-  moveSpeed: 35
+  moveSpeed: 45
   directionRight: 0
   rightDoor: {fileID: 6058391059423368275}
   maxRightVector: {x: 20, y: 20, z: 0}

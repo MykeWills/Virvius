@@ -6,7 +6,8 @@ public class ExplodeCrate : MonoBehaviour
 {
     [SerializeField]
     private ExplodingCrateSystem crateSystem;
-    private string[] tags = new string[11]
+
+    private string[] tags = new string[12]
    {
         "Sword",
         "ShotgunBullet",
@@ -19,7 +20,11 @@ public class ExplodeCrate : MonoBehaviour
         "SigmaBullet",
         "ObstacleBullet",
         "RocketBulletMini",
+        "ObstacleExplosive"
    };
+
+ 
+
     private void OnCollisionEnter(Collision collision)
     {
         string tag = collision.gameObject.tag;
@@ -39,3 +44,4 @@ public class ExplodeCrate : MonoBehaviour
         }
     }
 }
+

@@ -331,7 +331,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a79e7509801408d4eab67793efd0f449, type: 2}
+  - {fileID: 2100000, guid: 1e45fee477ea61b40aa18390d5eb20ea, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1306,15 +1306,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b82ca5dbe6dee624e9e2225c8c39ffcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveObjectSrc: {fileID: 0}
+  moveObjectSound:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   hasMoved: 0
   isActive: 0
-  currentSwitchType: 2
-  curentSwitchSubType: 0
+  isCoActive: 0
+  messageTrigger: {fileID: 0}
+  isMoving: 0
+  switchTime: 5
+  switchType: 0
+  switchSubType: 0
+  activationType: 0
   moveDirection: 1
+  rotateDirection: 0
   maxXYZ: -1.5
   minXYZ: -25.5
   moveSpeed: 20
+  rotateMoveObj: 0
+  rotateSpeed: 0
+  rotateAmt: 1
+  reverseUpdatedPos: 0
+  activationObject: {fileID: 0}
+  eventObject:
+  - {fileID: 0}
+  - {fileID: 0}
   pressSoundFx: {fileID: 8300000, guid: 90e975bed89b9b4438c0f03fd80ceb14, type: 3}
+  messageSoundFx:
+  - {fileID: 0}
+  - {fileID: 0}
   pressInObject:
   - {fileID: 4008530783404932898}
   - {fileID: 9137157379440448515}
@@ -1327,7 +1349,13 @@ MonoBehaviour:
   - {fileID: 2099648602133075245}
   - {fileID: 2828583639850285461}
   correspondingSwitch: {fileID: 6800232270842686820}
-  moveObject: {fileID: 0}
+  instantiationPos: {fileID: 0}
+  instantiationPool: {fileID: 0}
+  dropCranePosIndex: 0
+  navMeshLinkUpper: []
+  allowLinkValueChangeUpper: 0
+  navMeshLinkLower: []
+  allowLinkValueChangeLower: 0
 --- !u!65 &8215537561558560915
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1492,7 +1520,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a79e7509801408d4eab67793efd0f449, type: 2}
+  - {fileID: 2100000, guid: 1e45fee477ea61b40aa18390d5eb20ea, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
