@@ -60,7 +60,7 @@ public class SpawnSystem : MonoBehaviour
     [SerializeField]
     private bool randomizePositions = false;
     private int objIndex = 0;
-    private int posIndex = 0;
+    private int posIndex = -1;
     private bool spawnFinished = false;
     private bool startSpawning = false;
     private int objectIndex = 0;
@@ -221,7 +221,7 @@ public class SpawnSystem : MonoBehaviour
         startSpawning = false;
         spawnFinished = false;
         spawnTimer = spawnTime;
-        posIndex = 0;
+        posIndex = -1;
         objIndex = 0;
         for (int s = 0; s < 32; s++)
         {

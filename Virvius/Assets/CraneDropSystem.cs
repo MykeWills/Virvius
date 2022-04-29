@@ -56,6 +56,7 @@ public class CraneDropSystem : MonoBehaviour
         {
             crateRb[rb] = crates[rb].GetComponent<Rigidbody>();
             crateRb[rb].useGravity = false;
+            crateRb[rb].constraints = RigidbodyConstraints.FreezeAll;
             crateRb[rb].transform.localPosition = cratePosition;
             if(rb != 0)
                 crateRb[rb].gameObject.SetActive(false);
@@ -100,6 +101,10 @@ public class CraneDropSystem : MonoBehaviour
                 if (isOpen)
                 {
                     crateRb[dropIndex].useGravity = true;
+                    crateRb[dropIndex].constraints = RigidbodyConstraints.None;
+                    crateRb[dropIndex].constraints = RigidbodyConstraints.FreezeRotation;
+                    crateRb[dropIndex].constraints = RigidbodyConstraints.FreezePositionX;
+                    crateRb[dropIndex].constraints = RigidbodyConstraints.FreezePositionZ;
                     crateRb[dropIndex].transform.parent = transform.parent;
                 }
             }

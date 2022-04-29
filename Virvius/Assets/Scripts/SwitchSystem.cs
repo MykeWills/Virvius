@@ -47,7 +47,7 @@ public class SwitchSystem : MonoBehaviour
         "PhotonBullet",
         "SigmaBullet",
         "ObstacleBullet",
-        "RocketBulletMini",
+        "RocketBulletMini"
    };
     [Header("Main Switch Options")]
     public SwitchType switchType;
@@ -118,7 +118,7 @@ public class SwitchSystem : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Player") && !isActive)
+        if (other.gameObject.CompareTag("Player") && !isActive || other.gameObject.CompareTag("Crate") && !isActive)
         {
             if (switchType == SwitchType.Press || switchType == SwitchType.Step)
             {
@@ -194,12 +194,11 @@ public class SwitchSystem : MonoBehaviour
                 moveObjectSrc.clip = moveObjectSound[2];
                 moveObjectSrc.loop = false;
                 moveObjectSrc.Play();
-                if (allowLinkValueChangeUpper)
-                    SetNavLinks(navMeshLinkUpper, isActive);
-                if (allowLinkValueChangeLower)
-                    SetNavLinks(navMeshLinkLower, !isActive);
             }
-           
+            if (allowLinkValueChangeUpper)
+                SetNavLinks(navMeshLinkUpper, isActive);
+            if (allowLinkValueChangeLower)
+                SetNavLinks(navMeshLinkLower, !isActive);
         }
     }
     private void PlayMoveObjectSound()

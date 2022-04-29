@@ -65,6 +65,7 @@ TagManager:
   - NuclearCrate
   - RailBullet
   - SigmaBullet
+  - Crate
   layers:
   - Default
   - TransparentFX

@@ -6,8 +6,9 @@ public class DinSystem : MonoBehaviour
 {
     private CommandSystem commandSystem;
     private GameSystem gameSystem;
-    private OptionsSystem optionsSystem;
+    private WeaponSystem weaponSystem;
     private PowerupSystem powerupSystem;
+    private OptionsSystem optionsSystem;
     private PlayerSystem playerSystem;
     private AudioSource audioSrc;
     [HideInInspector]
@@ -59,6 +60,22 @@ public class DinSystem : MonoBehaviour
         "Damaged",
         "Dead"
     };
+    private StringBuilder tagSb = new StringBuilder();
+    [HideInInspector]
+    public string[] tags = new string[11]
+  {
+        "Sword",
+        "ShotgunBullet",
+        "SpikeBullet",
+        "MinigunBullet",
+        "GrenadeBullet",
+        "RocketBullet",
+        "RailBullet",
+        "PhotonBullet",
+        "SigmaBullet",
+        "ObstacleBullet",
+        "RocketBulletMini",
+   };
     [SerializeField]
     private string currentStateName;
     [SerializeField]
@@ -641,6 +658,64 @@ public class DinSystem : MonoBehaviour
         if (!isDead) OnDamaged();
         else OnDeath();
 
+    }
+    public void CollisionDamage(string tag, GameObject colGameObject)
+    {
+        if (tagSb.Length > 0) tagSb.Clear();
+        tagSb = tagSb.Append(tag);
+        for (int t = 0; t < tags.Length; t++)
+        {
+            if (tags[t] == tagSb.ToString())
+            {
+                if (weaponSystem == null) weaponSystem = WeaponSystem.weaponSystem;
+                float dmgAmt = 0;
+                switch (t)
+                {
+                    //sword
+                    case 0: dmgAmt = Random.Range(1.50f, 2.01f); break;
+                    //shotgun
+                    case 1: dmgAmt = !weaponSystem.weaponEquipped[3] ? Random.Range(0.5f, 1.01f) : Random.Range(0.5f, 1.51f); break;
+                    //spiker
+                    case 2: dmgAmt = Random.Range(1.90f, 2.01f); break;
+                    //minigun
+                    case 3: dmgAmt = Random.Range(0.25f, 1.25f); break;
+                    //grenade
+                    case 4: if (health <= (maxHealth / 4)) MutilateEnemy(); else dmgAmt = Random.Range(5f, 10f); break;
+                    //rocket
+                    case 5: if (health <= (maxHealth / 4)) MutilateEnemy(); else dmgAmt = Random.Range(10f, 15); break;
+                    //railgun
+                    case 6: if (health <= (maxHealth / 4)) MutilateEnemy(); else dmgAmt = Random.Range(30.75f, 41.01f); break;
+                    //photon
+                    case 7: dmgAmt = Random.Range(3.60f, 5.1f); break;
+                    //Sigma
+                    case 8: MutilateEnemy(); break;
+                    //Obstacle
+                    case 9: dmgAmt = 1; break;
+                    //MiniRocket
+                    case 10: if (health <= (maxHealth / 4)) MutilateEnemy(); else dmgAmt = Random.Range(2.5f, 5); break;
+                }
+                float damage = powerupSystem.powerEnabled[2] ? 999 : powerupSystem.powerEnabled[0] ? Mathf.CeilToInt(dmgAmt) * 5 : dmgAmt;
+                Damage(damage);
+                if (t != 0)
+                {
+                    if (tags[t] == "GrenadeBullet" || tags[t] == "RocketBullet" || tags[t] == "RocketBulletMini")
+                    {
+                        if (colGameObject.TryGetComponent(out GrenadeSystem grenadeSystem))
+                            grenadeSystem.Detonate();
+                        if (colGameObject.TryGetComponent(out RocketSystem rocketSystem))
+                            rocketSystem.Detonate();
+                        if (colGameObject.TryGetComponent(out RocketSubSystem rocketSubSystem))
+                            rocketSubSystem.Detonate();
+                    }
+                    else
+                    {
+                        if (tags[t] != "RailBullet" && tags[t] != "SigmaBullet") colGameObject.SetActive(false);
+                    }
+                }
+                return;
+            }
+        }
+        return;
     }
     private void OnDamaged()
     {
