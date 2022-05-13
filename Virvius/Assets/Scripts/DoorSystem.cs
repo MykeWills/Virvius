@@ -11,7 +11,8 @@ public class DoorSystem : MonoBehaviour
     private string[] tags = new string[3] { "Player", "Enemy", "DinEnemy" };
     private bool isOpen = false;
     private bool openDoor = false;
-    private bool lockDoor = false;
+    [HideInInspector]
+    public bool lockDoor = false;
     private bool[] keyDoor = new bool[3];
     public AudioClip DoorOpenSfx;
     public AudioClip DoorCloseSfx;

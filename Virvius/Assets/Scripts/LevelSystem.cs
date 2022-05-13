@@ -16,6 +16,7 @@ public class LevelSystem : MonoBehaviour
     public CraneDropSystem[] craneDropSystem;
     public ExplodingCrateSystem[] explodingCrateSystems;
     public ExplodeTrigger[] explodingTriggerSystems;
+    public DoorTrigger[] doorTriggers;
 
     public void ResetLevel()
     {
@@ -43,6 +44,8 @@ public class LevelSystem : MonoBehaviour
             explodingCrateSystems[a].ResetObject();  
         for (int a = 0; a < explodingTriggerSystems.Length; a++)
             explodingTriggerSystems[a].ResetObject();
+        for (int a = 0; a < doorTriggers.Length; a++)
+            doorTriggers[a].ResetObject();
         ActivateEnvironment();
     }
     public void ActivateEnvironment()

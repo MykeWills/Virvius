@@ -95,6 +95,12 @@ public class SwitchSystem : MonoBehaviour
     private NavMeshLink[] navMeshLinkLower;
     [SerializeField]
     private bool allowLinkValueChangeLower = false;
+    [Space]
+    [Header("Door Preferences")]
+    [SerializeField]
+    private bool lockedDoorEvent = false;
+    [SerializeField]
+    private bool multipleDoors = false;
     //========================================================================================//
     //===================================[UNITY FUNCTIONS]====================================//
     //========================================================================================//
@@ -334,7 +340,6 @@ public class SwitchSystem : MonoBehaviour
                             messageSystem.SetMessage("Sequence completed.", MessageSystem.MessageType.Center);
                         }
                         SetActivationType(activationType);
-                        ActivateEvent(0, isActive);
                     }
                     else if (switchCounter > 0)
                     {
@@ -409,10 +414,24 @@ public class SwitchSystem : MonoBehaviour
             light.enabled = active; 
             return; 
         }
-        if (eventObject[index].TryGetComponent(out DoorSystem door)) 
-        { 
-            door.LockDoor(!active); 
-            return; 
+        if (multipleDoors)
+        {
+            for (int d = 0; d < eventObject.Length; d++)
+            {
+                if (eventObject[d].TryGetComponent(out DoorSystem door))
+                {
+                    door.LockDoor(!lockedDoorEvent ? !active : active);
+                    return;
+                }
+            }
+        }
+        else
+        {
+            if (eventObject[index].TryGetComponent(out DoorSystem door))
+            {
+                door.LockDoor(!lockedDoorEvent ? !active : active);
+                return;
+            }
         }
         if (eventObject[index].TryGetComponent(out AutoMoveSystem autoMoveSystem)) 
         { 
