@@ -2440,9 +2440,7 @@ MonoBehaviour:
   rotateAmt: 1
   reverseUpdatedPos: 0
   activationObject: {fileID: 0}
-  eventObject:
-  - {fileID: 0}
-  - {fileID: 0}
+  eventObject: []
   pressSoundFx: {fileID: 8300000, guid: 90e975bed89b9b4438c0f03fd80ceb14, type: 3}
   messageSoundFx:
   - {fileID: 0}
@@ -2466,6 +2464,8 @@ MonoBehaviour:
   allowLinkValueChangeUpper: 0
   navMeshLinkLower: []
   allowLinkValueChangeLower: 0
+  lockedDoorEvent: 0
+  multipleDoors: 0
 --- !u!1 &3793411404212937371
 GameObject:
   m_ObjectHideFlags: 0

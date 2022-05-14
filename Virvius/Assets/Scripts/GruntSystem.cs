@@ -751,7 +751,7 @@ public class GruntSystem : MonoBehaviour
         Vector3 lookVector = PlayerPosition() - transform.position;
         lookVector.y = transform.position.y;
         Quaternion rot = Quaternion.LookRotation(lookVector);
-        Quaternion newRotation = Quaternion.Slerp(transform.rotation, rot, 1);
+        Quaternion newRotation = Quaternion.Slerp(transform.rotation, rot, 0.75f);
         newRotation.x = 0;
         newRotation.z = 0;
         transform.rotation = newRotation;

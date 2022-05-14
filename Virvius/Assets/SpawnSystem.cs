@@ -47,6 +47,8 @@ public class SpawnSystem : MonoBehaviour
     [SerializeField]
     private AudioSource[] spawnAudioSrcs;
     [SerializeField]
+    private AudioSource spawnAltAudioSrc;
+    [SerializeField]
     private GameObject[] spawnObjects = new GameObject[33];
     private GameObject spawnedObject;
     [SerializeField]
@@ -183,7 +185,8 @@ public class SpawnSystem : MonoBehaviour
             }
             else if(spawnAllAtOnce)
             {
-                spawnAudioSrcs[posIndex].PlayOneShot(warpSoundSfx);
+                if (spawnAltAudioSrc == null) Debug.LogWarning("Alt source is not Assigned!");
+                else spawnAltAudioSrc.PlayOneShot(warpSoundSfx);
                 for (int s = 0; s < spawnAmount; s++)
                     SpawnObjectType(objectType[s]);
                 startSpawning = false;

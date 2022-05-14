@@ -114,6 +114,7 @@ public class DoorSystem : MonoBehaviour
                 {
                     case DoorType.Normal:
                         {
+                            if (lockDoor) { messageSystem.SetMessage("Door Locked!", MessageSystem.MessageType.Center); return; }
                             PlayDoorSound(DoorOpenSfx);
                             isOpen = false;
                             openDoor = true;
@@ -125,7 +126,6 @@ public class DoorSystem : MonoBehaviour
                             PlayDoorSound(DoorOpenSfx);
                             isOpen = false;
                             openDoor = true;
-                            
                             break;
                         }
                     case DoorType.Blue:

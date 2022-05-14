@@ -66,6 +66,7 @@ TagManager:
   - RailBullet
   - SigmaBullet
   - Crate
+  - LavaChunk
   layers:
   - Default
   - TransparentFX
@@ -91,7 +92,7 @@ TagManager:
   - Rocket
   - Sight
   - PostProcessingClip
-  - 
+  - Chunk
   - 
   - 
   - 

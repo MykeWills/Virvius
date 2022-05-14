@@ -34,7 +34,7 @@ public class DinSystem : MonoBehaviour
     [SerializeField]
     private AudioClip[] enemySounds;
     [SerializeField]
-    private float viewAngle = 75; 
+    private float viewAngle = 100; 
     [SerializeField]
     private float navStopDist = 12.2f;
     [SerializeField]
@@ -62,7 +62,7 @@ public class DinSystem : MonoBehaviour
     };
     private StringBuilder tagSb = new StringBuilder();
     [HideInInspector]
-    public string[] tags = new string[11]
+    public string[] tags = new string[12]
   {
         "Sword",
         "ShotgunBullet",
@@ -74,6 +74,7 @@ public class DinSystem : MonoBehaviour
         "PhotonBullet",
         "SigmaBullet",
         "ObstacleBullet",
+        "ObstacleExplosive",
         "RocketBulletMini",
    };
     [SerializeField]
@@ -90,7 +91,7 @@ public class DinSystem : MonoBehaviour
     [HideInInspector]
     public bool isDead = false;
     [HideInInspector]
-    public float health = 50;
+    public float health = 35;
     [HideInInspector]
     public float maxHealth = 0;
     private float dmgTaken = 0;
@@ -151,7 +152,6 @@ public class DinSystem : MonoBehaviour
     private void Update()
     {
         if (gameSystem.BlockedAttributesActive()) return;
-        // if the enemy is dead disregard all
         if (isDead) return;
         playerDistance = Vector3.Magnitude(transform.position - PlayerPosition());
         if (playerDistance > 300) return;
@@ -365,6 +365,7 @@ public class DinSystem : MonoBehaviour
                     stateIndex = 6;
                     SetAnimation();
                     if (allowMovement) allowMovement = false;
+                    randomSpeed = DifficultyRNDSpeed();
                     break;
                 }
             case State.Death:
@@ -504,7 +505,7 @@ public class DinSystem : MonoBehaviour
             else
             {
                 if (animNames[an] == animation) anim.SetBool(animNames[an], true);
-                else anim.SetBool(animNames[an], false);
+                else { if(anim.isActiveAndEnabled) anim.SetBool(animNames[an], false); }
             }
            
         }
@@ -636,7 +637,7 @@ public class DinSystem : MonoBehaviour
         Vector3 lookVector = PlayerPosition() - transform.position;
         //lookVector.y = transform.position.y;
         Quaternion rot = Quaternion.LookRotation(lookVector);
-        Quaternion newRotation = Quaternion.Slerp(transform.rotation, rot, 0.5f);
+        Quaternion newRotation = Quaternion.Slerp(transform.rotation, rot, 1f);
         newRotation.x = 0;
         newRotation.z = 0;
         transform.rotation = newRotation;

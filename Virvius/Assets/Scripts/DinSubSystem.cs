@@ -7,4 +7,8 @@ public class DinSubSystem : MonoBehaviour
     {
         dinSystem.CollisionDamage(collision.gameObject.tag, collision.gameObject);
     }
+    public void Damage(float amt)
+    {
+        dinSystem.Damage(amt);
+    }
 }

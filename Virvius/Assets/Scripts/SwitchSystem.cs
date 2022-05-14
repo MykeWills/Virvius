@@ -72,7 +72,7 @@ public class SwitchSystem : MonoBehaviour
     [Space]
     [Header("Switch Assignment")]
     public GameObject activationObject;
-    public GameObject[] eventObject = new GameObject[2];
+    public GameObject[] eventObject;
     [Space]
     public AudioClip pressSoundFx;
     public AudioClip[] messageSoundFx = new AudioClip[2];
@@ -128,7 +128,7 @@ public class SwitchSystem : MonoBehaviour
         {
             if (switchType == SwitchType.Press || switchType == SwitchType.Step)
             {
-                if(eventObject[0] != null)
+                if(eventObject.Length > 0)
                 {
                     if (eventObject[0].TryGetComponent(out CraneDropSystem craneDropSystem))
                     {
@@ -408,7 +408,7 @@ public class SwitchSystem : MonoBehaviour
     }
     private void ActivateEvent(int index, bool active)
     {
-        if(eventObject[index] == null) return;
+        if(eventObject.Length < 1) return;
         if (eventObject[index].TryGetComponent(out Light light)) 
         { 
             light.enabled = active; 

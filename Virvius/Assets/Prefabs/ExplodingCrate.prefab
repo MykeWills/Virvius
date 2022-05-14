@@ -5035,6 +5035,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29a54c75d75cebc42a65628659289649, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  objectType: 0
   isDetonated: 0
   blastRadius: 50
   explosionSpeed: 400
@@ -5053,7 +5054,7 @@ SphereCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 1
-  m_Center: {x: -0.00000023841858, y: -0.00000023841858, z: 0}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &124969663706661616
 Rigidbody:
   m_ObjectHideFlags: 0
