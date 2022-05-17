@@ -546,6 +546,7 @@ public class SwitchSystem : MonoBehaviour
         }
         if (activationObject != null)
             activationObject.transform.localPosition = updatedPosition;
+        if (activationType == SwitchActivationType.Activation) { if (activationObject != null) activationObject.gameObject.SetActive(false); }
         if (switchType == SwitchType.Press || switchType == SwitchType.Step)
             boxCollider.isTrigger = true;
         else boxCollider.isTrigger = false;

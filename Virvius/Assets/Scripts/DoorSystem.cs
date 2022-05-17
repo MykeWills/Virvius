@@ -46,7 +46,7 @@ public class DoorSystem : MonoBehaviour
         leftDoor.localPosition = Vector3.zero;
         rightDoor.localPosition = Vector3.zero;
         SelectDoorType(doorType);
-        SetNavLinks(false);
+        //SetNavLinks(false);
     }
     [SerializeField]
     private NavMeshLink[] navMeshLinks;
@@ -56,14 +56,14 @@ public class DoorSystem : MonoBehaviour
         
         OpenDoor();
     }
-    private void SetNavLinks(bool active)
-    {
-        if (navMeshLinks.Length > 0)
-        {
-            for (int l = 0; l < navMeshLinks.Length; l++)
-                navMeshLinks[l].enabled = active;
-        }
-    }
+    //private void SetNavLinks(bool active)
+    //{
+    //    if (navMeshLinks.Length > 0)
+    //    {
+    //        for (int l = 0; l < navMeshLinks.Length; l++)
+    //            navMeshLinks[l].enabled = active;
+    //    }
+    //}
     private void PlayDoorSound(AudioClip clip)
     {
         if (audioSrc.isPlaying)
@@ -77,7 +77,7 @@ public class DoorSystem : MonoBehaviour
     }
     public void ResetObject()
     {
-        SetNavLinks(false);
+        //SetNavLinks(false);
         openDoor = false;
         isOpen = false;
         leftDoor.localPosition = Vector3.zero;
@@ -222,7 +222,7 @@ public class DoorSystem : MonoBehaviour
                 {
                     PlayDoorSound(DoorCloseSfx);
                     isOpen = true;
-                    SetNavLinks(false);
+                    //SetNavLinks(false);
                     openDoor = true;
                 }
                 break;
@@ -261,8 +261,8 @@ public class DoorSystem : MonoBehaviour
 
         if(leftDoor.localPosition == VectorL && rightDoor.localPosition == VectorR)
         {
-            if(!isOpen)
-                SetNavLinks(true);
+            //if(!isOpen)
+            //    SetNavLinks(true);
             PlayDoorSound(DoorBangSfx);
             openDoor = false;
         }

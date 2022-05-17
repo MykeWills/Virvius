@@ -307,11 +307,10 @@ public class PlayerSystem : MonoBehaviour
     {
         playerSystem = this;
         optionsSystem = OptionsSystem.optionsSystem;
-        gameSystem = GameSystem.gameSystem;
-        optionsSystem = OptionsSystem.optionsSystem;
     }
     public void Start()
     {
+        gameSystem = GameSystem.gameSystem;
         messageSystem = MessageSystem.messageSystem;
         environmentSystem = EnvironmentSystem.environmentSystem;
         audioSystem = AudioSystem.audioSystem;
@@ -1036,7 +1035,7 @@ public class PlayerSystem : MonoBehaviour
    
     private void EnvironmentUIFade()
     {
-        if (!optionsSystem.environmentEffects) return;
+        //if (!optionsSystem.environmentEffects) return;
         if (!fadeEnviroUI[0] && !fadeEnviroUI[1] && !fadeEnviroUI[2] && !fadeEnviroUI[3]) return;
 
         //LIGHTRAIN

@@ -181,7 +181,7 @@ public class DinSystem : MonoBehaviour
     private float DifficultyRNDSpeed()
     {
         if (optionsSystem == null) optionsSystem = OptionsSystem.optionsSystem;
-        float diffRange = Random.Range(15, 26);
+        float diffRange = Random.Range(20, 30);
         return diffRange * 2.3f;
     }
     public void EngagePlayer()
@@ -191,7 +191,6 @@ public class DinSystem : MonoBehaviour
         randomSpeed = DifficultyRNDSpeed();
         //Enemy has found the player
         FoundPlayer();
-        SetAnimation();
         ActiveState(curState);
     }
     private void ActiveState(State state)
@@ -363,9 +362,16 @@ public class DinSystem : MonoBehaviour
             case State.Damage:
                 {
                     stateIndex = 6;
-                    SetAnimation();
-                    if (allowMovement) allowMovement = false;
-                    randomSpeed = DifficultyRNDSpeed();
+                    if (!AnimatorIsPlaying("Damage") && !isDamaged)
+                    {
+                        CheckRadius(playerDistance);
+                    }
+                    else
+                    {
+                        SetAnimation();
+                        FreezeMovement();
+                        allowMovement = false;
+                    }
                     break;
                 }
             case State.Death:
@@ -383,31 +389,46 @@ public class DinSystem : MonoBehaviour
     private void FreezeMovement()
     {
         if (curSpeed != 0) curSpeed = 0;
-        if (chasePosition != transform.localPosition) chasePosition = transform.localPosition;
+        chasePosition = transform.localPosition;
         //Set destination to itself
         if (navAgent.destination != chasePosition) SetNav(chasePosition, 0, true);
     }
     private void CheckRadius(float distance)
     {
-        //if player is visible & close to enemy then fire at player, or idle
-        if (distance <= enemyStateRanges[0]) curState = playerVisible ? State.Attack : State.Idle;
-        //if player is visible & farther away from enemy then choose to shoot or chase
+        if (distance <= enemyStateRanges[0]) 
+        { 
+            curState = playerVisible ? State.Attack : State.Chase;
+            if (curState != State.Attack) 
+            { 
+                randomSpeed = DifficultyRNDSpeed(); 
+                chasePosition = GetPositionOnNavMesh(PlayerPosition());
+                SetNav(chasePosition, 0, true);
+                curSpeed = randomSpeed;
+            }
+        }
         else if (distance > enemyStateRanges[0] && distance <= enemyStateRanges[1])
         {
-            int rnd = Random.Range(0, 2);
-            curState = rnd == 0 ? State.Chase : playerVisible ? State.Attack : State.Chase;
-            if (curState != State.Attack) { randomSpeed = DifficultyRNDSpeed(); }
+            curState = playerVisible ? State.Jump : State.Chase;
+            if (curState != State.Jump)
+            {
+                randomSpeed = DifficultyRNDSpeed();
+                chasePosition = GetPositionOnNavMesh(PlayerPosition());
+                SetNav(chasePosition, 0, true);
+                curSpeed = randomSpeed;
+            }
 
         }
         else if (distance > enemyStateRanges[1] && distance <= enemyStateRanges[2])
         {
             curState = State.Chase;
             randomSpeed = DifficultyRNDSpeed();
+            chasePosition = GetPositionOnNavMesh(PlayerPosition());
+            SetNav(chasePosition, 0, true);
+            curSpeed = randomSpeed;
         }
-
         else if (distance > 299)
         {
-            curState = State.Walk;
+            curState = orgState;
             playerFound = false;
             playerVisible = false;
         }
@@ -453,14 +474,14 @@ public class DinSystem : MonoBehaviour
             //check the player radius
             CheckRadius(distance);
             //reset the state timer
-            stateTimer = SetStateTimer();
+            stateTimer = 1;/* SetStateTimer(); */
         }
     }
     private float SetStateTimer()
     {
         bool[] difficultyActive = new bool[4] { optionsSystem.difficultyActive[0], optionsSystem.difficultyActive[1], optionsSystem.difficultyActive[2], optionsSystem.difficultyActive[3] };
         int difVal = 0;
-        float repeatTime = 0;
+        float repeatTime = 1;
         for (int d = 0; d < difficultyActive.Length; d++)
         {
             if (difficultyActive[d]) difVal = d;
@@ -470,7 +491,7 @@ public class DinSystem : MonoBehaviour
             case 0: { repeatTime = Random.Range(3, 7); break; }
             case 1: { repeatTime = Random.Range(2, 6); break; }
             case 2: { repeatTime = Random.Range(1, 5); break; }
-            case 3: { repeatTime = Random.Range(0, 4); break; }
+            case 3: { repeatTime = Random.Range(0, 2); break; }
         }
         return repeatTime;
     }
@@ -607,7 +628,7 @@ public class DinSystem : MonoBehaviour
         //when angle is below 60 engage player
         if (angle < viewAngle && angle > -viewAngle)
         {
-            //Debug.DrawRay(transform.position, distanceVector - transform.forward, Color.magenta);
+            Debug.DrawRay(transform.position, distanceVector - transform.forward, Color.magenta);
             if (Physics.Raycast(transform.position, distanceVector - transform.forward, out playerHit, viewDistance))
             {
                 //if the raycast hit the player player is now found, activate shooting if player is within range
@@ -635,7 +656,7 @@ public class DinSystem : MonoBehaviour
     {
         if (!AnimatorIsPlaying("Attack") && !AnimatorIsPlaying("Jump")) return;
         Vector3 lookVector = PlayerPosition() - transform.position;
-        //lookVector.y = transform.position.y;
+        lookVector.y = transform.position.y;
         Quaternion rot = Quaternion.LookRotation(lookVector);
         Quaternion newRotation = Quaternion.Slerp(transform.rotation, rot, 1f);
         newRotation.x = 0;
@@ -776,11 +797,12 @@ public class DinSystem : MonoBehaviour
     //}
     public void DMGAnimFinished()
     {
-        curState = isDead ? State.Death : State.Chase;
+        int rnd = Random.Range(0, 2);
+        curState = isDead ? State.Death : (rnd == 0) ? State.Chase : State.Jump;
         if (curState == State.Chase)
         {
             allowMovement = true;
-            randomSpeed = DifficultyRNDSpeed();
+            CheckRadius(playerDistance);
         }
         isDamaged = false;
     }

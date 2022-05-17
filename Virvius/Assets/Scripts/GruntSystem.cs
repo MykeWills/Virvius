@@ -595,6 +595,12 @@ public class GruntSystem : MonoBehaviour
         {
             allowMovement = true;
             randomSpeed = DifficultyRNDSpeed();
+            //random position near the player or players position
+            chasePosition = GetPositionOnNavMesh(MoveInRadius(Random.Range(-20, 21), transform.TransformDirection(Vector3.forward).z * Random.Range(-6, 6)));
+            //set the nav to chase position
+            SetNav(chasePosition, 0, true);
+            //set the curent move speed to random speed so it doesnt kepp changing destination
+            curSpeed = randomSpeed;
         }
         isDamaged = false;
     }
