@@ -1,36 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &974278770074739926
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 6777196544356767295}
-  m_Layer: 14
-  m_Name: Links
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &6777196544356767295
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 974278770074739926}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 3766687410539076775}
-  m_Father: {fileID: 2507581528857437901}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1073466426756494069
 GameObject:
   m_ObjectHideFlags: 0
@@ -1296,57 +1265,6 @@ Light:
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
---- !u!1 &3488803100657963488
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3766687410539076775}
-  - component: {fileID: 6354017381200804624}
-  m_Layer: 14
-  m_Name: LinkU
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &3766687410539076775
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3488803100657963488}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -11.5, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 6777196544356767295}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6354017381200804624
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3488803100657963488}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6eeb5dc026fdf4b488bc7ae0138ab719, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_AgentTypeID: 0
-  m_StartPoint: {x: 0, y: 0, z: -5}
-  m_EndPoint: {x: 0, y: 0, z: 5}
-  m_Width: 19
-  m_CostModifier: -1
-  m_Bidirectional: 1
-  m_AutoUpdatePosition: 0
-  m_Area: 0
 --- !u!1 &4280533691309388781
 GameObject:
   m_ObjectHideFlags: 0
@@ -1360,6 +1278,7 @@ GameObject:
   - component: {fileID: 2223788528330945277}
   - component: {fileID: 1037739345014903152}
   - component: {fileID: 7328834698473934621}
+  - component: {fileID: 1459923147288008909}
   m_Layer: 14
   m_Name: LeftDoor
   m_TagString: Untagged
@@ -2412,6 +2331,22 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!208 &1459923147288008909
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4280533691309388781}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 13.028001, y: 12.375001, z: 2}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!1 &5916289543973530470
 GameObject:
   m_ObjectHideFlags: 0
@@ -2799,7 +2734,6 @@ Transform:
   - {fileID: 2767100064808434136}
   - {fileID: 6527802303876531957}
   - {fileID: 7677854007128718233}
-  - {fileID: 6777196544356767295}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2828,6 +2762,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ce3f52a34a03fc43a3335dff45ca771, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lockDoor: 0
   DoorOpenSfx: {fileID: 8300000, guid: 5b45e1b299ca3b448822d6639024a79b, type: 3}
   DoorCloseSfx: {fileID: 8300000, guid: 5b45e1b299ca3b448822d6639024a79b, type: 3}
   DoorBangSfx: {fileID: 8300000, guid: 9ea5bbca259fd824b94f537de41b2409, type: 3}
@@ -2842,8 +2777,6 @@ MonoBehaviour:
   directionLeft: 0
   leftDoor: {fileID: 9014326692910221926}
   maxLeftVector: {x: -20, y: -20, z: 0}
-  navMeshLinks:
-  - {fileID: 6354017381200804624}
 --- !u!82 &6408621539513170870
 AudioSource:
   m_ObjectHideFlags: 0

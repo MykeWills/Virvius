@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 public class AmbushSystem : MonoBehaviour
@@ -30,7 +28,7 @@ public class AmbushSystem : MonoBehaviour
         audioSrc = new AudioSource[transform.childCount];
         soundActive1 = new bool[transform.childCount];
         soundActive2 = new bool[transform.childCount];
-        SetNavLinks(false);
+        //SetNavLinks(false);
         for (int t = 0; t < doors.Length; t++)
         {
             audioSrc[t] = doors[t].GetComponent<AudioSource>();
@@ -47,14 +45,14 @@ public class AmbushSystem : MonoBehaviour
             }
         }
     }
-    private void SetNavLinks(bool active)
-    {
-        if (navMeshLinks.Length > 0)
-        {
-            for (int l = 0; l < navMeshLinks.Length; l++)
-                navMeshLinks[l].enabled = active;
-        }
-    }
+    //private void SetNavLinks(bool active)
+    //{
+    //    if (navMeshLinks.Length > 0)
+    //    {
+    //        for (int l = 0; l < navMeshLinks.Length; l++)
+    //            navMeshLinks[l].enabled = active;
+    //    }
+    //}
     // Update is called once per frame
     void Update()
     {
@@ -87,7 +85,7 @@ public class AmbushSystem : MonoBehaviour
                     audioSrc[t].loop = false;
                     audioSrc[t].PlayOneShot(doorSoundFx[0]);
                     soundActive2[t] = true;
-                    SetNavLinks(true);
+                    //SetNavLinks(true);
                 }
                 doorCount++;
             }
@@ -110,7 +108,7 @@ public class AmbushSystem : MonoBehaviour
             soundActive1[t] = false;
             soundActive2[t] = false;
         }
-        SetNavLinks(true);
+        //SetNavLinks(true);
         doorCount = 0;
         open = false;
     }

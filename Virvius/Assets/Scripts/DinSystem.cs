@@ -74,8 +74,8 @@ public class DinSystem : MonoBehaviour
         "PhotonBullet",
         "SigmaBullet",
         "ObstacleBullet",
-        "ObstacleExplosive",
         "RocketBulletMini",
+        "ObstacleExplosive"
    };
     [SerializeField]
     private string currentStateName;
@@ -731,7 +731,7 @@ public class DinSystem : MonoBehaviour
                     }
                     else
                     {
-                        if (tags[t] != "RailBullet" && tags[t] != "SigmaBullet") colGameObject.SetActive(false);
+                        if (tags[t] != "RailBullet" && tags[t] != "SigmaBullet" && tags[t] != "ObstacleExplosive") colGameObject.SetActive(false);
                     }
                 }
                 return;

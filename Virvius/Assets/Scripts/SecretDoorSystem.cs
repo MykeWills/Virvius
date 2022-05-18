@@ -70,20 +70,20 @@ public class SecretDoorSystem : MonoBehaviour
             case Direction.Down: slideDirection = new Vector3(pushDirection.x, pushDirection.y - slideDirAmt, pushDirection.z); break;
         }
         waitTimer = waitTime;
-        SetNavLinks(false);
+        //SetNavLinks(false);
     }
     void Update()
     {
         Opendoor();
     }
-    private void SetNavLinks(bool active)
-    {
-        if (navMeshLinks.Length > 0)
-        {
-            for (int l = 0; l < navMeshLinks.Length; l++)
-                navMeshLinks[l].enabled = active;
-        }
-    }
+    //private void SetNavLinks(bool active)
+    //{
+    //    if (navMeshLinks.Length > 0)
+    //    {
+    //        for (int l = 0; l < navMeshLinks.Length; l++)
+    //            navMeshLinks[l].enabled = active;
+    //    }
+    //}
     private void Opendoor()
     {
         if (!open) return;
@@ -132,7 +132,7 @@ public class SecretDoorSystem : MonoBehaviour
                         audioSrc.loop = false;
                         audioSrc.PlayOneShot(doorSoundFx[0]);
                         soundActive[0] = true;
-                        SetNavLinks(true);
+                        //SetNavLinks(true);
                     }
                     returnToOrigin = true;
                 }
@@ -150,7 +150,7 @@ public class SecretDoorSystem : MonoBehaviour
                     audioSrc.PlayOneShot(doorSoundFx[1]);
                     audioSrc.loop = true;
                     soundActive[0] = false;
-                    SetNavLinks(false);
+                    //SetNavLinks(false);
                 }
                 transform.localPosition = Vector3.MoveTowards(transform.localPosition, pushDirection, time * (moveSpeed * 2));
                 if (transform.localPosition == pushDirection)
@@ -211,7 +211,7 @@ public class SecretDoorSystem : MonoBehaviour
     }
     public void ResetObject()
     {
-        SetNavLinks(false);
+        //SetNavLinks(false);
         transform.localPosition = curPosition;
         audioSrc.Stop();
         for (int s = 0; s < soundActive.Length; s++)

@@ -1128,13 +1128,13 @@ public class PlayerSystem : MonoBehaviour
                 if (armor > 150) { intervalA = 1f; intervalH = 0.0f; }
                 else if (armor <= 150 && armor > 50) { intervalA = 0.75f; intervalH = 0.25f; }
                 else if (armor <= 50 && armor > 0) { intervalA = 0.50f; intervalH = 0.50f; }
-                armor -= amount * intervalA;
-                health -= amount * intervalH;
+                armor -= powerupSystem.powerEnabled[2] ? (amount * intervalA) / 2 : (amount * intervalA);
+                health -= powerupSystem.powerEnabled[2] ? (amount * intervalH) / 2 : (amount * intervalH);
             }
             else if (armor < 1)
             {
                 if (armorBannerObject[versionIndex].activeInHierarchy) armorBannerObject[versionIndex].SetActive(false);
-                health -= amount;
+                health -= powerupSystem.powerEnabled[2] ? amount / 2 : amount;
             }
         }
         else

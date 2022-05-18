@@ -48,8 +48,6 @@ public class DoorSystem : MonoBehaviour
         SelectDoorType(doorType);
         //SetNavLinks(false);
     }
-    [SerializeField]
-    private NavMeshLink[] navMeshLinks;
     // Update is called once per frame
     void Update()
     {

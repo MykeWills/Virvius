@@ -6,10 +6,11 @@ using Rewired;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine.SceneManagement;
+using System.Text;
 
 public class GameSystem : MonoBehaviour
 {
-   
+    private StringBuilder loadSb = new StringBuilder();
     public static GameSystem gameSystem;
     public static bool expandBulletPool = true;
     public bool isGameStarted = false;
@@ -94,6 +95,8 @@ public class GameSystem : MonoBehaviour
     private GameObject loadingCamera;
     [SerializeField]
     private GameObject loadingMenu;
+    [SerializeField]
+    private Text loadingText;    
     [SerializeField]
     private Image loadingBar;
     [HideInInspector]
@@ -213,9 +216,13 @@ public class GameSystem : MonoBehaviour
         }
         else
         {
+           
             if (!async.isDone && async.progress != 1)
             {
                 loadingBar.fillAmount = Map(Mathf.RoundToInt(async.progress * 100), 0, 100, 0, 1);
+                loadSb.Append(Mathf.RoundToInt(async.progress * 100) + "/100");
+                loadingText.text = loadSb.ToString();
+                loadSb.Clear();
                 if (async.progress >= 0.9f)
                 {        
                     loadingBar.fillAmount = 100;
@@ -278,6 +285,7 @@ public class GameSystem : MonoBehaviour
         // Load the first Scene
         curSceneIndex = 0;
         loadingBar.fillAmount = 0;
+        if (loadSb.Length > 0) loadSb.Clear();
         LoadGame(1);
     }
     public bool BlockedAttributesActive()

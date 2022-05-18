@@ -1101,7 +1101,7 @@ public class OptionsSystem : MonoBehaviour
         difficultyIndex = 1;
         SetDifficulty();
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~AUTOAIM
-        autoAIndex = 1;
+        autoAIndex = 0;
         SetAutoAim();
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~AUTOSAVE
         autoSIndex = 1;
@@ -1110,7 +1110,7 @@ public class OptionsSystem : MonoBehaviour
         cameraBIndex = 1;
         SetCameraBobbing();
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~WEAPONHAND
-        handIndex = 1;
+        handIndex = 0;
         SetWeaponHand();
         //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~AUTOSWITCHNEW
         switchNewIndex = 1;

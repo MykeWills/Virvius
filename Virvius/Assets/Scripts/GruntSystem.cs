@@ -78,8 +78,8 @@ public class GruntSystem : MonoBehaviour
     private float curSpeed = 0;
     private float viewDistance = 0;
     private string[] animNames = new string[6] { "Idle", "Walk", "Chase", "Shoot", "Damage", "Death" };
-    private string[] tags = new string[11]
-  {
+    public string[] tags = new string[12]
+    {
         "Sword",
         "ShotgunBullet",
         "SpikeBullet",
@@ -91,7 +91,8 @@ public class GruntSystem : MonoBehaviour
         "SigmaBullet",
         "ObstacleBullet",
         "RocketBulletMini",
-   };
+        "ObstacleExplosive"
+     };
     private string curAnim = null;
     [HideInInspector]
     public bool isDead = false;
@@ -233,7 +234,7 @@ public class GruntSystem : MonoBehaviour
                     }
                     else
                     {
-                        if(tags[t] != "RailBullet" && tags[t] != "SigmaBullet") collision.gameObject.SetActive(false);
+                        if (tags[t] != "RailBullet" && tags[t] != "SigmaBullet" && tags[t] != "ObstacleExplosive") collision.gameObject.SetActive(false);
                     }
                 }
                 return;
