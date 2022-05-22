@@ -181,7 +181,7 @@
             {
                 "type": "UnityEngine.ProBuilder.SelectMode, Unity.ProBuilder, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
                 "key": "editor.selectMode",
-                "value": "{\"m_Value\":1}"
+                "value": "{\"m_Value\":2}"
             },
             {
                 "type": "UnityEngine.ProBuilder.PivotLocation, Unity.ProBuilder, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
@@ -226,7 +226,7 @@
             {
                 "type": "System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
                 "key": "WeldVertices.weldDistance",
-                "value": "{\"m_Value\":1.100000023841858}"
+                "value": "{\"m_Value\":20.0}"
             },
             {
                 "type": "System.Single, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
