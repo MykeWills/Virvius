@@ -15,7 +15,6 @@ public class GruntSystem : MonoBehaviour
     public NavMeshAgent navAgent;
     private Animator anim;
     private BoxCollider boxCollider;
-    private StringBuilder stringBuilderState = new StringBuilder();
     private StringBuilder tagSb = new StringBuilder();
     [SerializeField]
     private Transform[] movePositions = new Transform[4];
@@ -61,17 +60,6 @@ public class GruntSystem : MonoBehaviour
     public  enum State { Idle, Walk, Chase, Shoot, Damage, Death }
     public State curState = State.Idle;
     private State orgState;
-    private string[] stateName = new string[6]
-    {
-        "Idling",
-        "Walking",
-        "Chasing",
-        "Shooting",
-        "Damaged",
-        "Dead"
-    };
-    [SerializeField]
-    private string currentStateName;
     private int stateIndex = 0;
     private int curStateIndex = 9;
     private int curPositionIndex = 0;
@@ -452,7 +440,6 @@ public class GruntSystem : MonoBehaviour
     {
         if (curStateIndex != stateIndex)
         {
-            currentStateName = StateName();
             curStateIndex = stateIndex;
             curAnim = animNames[stateIndex];
             ActiveAnimation(curAnim);
@@ -538,12 +525,6 @@ public class GruntSystem : MonoBehaviour
         }
         return repeatTime;
     }
-    private string StateName()
-    {
-        if (stringBuilderState.Length > 0) stringBuilderState.Clear();
-        stringBuilderState.Append(stateName[stateIndex]);
-        return stringBuilderState.ToString();
-    }
     //-------------------------------------------------------------------------------------------------------
     //---------------------------------ANIMATION-------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------------
@@ -610,7 +591,7 @@ public class GruntSystem : MonoBehaviour
         allowMovement = true;
     }
     //-------------------------------------------------------------------------------------------------------
-    //---------------------------------NAVAGATION------------------------------------------------------------
+    //---------------------------------NAVIGATION------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------------
     private void SetNav(Vector3 pos, float stop, bool active)
     {
@@ -871,8 +852,6 @@ public class GruntSystem : MonoBehaviour
         ammoPack.transform.localRotation = Quaternion.identity;
         ammoPack.SetActive(true);
     }
-
- 
     public void ResetObject(bool setOrgPos)
     {
         if (anim == null || audioSrc == null) Start();

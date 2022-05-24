@@ -112,7 +112,11 @@ public class DoorSystem : MonoBehaviour
                 {
                     case DoorType.Normal:
                         {
-                            if (lockDoor) { messageSystem.SetMessage("Door Locked!", MessageSystem.MessageType.Center); return; }
+                            if (lockDoor) 
+                            {
+                                if (tags[0] == tag) messageSystem.SetMessage("Door Locked!", MessageSystem.MessageType.Center); 
+                                return; 
+                            }
                             PlayDoorSound(DoorOpenSfx);
                             isOpen = false;
                             openDoor = true;
@@ -120,7 +124,11 @@ public class DoorSystem : MonoBehaviour
                         }
                     case DoorType.Locked:
                         {
-                            if (lockDoor) { messageSystem.SetMessage("Door Locked!", MessageSystem.MessageType.Center); return; }
+                            if (lockDoor) 
+                            {
+                                if (tags[0] == tag) messageSystem.SetMessage("Door Locked!", MessageSystem.MessageType.Center); 
+                                return; 
+                            }
                             PlayDoorSound(DoorOpenSfx);
                             isOpen = false;
                             openDoor = true;

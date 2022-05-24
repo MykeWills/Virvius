@@ -764,6 +764,7 @@ public class WeaponSystem : MonoBehaviour
         switchRight = false;
         weapons[weaponIndex].transform.localPosition = holsteredReturnPos[weaponIndex];
         weapons[weaponIndex].transform.localRotation = Quaternion.identity;
+        aimObjects.Clear();
         //This is only temporary until save/load state is created
         for (int w = 0; w < weaponObtained.Length; w++)
         {
@@ -977,6 +978,7 @@ public class WeaponSystem : MonoBehaviour
     {
         for (int e = 0; e < aimObjects.Count; e++)
         {
+            if (aimObjects[e] == null) { aimObjects.Clear();  return Vector3.zero; }
             if (aimObjects[e].TryGetComponent(out GruntSystem gruntSystem))
             {
                 if (gruntSystem.isDead)

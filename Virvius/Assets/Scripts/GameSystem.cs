@@ -290,11 +290,12 @@ public class GameSystem : MonoBehaviour
     }
     public bool BlockedAttributesActive()
     {
-        if (!isGameStarted) return true;
-        else if (isPaused) return true;
-        else if (isLoading) return true;
-        else if (CommandSystem.commandOpen) return true;
-        else return false;
+        //if (!isGameStarted) return true;
+        //else if (isPaused) return true;
+        //else if (isLoading) return true;
+        //else if (CommandSystem.commandOpen) return true;
+        //else return false;
+        return false;
     }
     private float Map(float value, float inMin, float inMax, float outMin, float outMax)
     {

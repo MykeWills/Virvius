@@ -316,7 +316,7 @@ public class PlayerSystem : MonoBehaviour
         audioSystem = AudioSystem.audioSystem;
         commandSystem = CommandSystem.commandSystem;
         characterController = GetComponent<CharacterController>();
-        gameSystem.SetPlayerScenePosition(gameSystem.sceneIndex);
+        //gameSystem.SetPlayerScenePosition(gameSystem.sceneIndex);
         versionIndex = 3;
         uISelectIndex = versionIndex;
         UIVersion(versionIndex);

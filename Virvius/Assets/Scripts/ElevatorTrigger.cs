@@ -3,7 +3,6 @@
 public class ElevatorTrigger : MonoBehaviour
 {
     public SwitchSystem mainSwitch;
-    public Transform playerHolder;
     private Transform holderReturn;
     public bool dontMoveElevator = false;
     private CharacterController characterController;
