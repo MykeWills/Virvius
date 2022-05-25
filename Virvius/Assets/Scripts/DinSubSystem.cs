@@ -2,7 +2,7 @@
 
 public class DinSubSystem : MonoBehaviour
 {
-    public DinSystem dinSystem;
+    public EnemyDSystem dinSystem;
     private void OnCollisionEnter(Collision collision)
     {
         dinSystem.CollisionDamage(collision.gameObject.tag, collision.gameObject);

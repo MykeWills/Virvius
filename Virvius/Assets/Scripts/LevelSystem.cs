@@ -3,8 +3,8 @@ using System.Collections.Generic;
 public class LevelSystem : MonoBehaviour
 {
     public AmbushSystem[] ambushSystems;
-    public GruntSystem[] gruntSystems;
-    public DinSystem[] dinSystems;
+    public EnemyGSystem[] gruntSystems;
+    public EnemyDSystem[] dinSystems;
     public SecretDoorSystem[] secretDoorSystems;
     public SwitchSystem[] switches;
     public GameObject[] pickupItems;
