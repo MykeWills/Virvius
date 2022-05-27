@@ -979,7 +979,7 @@ public class WeaponSystem : MonoBehaviour
         for (int e = 0; e < aimObjects.Count; e++)
         {
             if (aimObjects[e] == null) { aimObjects.Clear();  return Vector3.zero; }
-            if (aimObjects[e].TryGetComponent(out GruntSystem gruntSystem))
+            if (aimObjects[e].TryGetComponent(out EnemyGSystem gruntSystem))
             {
                 if (gruntSystem.isDead)
                     aimObjects.Remove(aimObjects[e].transform);
@@ -1025,7 +1025,7 @@ public class WeaponSystem : MonoBehaviour
         switch (tag)
         {
             case "Enemy":
-                if (other.TryGetComponent(out GruntSystem gruntSystem))
+                if (other.TryGetComponent(out EnemyGSystem gruntSystem))
                 {
                     if (!gruntSystem.isDead)
                         aimObjects.Add(other.transform);

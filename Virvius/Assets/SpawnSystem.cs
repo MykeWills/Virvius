@@ -137,14 +137,14 @@ public class SpawnSystem : MonoBehaviour
         if (index < 2)
         {
             //try to access the enemy systems and reset them, set the spawn point then engage player right away.
-            if (spawnedObject.TryGetComponent(out GruntSystem gruntSystem)) 
+            if (spawnedObject.TryGetComponent(out EnemyGSystem gruntSystem)) 
             {
                 gruntSystem.ResetObject(false);
                 gruntSystem.navAgent.Warp(spawnPoints[posIndex].transform.position);
                 gruntSystem.transform.localPosition = spawnPoints[posIndex].transform.localPosition;
                 gruntSystem.EngagePlayer();
             }
-            else  if (spawnedObject.TryGetComponent(out DinSystem dinSystem))
+            else  if (spawnedObject.TryGetComponent(out EnemyDSystem dinSystem))
             {
                 dinSystem.ResetObject(false);
                 dinSystem.navAgent.Warp(spawnPoints[posIndex].transform.position);

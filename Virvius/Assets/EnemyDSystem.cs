@@ -9,7 +9,8 @@ public class EnemyDSystem : MonoBehaviour
     private PowerupSystem powerupSystem;
     private PlayerSystem playerSystem;
     private AudioSource audioSrc;
-    private NavMeshAgent navAgent;
+    [HideInInspector]
+    public NavMeshAgent navAgent;
     private Animator animator;
     private StringBuilder currentState = new StringBuilder();
     private StringBuilder collisionTag = new StringBuilder();
@@ -285,6 +286,14 @@ public class EnemyDSystem : MonoBehaviour
             elapsed -= 0.5f;
             updateNextPosition = true;
         }
+    }
+    public void EngagePlayer()
+    {
+        FoundPlayer();
+        FoundPlayer();
+        EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
+        enemyState = state;
+        ActiveState();
     }
     private void CheckDistance()
     {
