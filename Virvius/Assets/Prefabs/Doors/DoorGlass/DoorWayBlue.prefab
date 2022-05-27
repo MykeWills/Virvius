@@ -2773,10 +2773,10 @@ MonoBehaviour:
   moveSpeed: 45
   directionRight: 0
   rightDoor: {fileID: 2767100064808434136}
-  maxRightVector: {x: 20, y: 20, z: 0}
+  maxRightVector: {x: 25, y: 25, z: 0}
   directionLeft: 0
   leftDoor: {fileID: 9014326692910221926}
-  maxLeftVector: {x: -20, y: -20, z: 0}
+  maxLeftVector: {x: -25, y: -25, z: 0}
 --- !u!82 &6408621539513170870
 AudioSource:
   m_ObjectHideFlags: 0

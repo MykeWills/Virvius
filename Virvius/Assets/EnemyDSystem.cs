@@ -39,8 +39,7 @@ public class EnemyDSystem : MonoBehaviour
     [Header("Enemy Values")]
     [HideInInspector]
     public bool isDead;
-    [SerializeField]
-    private float LOSAngle = 0;
+    private float LOSAngle = 160;
     [SerializeField]
     private float LOSDistance = 0;
     [SerializeField]
@@ -51,8 +50,7 @@ public class EnemyDSystem : MonoBehaviour
     private float health = 8;
     [SerializeField]
     private bool damageResistance = false;
-    [SerializeField]
-    private bool behindWall = false;
+    private float walkPositionDistance = 2;
 
 
     private RaycastHit playerHit;
@@ -92,14 +90,14 @@ public class EnemyDSystem : MonoBehaviour
         30.0f,
         90.0f,
         120.0f,
-        180.0f,
+        180.0f
     };
     private float[] movementSpeeds = new float[5]
     {
         0,
-        25,
+        2.5f,
         50,
-        75,
+        70,
         100
     };
     private float movementSpeed = 0;
@@ -111,15 +109,17 @@ public class EnemyDSystem : MonoBehaviour
     private float elapsed = 2.5f;
     [HideInInspector]
     public bool playerFound = false;
-    private bool disableFindRange = false;
     private bool autoBraking = false;
     private bool playerVisible = false;
     private bool isDamaged = false;
     private bool updateNextPosition = false;
+    private bool rebootEnemy = false;
+    private bool playerIsDead = false;
 
     private void Start()
     {
         CheckActiveComponents();
+        originalPosition = transform.position;
         enemyState = startState;
         maxHealth = health;
         ActiveState();
@@ -128,12 +128,47 @@ public class EnemyDSystem : MonoBehaviour
     {
         if (gameSystem.BlockedAttributesActive()) return;
         if (isDead) return;
-        time = Time.deltaTime;
-        CheckPath();
-        CheckDistance();
-        IsDamaged();
+        if (ShutdownEnemy()) return;
+        if (playerSystem.isDead && !rebootEnemy && !playerIsDead) { rebootEnemy = true; playerIsDead = true; }
+        RebootEnemy();
+        IdleDistance();
+        WalkDistance();
         LineOfSight();
+        if (!playerFound) return;
+        CheckDistance();
+        time = Time.deltaTime;
+        IsDamaged();
+        CheckPath();
         LookAtPlayerShooting();
+    }
+    private void WalkDistance()
+    {
+        if (activeState != EnemyState.walk) return;
+        float dist = Vector3.Distance(WalkDestination(), transform.position);
+        if (dist < walkPositionDistance) { ChangeDestination(); ActiveState(); }
+        //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
+        if (PlayerDistance() <= distanceRanges[1]) { if(playerVisible) FoundPlayer(); }
+    }
+    private void IdleDistance()
+    {
+        if (activeState != EnemyState.idle) return;
+        //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
+        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) FoundPlayer(); }
+    }
+    private void RebootEnemy()
+    {
+        if (!rebootEnemy) return;
+        enemyState = startState;
+        ActiveState();
+        rebootEnemy = false;
+    }
+    private bool ShutdownEnemy()
+    {
+        bool enemyActive = PlayerDistance() > 300 ? false : true;
+        if (!enemyActive) rebootEnemy = true;
+        animator.enabled = enemyActive;
+        navAgent.enabled = enemyActive;
+        return !enemyActive;
     }
     public void PlayAttackSound()
     {
@@ -199,6 +234,7 @@ public class EnemyDSystem : MonoBehaviour
     }
     private void CheckActiveComponents()
     {
+        if (gameSystem == null) gameSystem = GameSystem.gameSystem;
         if (commandSystem == null) commandSystem = CommandSystem.commandSystem;
         if (playerSystem == null) playerSystem = PlayerSystem.playerSystem;
         if (optionsSystem == null) optionsSystem = OptionsSystem.optionsSystem;
@@ -236,8 +272,9 @@ public class EnemyDSystem : MonoBehaviour
     private void FoundPlayer()
     {
         if (powerupSystem.powerEnabled[1]) return;
-        if (disableFindRange || playerFound) return;
+        if (playerFound) return;
         audioSrc.PlayOneShot(enemySounds[0]);
+        updateNextPosition = true;
         playerFound = true;
     }
     private void CheckPath()
@@ -251,21 +288,10 @@ public class EnemyDSystem : MonoBehaviour
     }
     private void CheckDistance()
     {
-        if (!updateNextPosition) return;
         if (PlayerSystem.playerSystem == null || PlayerDistance() == 0) return;
-        if (AnimatorIsPlaying("Attack") || AnimatorIsPlaying("Jump") || AnimatorIsPlaying("Damage") || enemyState == EnemyState.death) return;
-        //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[2]) { if(!behindWall) FoundPlayer(); }
-        //HAS LOST THE PLAYER - ANIMATION SET TO BACK DEFAULT [WALK OR IDLE]
-        if (PlayerDistance() > distanceRanges[3])
-        {
-            playerFound = false;
-            playerVisible = false;
-            enemyState = startState;
-            ActiveState();
-        }
+        if (!updateNextPosition) return;
+        if (AnimatorIsPlaying("Attack") || AnimatorIsPlaying("Jump") || enemyState == EnemyState.damage || enemyState == EnemyState.death) return;
 
-        if (!playerFound) return;
         //ATTACKS IN CLOSE RANGE
         if (PlayerDistance() <= distanceRanges[0])
         {
@@ -275,7 +301,7 @@ public class EnemyDSystem : MonoBehaviour
             ActiveState();
         }
         //ATTACKS FROM DISTANCE
-        if (PlayerDistance() > distanceRanges[0] && PlayerDistance() <= distanceRanges[1])
+        else if (PlayerDistance() > distanceRanges[0] && PlayerDistance() <= distanceRanges[1])
         {
             EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
             enemyState = state;
@@ -283,17 +309,25 @@ public class EnemyDSystem : MonoBehaviour
             ActiveState();
         }
         //MOVES TO PLAYER POSITION
-        if (PlayerDistance() > distanceRanges[1] && PlayerDistance() <= distanceRanges[2])
+        else if (PlayerDistance() > distanceRanges[1] && PlayerDistance() <= distanceRanges[2])
         {
             enemyState = EnemyState.chase;
             distanceIndex = 2;
             ActiveState();
         }
         //MOVES TO STAGGERED PLAYER POSITION
-        if (PlayerDistance() > distanceRanges[2] && PlayerDistance() <= distanceRanges[3])
+        else if (PlayerDistance() > distanceRanges[2] && PlayerDistance() <= distanceRanges[3])
         {
             enemyState = EnemyState.chase;
             distanceIndex = 3;
+            ActiveState();
+        }
+        //HAS LOST THE PLAYER - ANIMATION SET TO BACK DEFAULT [WALK OR IDLE]
+        else if (PlayerDistance() > distanceRanges[3])
+        {
+            playerFound = false;
+            playerVisible = false;
+            enemyState = startState;
             ActiveState();
         }
         updateNextPosition = false;
@@ -317,21 +351,13 @@ public class EnemyDSystem : MonoBehaviour
                 }
             case EnemyState.walk:
                 {
-                    if ((!AnimatorIsPlaying("Attack") || !AnimatorIsPlaying("Jump")) && !AnimatorIsPlaying("Damage"))
-                    {
-                        if (animator.GetFloat("Speed") != 1.5f)
-                            animator.SetFloat("Speed", 1.5f);
-                        SetAnimation(1);
-                        movementSpeed = movementSpeeds[1];
-                        stoppingDistance = 0;
-                        autoBraking = false;
-                        float dist = Vector3.Distance(WalkDestination(), transform.position);
-                        if (dist < 2)
-                        {
-                            ChangeDestination();
-                        }
-                        SetNav(WalkDestination(), true);
-                    }
+                    if (animator.GetFloat("Speed") != 1.5f)
+                        animator.SetFloat("Speed", 1.5f);
+                    SetAnimation(1);
+                    movementSpeed = movementSpeeds[1];
+                    stoppingDistance = 0;
+                    autoBraking = false;
+                    SetNav(WalkDestination(), true);
                     break;
                 }
             case EnemyState.chase:
@@ -403,7 +429,7 @@ public class EnemyDSystem : MonoBehaviour
         movementSpeed = movementSpeeds[0];
         stoppingDistance = 0;
         autoBraking = false;
-        SetNav(transform.localPosition, false);
+        SetNav(transform.position, false);
     }
     private Vector3 PlayerPosition()
     {
@@ -412,8 +438,9 @@ public class EnemyDSystem : MonoBehaviour
     }
     private void SetNav(Vector3 nextPosition, bool active)
     {
-        Vector3 newPos = active ? nextPosition : transform.localPosition;
-        if (isDead) { navAgent.destination = transform.localPosition; return; }
+        if (!enemyBody.activeInHierarchy) return;
+        Vector3 newPos = active ? nextPosition : transform.position;
+        if (isDead) { navAgent.destination = transform.position; return; }
         navAgent.destination = newPos;
         navAgent.autoBraking = autoBraking;
         navAgent.autoRepath = active;
@@ -427,24 +454,9 @@ public class EnemyDSystem : MonoBehaviour
         bool positionFound = NavMesh.SamplePosition(position, out hit, 2, NavMesh.AllAreas);
         return positionFound ? hit.position : position;
     }
-    //private Vector3 MoveInPlayerRadius(float offsetX, float offsetZ)
-    //{
-    //    Vector3 player = (playerSystem != null) ? playerSystem.transform.position : Vector3.zero;
-    //    if (player == Vector3.zero) { return transform.position; }
-    //    Vector3[] positions = new Vector3[3]
-    //    {
-    //        new Vector3(player.x + offsetX, transform.position.y, player.z + offsetZ),
-    //        new Vector3(transform.position.x + offsetX, transform.position.y, transform.position.z + offsetX),
-    //        player
-    //    };
-
-    //    int rndIndex = Random.Range(0, 3);
-    //    Vector3 movePosition = positions[rndIndex];
-    //    return movePosition;
-    //}
     private Vector3 WalkDestination()
     {
-        if (walkPositions[0] == null) return transform.localPosition;
+        if (walkPositions[0] == null) return transform.position;
         Vector3 direction = new Vector3(walkPositions[walkPositionIndex].position.x, transform.position.y, walkPositions[walkPositionIndex].position.z);
         return direction;
     }
@@ -465,15 +477,16 @@ public class EnemyDSystem : MonoBehaviour
     }
     private void SetAnimation(int index)
     {
+        if (currentState.Length > 0) currentState.Clear();
         if (currentState.ToString() != animStates[index])
         {
-            if (currentState.Length > 0) currentState.Clear();
             currentState.Append(animStates[index]);
             ActiveAnimation(currentState.ToString());
         }
     }
     private void ActiveAnimation(string animation)
     {
+        if (!enemyBody.activeInHierarchy) return;
         for (int an = 0; an < animStates.Length; an++)
         {
             if (animStates[an] == animation)
@@ -506,15 +519,17 @@ public class EnemyDSystem : MonoBehaviour
     }
     public void OverKill()
     {
+      
         for (int mc = 0; mc < meshColliders.Length; mc++)
         {
             if (meshColliders[mc].enabled) meshColliders[mc].enabled = false;
         }
         health = 0;
-        enemyBody.SetActive(false);
         goreExplosion.SetActive(true);
         isDead = true;
-        navAgent.enabled = false;
+        OnDeath();
+        enemyBody.SetActive(false);
+
     }
     private bool EligibleForOverKill()
     {
@@ -542,15 +557,10 @@ public class EnemyDSystem : MonoBehaviour
         if (!isDamaged)
         {
             isDamaged = true;
+            FoundPlayer();
             if (currentState.Length > 0) currentState.Clear();
             enemyState = EnemyState.damage;
             audioSrc.PlayOneShot(enemySounds[2]);
-            ActiveState();
-        }
-        else
-        {
-            if (currentState.Length > 0) currentState.Clear();
-            enemyState = EnemyState.chase;
             ActiveState();
         }
     }
@@ -591,13 +601,13 @@ public class EnemyDSystem : MonoBehaviour
         isDamaged = false;
         playerFound = false;
         playerVisible = false;
+        playerIsDead = false;
+        rebootEnemy = false;
         isDead = false;
         audioSrc.Stop();
         enemyState = startState;
         for (int mc = 0; mc < meshColliders.Length; mc++)
-        {
-            if (meshColliders[mc].enabled) meshColliders[mc].enabled = true;
-        }
+            meshColliders[mc].enabled = true;
         if (!setOrgPos) return;
         navAgent.Warp(originalPosition);
         transform.position = originalPosition;

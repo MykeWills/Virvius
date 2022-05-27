@@ -316,7 +316,7 @@ public class PlayerSystem : MonoBehaviour
         audioSystem = AudioSystem.audioSystem;
         commandSystem = CommandSystem.commandSystem;
         characterController = GetComponent<CharacterController>();
-        //gameSystem.SetPlayerScenePosition(gameSystem.sceneIndex);
+        gameSystem.SetPlayerScenePosition(gameSystem.sceneIndex);
         versionIndex = 3;
         uISelectIndex = versionIndex;
         UIVersion(versionIndex);
@@ -566,10 +566,10 @@ public class PlayerSystem : MonoBehaviour
         if (isDead) return;
         if (collision.gameObject.CompareTag("ShotgunBullet"))
         {
-            int rangeMultiplier = optionsSystem.difficultyActive[0] ? 11 :
-                                     optionsSystem.difficultyActive[1] ? 16 :
+            int rangeMultiplier = optionsSystem.difficultyActive[0] ? 6 :
+                                     optionsSystem.difficultyActive[1] ? 11 :
                                      optionsSystem.difficultyActive[2] ? 21 :
-                                     optionsSystem.difficultyActive[3] ? 26 : 1;
+                                     optionsSystem.difficultyActive[3] ? 31 : 1;
             int rndDamage = Random.Range(1, rangeMultiplier);
             if (health < rndDamage + 1) overKill = true;
             Damage(rndDamage);
@@ -577,10 +577,10 @@ public class PlayerSystem : MonoBehaviour
         }
         if (collision.gameObject.CompareTag("DinEnemy") && !isHit)
         {
-            int rangeMultiplier = optionsSystem.difficultyActive[0] ? 11 :
-                                     optionsSystem.difficultyActive[1] ? 16 :
+            int rangeMultiplier = optionsSystem.difficultyActive[0] ? 6 :
+                                     optionsSystem.difficultyActive[1] ? 11 :
                                      optionsSystem.difficultyActive[2] ? 21 :
-                                     optionsSystem.difficultyActive[3] ? 26 : 1;
+                                     optionsSystem.difficultyActive[3] ? 31 : 1;
             int rndDamage = Random.Range(1, rangeMultiplier);
             if (health < rndDamage + 1) overKill = true;
             Damage(rndDamage);
@@ -590,9 +590,9 @@ public class PlayerSystem : MonoBehaviour
         if (collision.gameObject.CompareTag("ObstacleBullet"))
         {
             int rangeMultiplier = optionsSystem.difficultyActive[0] ? 4 :
-                                    optionsSystem.difficultyActive[1] ? 6:
-                                    optionsSystem.difficultyActive[2] ? 9 :
-                                    optionsSystem.difficultyActive[3] ? 11 : 1;
+                                    optionsSystem.difficultyActive[1] ? 6 :
+                                    optionsSystem.difficultyActive[2] ? 11 :
+                                    optionsSystem.difficultyActive[3] ? 16 : 1;
             int rndDamage = Random.Range(1, rangeMultiplier);
             if (health < rndDamage + 1) overKill = true;
             Damage(rndDamage);

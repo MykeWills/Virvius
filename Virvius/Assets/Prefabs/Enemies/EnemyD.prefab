@@ -131,12 +131,14 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   isDead: 0
-  LOSAngle: 60
-  LOSDistance: 60
-  angularSpeed: 200
+  LOSAngle: 75
+  LOSDistance: 70
+  angularSpeed: 300
   damageResistanceTime: 5
   health: 35
   damageResistance: 1
+  behindWall: 0
+  walkPositionDistance: 2
   playerFound: 0
 --- !u!95 &7378070610204510564
 Animator:
@@ -191,15 +193,15 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 2059389181635721526, guid: 893aef4c0b2e770418a75fdb2c9dbd6b, type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.7
-  m_Pitch: 0.9
+  m_Volume: 1
+  m_Pitch: 1
   Loop: 0
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1
+  MinDistance: 75
   MaxDistance: 250
   Pan2D: 0
   rolloffMode: 1
@@ -235,7 +237,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.5
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0

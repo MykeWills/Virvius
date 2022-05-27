@@ -56,8 +56,7 @@ public class EnemyGSystem : MonoBehaviour
     [Header("Enemy Values")]
     [HideInInspector]
     public bool isDead;
-    [SerializeField]
-    private float LOSAngle = 0;
+    private float LOSAngle = 160;
     [SerializeField]
     private float LOSDistance = 0;
     [SerializeField]
@@ -67,11 +66,8 @@ public class EnemyGSystem : MonoBehaviour
     [SerializeField]
     private float health = 8;
     [SerializeField]
-    private float bulletForce = 10000;
-    [SerializeField]
     private bool damageResistance = false;  
-    [SerializeField]
-    private bool behindWall = false;
+    private float walkPositionDistance = 2;
 
     private RaycastHit playerHit;
     private Vector3 randomPosition;
@@ -107,10 +103,11 @@ public class EnemyGSystem : MonoBehaviour
 
     private float[] distanceRanges = new float[4]
     {
-        15.0f,
         30.0f,
         60.0f,
-        120.0f,
+        90.0f,
+        180.0f,
+
     };
     private float[] movementSpeeds = new float[4] 
     { 
@@ -132,12 +129,13 @@ public class EnemyGSystem : MonoBehaviour
 
     [HideInInspector]
     public bool playerFound = false;
-    private bool disableFindRange = false;
     private bool autoBraking = false;
     private bool playerVisible = false;
     private bool gunFlash = false;
     private bool isDamaged = false;
     private bool updateNextPosition = false;
+    private bool rebootEnemy = false;
+    private bool playerIsDead = false;
 
     private void Start()
     {
@@ -151,13 +149,49 @@ public class EnemyGSystem : MonoBehaviour
     {
         if (gameSystem.BlockedAttributesActive()) return;
         if (isDead) return;
-        time = Time.deltaTime;
-        CheckPath();
-        CheckDistance();
-        IsDamaged();
+        if (ShutdownEnemy()) return;
+        if(playerSystem.isDead && !rebootEnemy && !playerIsDead) { rebootEnemy = true; playerIsDead = true;  }
+        RebootEnemy();
+        IdleDistance();
+        WalkDistance();
         LineOfSight();
+        if (!playerFound) return;
+        CheckDistance();
+        time = Time.deltaTime;
+        IsDamaged();
+        CheckPath();
         LookAtPlayerShooting();
         GunFlash();
+    }
+    private void IdleDistance()
+    {
+        if (activeState != EnemyState.idle) return;
+        //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
+        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) FoundPlayer(); }
+    }
+    private void WalkDistance()
+    {
+        if (activeState != EnemyState.walk) return;
+        float dist = Vector3.Distance(WalkDestination(), transform.position);
+        if (dist < walkPositionDistance) { ChangeDestination(); ActiveState(); }
+        //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
+        if (PlayerDistance() <= distanceRanges[1]) { if(playerVisible) FoundPlayer(); }
+    }
+    private void RebootEnemy()
+    {
+        if (!rebootEnemy) return;
+        enemyState = startState;
+        ActiveState();
+        playerFound = false;
+        rebootEnemy = false;
+    }
+    private bool ShutdownEnemy()
+    {
+        bool enemyActive = PlayerDistance() > 300 ? false : true;
+        if (!enemyActive) rebootEnemy = true;
+        animator.enabled = enemyActive;
+        navAgent.enabled = enemyActive;
+        return !enemyActive;
     }
     private void OnCollisionEnter(Collision collision)
     {
@@ -220,6 +254,7 @@ public class EnemyGSystem : MonoBehaviour
     }
     private void CheckActiveComponents()
     {
+        if (gameSystem == null) gameSystem = GameSystem.gameSystem;
         if (commandSystem == null) commandSystem = CommandSystem.commandSystem;
         if (playerSystem == null) playerSystem = PlayerSystem.playerSystem;
         if (optionsSystem == null) optionsSystem = OptionsSystem.optionsSystem;
@@ -242,7 +277,7 @@ public class EnemyGSystem : MonoBehaviour
         //when angle is below 60 engage player
         if (angle < LOSAngle && angle > -LOSAngle)
         {
-            //Debug.DrawRay(transform.position, distanceVector - transform.forward, Color.magenta);
+            Debug.DrawRay(transform.position, distanceVector - transform.forward, Color.magenta);
             if (Physics.Raycast(transform.position, distanceVector - transform.forward, out playerHit, LOSDistance))
             {
                 //if the raycast hit the player player is now found, activate shooting if player is within range
@@ -258,8 +293,9 @@ public class EnemyGSystem : MonoBehaviour
     private void FoundPlayer()
     {
         if (powerupSystem.powerEnabled[1]) return;
-        if (disableFindRange || playerFound) return;
+        if (playerFound) return;
         audioSrc.PlayOneShot(enemySounds[0]);
+        updateNextPosition = true;
         playerFound = true;
     }
     private void CheckPath()
@@ -273,45 +309,52 @@ public class EnemyGSystem : MonoBehaviour
     }
     private void CheckDistance()
     {
-        if (!updateNextPosition) return;
         if (PlayerSystem.playerSystem == null || PlayerDistance() == 0) return;
+        if (!updateNextPosition) return;
         if (AnimatorIsPlaying("Shoot") || enemyState == EnemyState.damage || enemyState == EnemyState.death) return;
-        //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[2]) { if (!behindWall) FoundPlayer(); }
-        //HAS LOST THE PLAYER - ANIMATION SET TO BACK DEFAULT [WALK OR IDLE]
-        if (PlayerDistance() > distanceRanges[3])
-        {
-            playerFound = false;
-            playerVisible = false;
-            enemyState = startState;
-            ActiveState();
-        }
 
-        if (!playerFound) return;
-        //ATTACKS IN CLOSE RANGE
+        //SHOOT IN CLOSE RANGE
         if (PlayerDistance() <= distanceRanges[0])
         {
             EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
             enemyState = state;
             ActiveState();
         }
-        //ATTACKS FROM DISTANCE
+        //SHOOT IN LONG RANGE
         if (PlayerDistance() > distanceRanges[0] && PlayerDistance() <= distanceRanges[1])
         {
             EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
             enemyState = state;
             ActiveState();
         }
-        //MOVES TO PLAYER POSITION
+        //SHOOT ONLY IF HARD OR VERYHARD [EASY & NORMAL WILL CHASE]
         if (PlayerDistance() > distanceRanges[1] && PlayerDistance() <= distanceRanges[2])
         {
-            enemyState = EnemyState.chase;
+            if (optionsSystem.difficultyActive[2] || optionsSystem.difficultyActive[3])
+            {
+                EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
+                enemyState = state;
+            }
+            else enemyState = EnemyState.chase;
             ActiveState();
         }
-        //MOVES TO STAGGERED PLAYER POSITION
+        //SHOOT ONLY IF VERYHARD [EASY, NORMAL & HARD WILL CHASE]
         if (PlayerDistance() > distanceRanges[2] && PlayerDistance() <= distanceRanges[3])
         {
-            enemyState = EnemyState.chase;
+            if (optionsSystem.difficultyActive[3])
+            {
+                EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
+                enemyState = state;
+            }
+            else enemyState = EnemyState.chase;
+            ActiveState();
+        }
+        //HAS LOST THE PLAYER - ANIMATION SET TO BACK DEFAULT [WALK OR IDLE]
+        if (PlayerDistance() > distanceRanges[3])
+        {
+            playerFound = false;
+            playerVisible = false;
+            enemyState = startState;
             ActiveState();
         }
         updateNextPosition = false;
@@ -335,21 +378,13 @@ public class EnemyGSystem : MonoBehaviour
                 }
             case EnemyState.walk:
                 {
-                    if (!AnimatorIsPlaying("Shoot") && !AnimatorIsPlaying("Damage"))
-                    {
-                        if (animator.GetFloat("Speed") != 1.5f)
-                            animator.SetFloat("Speed", 1.5f);
-                        SetAnimation(1);
-                        movementSpeed = movementSpeeds[1];
-                        stoppingDistance = 0;
-                        autoBraking = false;
-                        float dist = Vector3.Distance(WalkDestination(), transform.position);
-                        if (dist < 2)
-                        {
-                            ChangeDestination();
-                        }
-                        SetNav(WalkDestination(), true);
-                    }
+                    if (animator.GetFloat("Speed") != 1.5f)
+                        animator.SetFloat("Speed", 1.5f);
+                    SetAnimation(1);
+                    movementSpeed = movementSpeeds[1];
+                    stoppingDistance = 0;
+                    autoBraking = false;
+                    SetNav(WalkDestination(), true);
                     break;
                 }
             case EnemyState.chase:
@@ -424,8 +459,9 @@ public class EnemyGSystem : MonoBehaviour
     }
     private void SetNav(Vector3 nextPosition, bool active)
     {
-        Vector3 newPos = active ? nextPosition : transform.localPosition;
-        if (isDead) { navAgent.destination = transform.localPosition; return; }
+        if (!enemyBody.activeInHierarchy) return;
+        Vector3 newPos = active ? nextPosition : transform.position;
+        if (isDead) { navAgent.destination = transform.position; return; }
         navAgent.destination = newPos;
         navAgent.autoBraking = autoBraking;
         navAgent.autoRepath = active;
@@ -456,13 +492,14 @@ public class EnemyGSystem : MonoBehaviour
     }
     private Vector3 WalkDestination()
     {
-        if (walkPositions[0] == null) return transform.localPosition;
+        if (walkPositions[0] == null) return transform.position;
         Vector3 direction = new Vector3(walkPositions[walkPositionIndex].position.x, transform.position.y, walkPositions[walkPositionIndex].position.z);
         return direction;
     }
     private Vector3 RandomDestination()
     {
-        randomPosition = MoveInPlayerRadius(Random.Range(-20, 21), transform.TransformDirection(Vector3.forward).z * Random.Range(-6, 6));
+        if (optionsSystem.difficultyActive[3]) randomPosition = PlayerPosition();
+        else randomPosition = MoveInPlayerRadius(Random.Range(-15, 15), transform.TransformDirection(Vector3.forward).z * Random.Range(-4, 4));
         Vector3 direction = new Vector3(randomPosition.x, transform.position.y, randomPosition.z);
         return direction;
         
@@ -477,15 +514,16 @@ public class EnemyGSystem : MonoBehaviour
     }
     private void SetAnimation(int index)
     {
+        if (currentState.Length > 0) currentState.Clear();
         if (currentState.ToString() != animStates[index])
         {
-            if (currentState.Length > 0) currentState.Clear();
             currentState.Append(animStates[index]);
             ActiveAnimation(currentState.ToString());
         }
     }
     private void ActiveAnimation(string animation)
     {
+        if (!enemyBody.activeInHierarchy) return;
         for (int an = 0; an < animStates.Length; an++)
         {
             if (animStates[an] == animation) 
@@ -520,7 +558,20 @@ public class EnemyGSystem : MonoBehaviour
         bullet.transform.rotation = emitter.rotation;
         bullet.SetActive(true);
         bulletSystem.SetupLifeTime(5);
-        rb.AddForce(emitter.transform.forward * bulletForce);
+        float bulletforce = 0;
+        //VERYHARD
+        if (optionsSystem.difficultyActive[3])
+            bulletforce = 20000f;
+        //HARD
+        else if (optionsSystem.difficultyActive[2])
+            bulletforce = 15000f;
+        //NORMAL
+        else if (optionsSystem.difficultyActive[1])
+            bulletforce = 10000f;
+        //EASY
+        else if (optionsSystem.difficultyActive[0])
+            bulletforce = 7500;
+        rb.AddForce(emitter.transform.forward * bulletforce);
     }
     private void LookAtPlayerShooting()
     {
@@ -561,10 +612,10 @@ public class EnemyGSystem : MonoBehaviour
                     bulletPool.GetChild(b).gameObject.SetActive(false);
             }
             health = 0;
-            enemyBody.SetActive(false);
             goreExplosion.SetActive(true);
             isDead = true;
-            navAgent.enabled = false;
+            OnDeath();
+            enemyBody.SetActive(false);
             boxCollider.enabled = false;
             shotgunMuzzle.transform.Rotate(0, 30, 0);
             shotgunMuzzle.enabled = false;
@@ -600,6 +651,7 @@ public class EnemyGSystem : MonoBehaviour
         if (!isDamaged)
         {
             isDamaged = true;
+            FoundPlayer();
             if (currentState.Length > 0) currentState.Clear();
             enemyState = EnemyState.damage;
             audioSrc.PlayOneShot(enemySounds[2]);
@@ -676,11 +728,13 @@ public class EnemyGSystem : MonoBehaviour
         isDamaged = false;
         playerFound = false;
         playerVisible = false;
+        playerIsDead = false;
+        rebootEnemy = false;
         isDead = false;
         shotgunLight.enabled = false;
         shotgunMuzzle.enabled = false;
         audioSrc.Stop();
-        enemyState = startState;
+      
         for (int a = 0; a < ammoDropPool.childCount; a++)
         {
             if (ammoDropPool.GetChild(a).gameObject.activeInHierarchy)
@@ -688,9 +742,10 @@ public class EnemyGSystem : MonoBehaviour
         }
         navAgent.enabled = true;
         boxCollider.enabled = true;
-       
         if (!setOrgPos) return;
         navAgent.Warp(originalPosition);
         transform.position = originalPosition;
+        enemyState = startState;
+        ActiveState();
     }
 }
