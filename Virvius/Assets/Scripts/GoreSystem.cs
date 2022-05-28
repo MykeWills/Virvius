@@ -11,9 +11,11 @@ public class GoreSystem : MonoBehaviour
     private float lifeTimer = 0;
     private bool lifeTimeActive = false;
     private float time = 0;
+    private bool bootFirstTime = true;
     private void OnEnable()
     {
-        ExplodeGore();
+        if(!bootFirstTime)
+            ExplodeGore();
     }
     private void OnDisable()
     {
@@ -73,7 +75,9 @@ public class GoreSystem : MonoBehaviour
         }
         lifeTimer = lifeTime;
         lifeTimeActive = false;
+        bootFirstTime = false;
         gameObject.SetActive(false);
+
     }
     private void LifeTime()
     {

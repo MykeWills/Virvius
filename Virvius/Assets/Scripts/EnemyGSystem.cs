@@ -67,7 +67,9 @@ public class EnemyGSystem : MonoBehaviour
     [SerializeField]
     private float health = 8;
     [SerializeField]
-    private bool damageResistance = false;  
+    private bool damageResistance = false;
+    [SerializeField]
+    private float offMeshLinkSpeed = 20f;
     private float walkPositionDistance = 2;
 
     private RaycastHit playerHit;
@@ -136,7 +138,9 @@ public class EnemyGSystem : MonoBehaviour
     private bool isDamaged = false;
     private bool updateNextPosition = false;
     private bool rebootEnemy = false;
-    private bool playerIsDead = false;
+    private bool returnToDefault = false;
+    private bool wasOnLink = false;
+
 
     private void Start()
     {
@@ -146,15 +150,16 @@ public class EnemyGSystem : MonoBehaviour
         maxHealth = health;
         ActiveState();
     }
-    void Update()
+    private void Update()
     {
+       
         if (gameSystem.BlockedAttributesActive()) return;
         if (isDead) return;
         if (ShutdownEnemy()) return;
-        if(playerSystem.isDead && !rebootEnemy && !playerIsDead) { rebootEnemy = true; playerIsDead = true;  }
         RebootEnemy();
         IdleDistance();
         WalkDistance();
+        if (DefaultEnemy()) return;
         LineOfSight();
         if (!playerFound) return;
         CheckDistance();
@@ -164,18 +169,33 @@ public class EnemyGSystem : MonoBehaviour
         LookAtPlayerShooting();
         GunFlash();
     }
+    private void FixedUpdate()
+    {
+        if (navAgent.isOnOffMeshLink && !wasOnLink)
+        {
+            navAgent.speed = offMeshLinkSpeed;
+            wasOnLink = true;
+        }
+        else if (!navAgent.isOnOffMeshLink && wasOnLink) 
+        {
+            navAgent.speed = movementSpeed;
+            navAgent.velocity = Vector3.zero;
+            wasOnLink = false;
+        }
+    }
     public void EngagePlayer()
     {
         FoundPlayer();
         EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
         enemyState = state;
+        if (currentState.Length > 0) currentState.Clear();
         ActiveState();
     }
     private void IdleDistance()
     {
         if (activeState != EnemyState.idle) return;
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) FoundPlayer(); }
+        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]); FoundPlayer(); } }
     }
     private void WalkDistance()
     {
@@ -183,15 +203,29 @@ public class EnemyGSystem : MonoBehaviour
         float dist = Vector3.Distance(WalkDestination(), transform.position);
         if (dist < walkPositionDistance) { ChangeDestination(); ActiveState(); }
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[1]) { if(playerVisible) FoundPlayer(); }
+        if (PlayerDistance() <= distanceRanges[1]) { if(playerVisible) { if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]); FoundPlayer(); } }
     }
     private void RebootEnemy()
     {
         if (!rebootEnemy) return;
+        if (currentState.Length > 0) currentState.Clear();
         enemyState = startState;
         ActiveState();
         playerFound = false;
         rebootEnemy = false;
+    }
+    private bool DefaultEnemy()
+    {
+        bool playerActive = playerSystem.isDead ? false : true;
+        if (!returnToDefault)
+        {
+            if (currentState.Length > 0) currentState.Clear();
+            enemyState = startState;
+            ActiveState();
+            playerFound = false;
+            returnToDefault = true;
+        }
+        return !playerActive;
     }
     private bool ShutdownEnemy()
     {
@@ -291,6 +325,7 @@ public class EnemyGSystem : MonoBehaviour
                 //if the raycast hit the player player is now found, activate shooting if player is within range
                 if (playerHit.collider.gameObject.CompareTag("Player"))
                 {
+                    if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]);
                     FoundPlayer();
                     playerVisible = true;
                 }
@@ -652,7 +687,7 @@ public class EnemyGSystem : MonoBehaviour
         health = Mathf.Clamp(health, 0, maxHealth);
         isDead = health < 1 ? true : false;
         if (!isDead) OnDamaged();
-        else OnDeath();
+        else { audioSrc.PlayOneShot(enemySounds[3]); OnDeath(); }
     }
     private void OnDamaged()
     {
@@ -691,7 +726,6 @@ public class EnemyGSystem : MonoBehaviour
             ActiveState();
             navAgent.enabled = false;
             boxCollider.enabled = false;
-            audioSrc.PlayOneShot(enemySounds[3]);
             gunFlash = false;
             shotgunMuzzle.transform.Rotate(0, 30, 0);
             shotgunMuzzle.enabled = false;
@@ -727,6 +761,8 @@ public class EnemyGSystem : MonoBehaviour
         goreExplosion.SetActive(false);
         enemyBody.SetActive(true);
         animator.Rebind();
+        navAgent.enabled = true;
+        boxCollider.enabled = true;
         damageResistanceTimer = damageResistanceTime;
         gunFlash = false;
         gunflashTimer = gunflashTime;
@@ -736,24 +772,22 @@ public class EnemyGSystem : MonoBehaviour
         isDamaged = false;
         playerFound = false;
         playerVisible = false;
-        playerIsDead = false;
+        returnToDefault = false;
         rebootEnemy = false;
         isDead = false;
         shotgunLight.enabled = false;
         shotgunMuzzle.enabled = false;
         audioSrc.Stop();
-      
         for (int a = 0; a < ammoDropPool.childCount; a++)
         {
             if (ammoDropPool.GetChild(a).gameObject.activeInHierarchy)
                 ammoDropPool.GetChild(a).gameObject.SetActive(false);
         }
-        navAgent.enabled = true;
-        boxCollider.enabled = true;
+        if (currentState.Length > 0) currentState.Clear();
+        enemyState = startState;
+        ActiveState();
         if (!setOrgPos) return;
         navAgent.Warp(originalPosition);
         transform.position = originalPosition;
-        enemyState = startState;
-        ActiveState();
     }
 }

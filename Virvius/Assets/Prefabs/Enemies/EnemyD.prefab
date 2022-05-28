@@ -112,12 +112,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f62ddcf65a1cd846b7054606ea66b5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  navAgent: {fileID: 0}
   meshColliders:
   - {fileID: 7378070610436939203}
   - {fileID: 7378070610965948630}
   - {fileID: 7378070610262066657}
   - {fileID: 7378070611903981489}
-  startState: 0
+  startState: 2
   goreExplosion: {fileID: 2109226051377458071}
   enemyBody: {fileID: 7378070610060607601}
   enemySounds:
@@ -131,14 +132,12 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   isDead: 0
-  LOSAngle: 75
   LOSDistance: 70
   angularSpeed: 300
   damageResistanceTime: 5
   health: 35
   damageResistance: 1
-  behindWall: 0
-  walkPositionDistance: 2
+  offMeshLinkSpeed: 7.5
   playerFound: 0
 --- !u!95 &7378070610204510564
 Animator:
@@ -13424,7 +13423,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1885816653436743475, guid: a3dcf1ba468229440b9214ffb3853699, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1885816653504273284, guid: a3dcf1ba468229440b9214ffb3853699, type: 3}
       propertyPath: m_Mesh
