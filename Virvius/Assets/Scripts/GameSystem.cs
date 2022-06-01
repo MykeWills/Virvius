@@ -7,6 +7,8 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine.SceneManagement;
 using System.Text;
+using System.Threading.Tasks;
+using System.Threading;
 
 public class GameSystem : MonoBehaviour
 {
@@ -30,6 +32,10 @@ public class GameSystem : MonoBehaviour
     private PowerupSystem powerupSystem;
     [SerializeField]
     private EnvironmentSystem environmentSystem;
+    [SerializeField]
+    private MainMenuSystem mainMenuSystem;
+    [SerializeField]
+    private ButtonAnimate[] buttonAnimates = new ButtonAnimate[6];
     [SerializeField]
     private BobSystem[] bobSystem = new BobSystem[10];
     [SerializeField]
@@ -64,8 +70,8 @@ public class GameSystem : MonoBehaviour
     private string dataPath;
     [Header("Menu Assignment")]
     [SerializeField]
-    private Selectable[] b_Select = new Selectable[4];
-    private bool[] currentMenuButtonSelected = new bool[4] { true, false, false, false };
+    private Selectable[] b_Select = new Selectable[6];
+    private bool[] currentMenuButtonSelected = new bool[6] { true, false, false, false, false, false };
 
     [SerializeField]
     private AudioClip[] pauseOpenSfx = new AudioClip[2];
@@ -78,7 +84,7 @@ public class GameSystem : MonoBehaviour
     [SerializeField]
     private GameObject mainNavigation;
     [SerializeField]
-    private GameObject loadSelection;
+    private GameObject[] fileSelection;
     [SerializeField]
     private GameObject gameUI;
     [SerializeField]
@@ -136,7 +142,7 @@ public class GameSystem : MonoBehaviour
         if (CommandSystem.commandOpen) return;
         if (!isGameStarted) return;
         if (optionsSystem.quitOpen) return;
-        if (inputPlayer.GetButtonDown("Start") && optionsSystem.canQuit && !optionsSystem.optionsOpen)
+        if (inputPlayer.GetButtonDown("Start") && optionsSystem.canQuit && !optionsSystem.optionsOpen && !optionsSystem.fileSelectionOpen)
         {
             isPaused = !isPaused;
             int open = isPaused ? 1 : 0;
@@ -144,17 +150,27 @@ public class GameSystem : MonoBehaviour
             audioSystem.PlayAudioSource(pauseOpenSfx[open], 1, 1, 128);
             Time.timeScale = isPaused ? 0 : 1;
             OpenMainSelection(isPaused);
-           
         }
     }
     public void OpenMainSelection(bool active)
     {
-        //if (optionsSystem.quitOpen) optionsSystem.OpenQuitMenu(false);
         optionsSystem.FadeMainMenu(active ? 1 : 0);
         mainUI.SetActive(active);
         mainSelection.SetActive(active);
         mainNavigation.SetActive(active);
-        if (active) { SelectMenuSelectable(); }
+        if (active) 
+        { 
+            SelectFileSelectable(0);
+            SetButtonAnimates(0);
+        }
+    }
+    public void SetButtonAnimates(int ID)
+    {
+        for (int b = 0; b < buttonAnimates.Length; b++)
+        {
+            if (b == ID) buttonAnimates[b].StartAnimation(true);
+            else buttonAnimates[b].StartAnimation(false);
+        }
     }
     public void SetCurrentlySelected(int index)
     {
@@ -184,14 +200,14 @@ public class GameSystem : MonoBehaviour
         isPaused = !isPaused;
         int open = isPaused ? 1 : 0;
         if (isPaused) optionsSystem.FadeMainMenu(1);
-        if(loadSelection.activeInHierarchy) loadSelection.SetActive(false);
+        optionsSystem.OpenFileSelection(false);
         GameMouseActive(isPaused, isPaused ? CursorLockMode.Confined : CursorLockMode.Locked);
         audioSystem.PlayAudioSource(pauseOpenSfx[open], 1, 1, 128);
         Time.timeScale = isPaused ? 0 : 1;
         mainUI.SetActive(isPaused);
         mainSelection.SetActive(isPaused);
         mainNavigation.SetActive(isPaused);
-        if (isPaused) { SelectMenuSelectable(); }
+        if (isPaused) { SelectFileSelectable(0); SetButtonAnimates(0); }
         if (optionSelection.activeInHierarchy) optionsSystem.OpenOptions(false);
         optionsSystem.ApplyActiveInputUI();
     }
@@ -210,6 +226,7 @@ public class GameSystem : MonoBehaviour
         if (!isLoading) return;
         if (curSceneIndex != sceneIndex)
         {
+            Application.backgroundLoadingPriority = UnityEngine.ThreadPriority.High;
             async = SceneManager.LoadSceneAsync(sceneIndex, LoadSceneMode.Single);
             async.allowSceneActivation = false;
             curSceneIndex = sceneIndex;
@@ -225,8 +242,11 @@ public class GameSystem : MonoBehaviour
                 loadSb.Clear();
                 if (async.progress >= 0.9f)
                 {        
-                    loadingBar.fillAmount = 100;
                     async.allowSceneActivation = true;
+                    loadingBar.fillAmount = 100;
+                    loadSb.Clear();
+                    loadSb.Append("100/100");
+                    loadingText.text = loadSb.ToString();
                 }
             }
             else if(SceneManager.GetActiveScene().isLoaded) StartLevel();
@@ -261,15 +281,13 @@ public class GameSystem : MonoBehaviour
         playerSystem.SetupNewLevel();
         isLoading = false;
         isGameStarted = true;
+        mainMenuSystem.FadeBlackScreen(false);
     }
     public void SetNewGame()
     {
         isLoading = true;
-
-        // Shut off NavigationUI
-        if (mainNavigation.activeInHierarchy) mainNavigation.SetActive(false);
         // Shut off LoadSelection
-        if (loadSelection.activeInHierarchy) loadSelection.SetActive(false);
+        if(optionsSystem.fileSelectionOpen) optionsSystem.OpenFileSelection(false);
         // Shut off BootIntro
         if (bootIntro.activeInHierarchy) bootIntro.SetActive(false);
         // Shut off GameUI
@@ -282,6 +300,9 @@ public class GameSystem : MonoBehaviour
         if (videoUI.enabled) videoUI.enabled = false;
         // Shut off Video Player
         if (videoPlayer.isPlaying) videoPlayer.Stop();
+        if(mainmenuOpen) mainmenuOpen = false;
+        // Shut off NavigationUI
+        if (mainNavigation.activeInHierarchy) mainNavigation.SetActive(false);
         // Load the first Scene
         curSceneIndex = 0;
         loadingBar.fillAmount = 0;
@@ -304,18 +325,18 @@ public class GameSystem : MonoBehaviour
     {
         for (int s = 0; s < b_Select.Length; s++)
         {
-
             if (b_Select[s].interactable)
             {
-                if (currentMenuButtonSelected[s])
-                {
-                    if (buttonHighlight != b_Select[s].GetComponent<ButtonHighlight>()) buttonHighlight = b_Select[s].GetComponent<ButtonHighlight>();
-                    buttonHighlight.Activate(true);
-                    b_Select[s].Select();
-                    break;
-                }
-               
+                if (currentMenuButtonSelected[s]) { b_Select[s].Select(); break;}
             }
+        }
+    }
+    public void SelectFileSelectable(int currID)
+    {
+        for (int s = 0; s < b_Select.Length; s++)
+        {
+            if (s == currID) { currentMenuButtonSelected[s] = true; b_Select[s].Select(); }
+            else currentMenuButtonSelected[s] = false;
         }
     }
     public void GameMouseActive(bool active, CursorLockMode lockMode)

@@ -26,11 +26,12 @@ public class MainMenuSystem : MonoBehaviour
     [SerializeField]
     private Image blackScreen;
     private bool blackScreenActive = false;
+    private bool fadeOut = false;
     private float fadeInterval = 0;
     [SerializeField]
     private VideoPlayer videoPlayer;
     private AudioSource videoAudioSrc;
-
+    private bool animationUIActive = false;
     [SerializeField]
     private VideoClip previewClip;
     [SerializeField]
@@ -51,18 +52,18 @@ public class MainMenuSystem : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        FadeOutBlackScreen();
         if (gameSystem.isLoading) return;
         if (gameSystem.isGameStarted) return;
         if (optionsSystem.optionsOpen) return;
         if (optionsSystem.quitOpen) return;
-        FadeBlackScreen();
         PulseAlpha();
         if (!startGame)
         {
             if (introSystem.gameObject.activeInHierarchy)
             {
                 ResetVideo();
-                blackScreenActive = true;
+                FadeBlackScreen(false);
                 introSystem.gameObject.SetActive(false);
                 OpenMainMenu(true);
             }
@@ -83,6 +84,11 @@ public class MainMenuSystem : MonoBehaviour
             }
         }
     }
+    public void FadeBlackScreen(bool fadeIn)
+    {
+        fadeOut = !fadeIn;
+        blackScreenActive = true;
+    }
     public void ResetVideo()
     {
         videoPlayer.clip = null;
@@ -101,14 +107,22 @@ public class MainMenuSystem : MonoBehaviour
             }
         }
     }
-    private void FadeBlackScreen()
+    private void FadeOutBlackScreen()
     {
         if (!blackScreenActive) return;
-        blackScreen.color = new Color(blackScreen.color.r, blackScreen.color.g, blackScreen.color.b, Mathf.Lerp(1, 0, fadeInterval));
-        fadeInterval += Time.unscaledDeltaTime * 2;
+        int val = fadeOut ? 0 : 1;
+        int val2 = fadeOut ? 1 : 0;
+        blackScreen.color = new Color(blackScreen.color.r, blackScreen.color.g, blackScreen.color.b, Mathf.Lerp(val2, val, fadeInterval));
+        fadeInterval += Time.unscaledDeltaTime;
         fadeInterval = Mathf.Clamp01(fadeInterval);
         if (fadeInterval == 1)
+        {
             blackScreenActive = false;
+            if (!fadeOut)
+            {
+                gameSystem.SetNewGame();
+            }
+        }
     }
     public void OpenMainMenu(bool active)
     {
@@ -158,4 +172,5 @@ public class MainMenuSystem : MonoBehaviour
         GL.Clear(true, true, Color.clear);
         RenderTexture.active = rt;
     }
+
 }

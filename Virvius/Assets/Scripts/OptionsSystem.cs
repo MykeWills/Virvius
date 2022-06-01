@@ -116,7 +116,9 @@ public class OptionsSystem : MonoBehaviour
     [SerializeField]
     private Button declineButton;
     [SerializeField]
-    private GameObject fileSelection;
+    private GameObject[] fileSelection;
+    [HideInInspector]
+    public bool fileSelectionOpen = false;
     [Space]
     [Header("Game Settings")]
     [SerializeField]
@@ -410,9 +412,9 @@ public class OptionsSystem : MonoBehaviour
     public Color currentVisorColor = new Color(1, 0.98f, 0.7f, 0.1f);
     private Color[] visorColor = new Color[11]
     {
-        //DEFAULT - fire red
-        new Color(1f, 0.15f, 0f, 0.6f),
-
+         //DEFAULT - navy green
+        new Color(1f, 1f, 0.7f, 0.1f),
+      
         //MARINE - navy green
         new Color(0.6f, 0.66f, 0.37f, 0.1f),
 
@@ -445,8 +447,8 @@ public class OptionsSystem : MonoBehaviour
     };
     private Color[] visorColor2 = new Color[11]
 {
-        //DEFAULT - navy green
-        new Color(1f, 1f, 0.7f, 0.1f),
+         //DEFAULT - fire red
+        new Color(1f, 0.15f, 0f, 0.6f),
 
         //MARINE - dark Green theme
         new Color(0.26f, 0.41f, 0.25f, 0.3f),
@@ -739,7 +741,7 @@ public class OptionsSystem : MonoBehaviour
     //====================================================================
     public void CheckMouseActive()
     {
-        if (!gameSystem.isPaused) return;
+       
         if (Cursor.visible && inputPlayer.controllers.Keyboard.GetAnyButton())
         {
             mainMenuSystem.SetNavigationUI(MainMenuSystem.Navigation.Keyboard);
@@ -755,6 +757,7 @@ public class OptionsSystem : MonoBehaviour
                 currentMousePosition = Input.mousePosition;
             }
         }
+        if (!gameSystem.isPaused) return;
         if (Input.mousePosition != currentMousePosition && !Cursor.visible)
         {
             mainMenuSystem.SetNavigationUI(MainMenuSystem.Navigation.Keyboard);
@@ -777,7 +780,7 @@ public class OptionsSystem : MonoBehaviour
     {
         if (gameSystem.isLoading) return;
         if (CommandSystem.commandOpen) return;
-        if (!optionsOpen && !quitOpen) return;
+        if (!optionsOpen && !quitOpen && !fileSelectionOpen) return;
         if (optionsOpen)
         {
             canQuit = false;
@@ -807,9 +810,23 @@ public class OptionsSystem : MonoBehaviour
         }
         else if (quitOpen)
         {
+           
             if (Input.GetKeyDown(KeyCode.Escape) && !selectingOption || inputPlayer.GetButtonDown("B") && !selectingOption)
             {
                 OpenQuitMenu(false);
+                gameSystem.SelectFileSelectable(3);
+                audioSystem.PlayAudioSource(selectFx, 1, 1, 128);
+                selectingOption = true;
+            }
+            if (Input.GetKeyUp(KeyCode.Escape) || inputPlayer.GetButtonUp("B")) selectingOption = false;
+        }
+        else if (fileSelectionOpen)
+        {
+            canQuit = false;
+            if (Input.GetKeyDown(KeyCode.Escape) && !selectingOption || inputPlayer.GetButtonDown("B") && !selectingOption)
+            {
+                OpenFileSelection(false);
+                gameSystem.SelectFileSelectable(0);
                 audioSystem.PlayAudioSource(selectFx, 1, 1, 128);
                 selectingOption = true;
             }
@@ -2097,20 +2114,23 @@ public class OptionsSystem : MonoBehaviour
     //--------------------------------------------------------------------
     public void SetVisorColor()
     {
-        if(visorColorIndex < 1)
-        {
-            playerSystem.visorColor = visorColor2[visorColorIndex];
-            playerSystem.visorColor2 = visorColor2[visorColorIndex];
-            ChangeOptionsUIColor(visorColor[visorColorIndex], visorColor[visorColorIndex]);
-            playerSystem.ChangeVisorColorOverhaul();
+        playerSystem.visorColor = visorColor[visorColorIndex];
+        playerSystem.visorColor2 = visorColor2[visorColorIndex];
+        ChangeOptionsUIColor(visorColor[visorColorIndex], visorColor2[visorColorIndex]);
+        //if (visorColorIndex < 1)
+        //{
+        //    playerSystem.visorColor = visorColor2[visorColorIndex];
+        //    playerSystem.visorColor2 = visorColor2[visorColorIndex];
+        //    ChangeOptionsUIColor(visorColor[visorColorIndex], visorColor[visorColorIndex]);
+        //    playerSystem.ChangeVisorColorOverhaul();
            
-        }
-        else
-        {
-            playerSystem.visorColor = visorColor[visorColorIndex];
-            playerSystem.visorColor2 = visorColor2[visorColorIndex];
-            ChangeOptionsUIColor(visorColor[visorColorIndex], visorColor2[visorColorIndex]);
-        }
+        //}
+        //else
+        //{
+        //    playerSystem.visorColor = visorColor[visorColorIndex];
+        //    playerSystem.visorColor2 = visorColor2[visorColorIndex];
+        //    ChangeOptionsUIColor(visorColor[visorColorIndex], visorColor2[visorColorIndex]);
+        //}
         playerSystem.ChangeVisorColorOverhaul();
         uiContentSubText[5].text = VisorColorSubText[visorColorIndex];
     }
@@ -2118,19 +2138,22 @@ public class OptionsSystem : MonoBehaviour
     {
         visorColorIndex++;
         if (visorColorIndex > 10) visorColorIndex = 0;
-        if (visorColorIndex < 1)
-        {
-            playerSystem.visorColor = visorColor2[visorColorIndex];
-            playerSystem.visorColor2 = visorColor2[visorColorIndex];
-            ChangeOptionsUIColor(visorColor[visorColorIndex], visorColor[visorColorIndex]);
-            playerSystem.ChangeVisorColorOverhaul();
-        }
-        else
-        {
-            playerSystem.visorColor = visorColor[visorColorIndex];
-            playerSystem.visorColor2 = visorColor2[visorColorIndex];
-            ChangeOptionsUIColor(visorColor[visorColorIndex], visorColor2[visorColorIndex]);
-        }
+        playerSystem.visorColor = visorColor[visorColorIndex];
+        playerSystem.visorColor2 = visorColor2[visorColorIndex];
+        ChangeOptionsUIColor(visorColor[visorColorIndex], visorColor2[visorColorIndex]);
+        //if (visorColorIndex < 1)
+        //{
+        //    playerSystem.visorColor = visorColor2[visorColorIndex];
+        //    playerSystem.visorColor2 = visorColor2[visorColorIndex];
+        //    ChangeOptionsUIColor(visorColor[visorColorIndex], visorColor[visorColorIndex]);
+        //    playerSystem.ChangeVisorColorOverhaul();
+        //}
+        //else
+        //{
+        //    playerSystem.visorColor = visorColor[visorColorIndex];
+        //    playerSystem.visorColor2 = visorColor2[visorColorIndex];
+        //    ChangeOptionsUIColor(visorColor[visorColorIndex], visorColor2[visorColorIndex]);
+        //}
         playerSystem.ChangeVisorColorOverhaul();
         uiContentSubText[5].text = VisorColorSubText[visorColorIndex];
     }
@@ -2814,12 +2837,23 @@ public class OptionsSystem : MonoBehaviour
         }
         else
         {
-            fileSelection.SetActive(false);
+            OpenFileSelection(false);
             gameSystem.OpenMainSelection(false);
             quitWindow.SetActive(active);
             FadeQuitMenu(active ? 1 : 0);
         }
        
+    }
+    public void OpenFileSelection(bool active)
+    {
+        if (active) gameSystem.mainmenuOpen = false;
+        else { gameSystem.OpenMainSelection(true); }
+        for(int s = 0; s < fileSelection.Length; s++)
+        {
+            if (s < 4) fileSelection[s].SetActive(!active);
+            else fileSelection[s].SetActive(active);
+        }
+        fileSelectionOpen = active;
     }
     public void SetMusicSoundtrack()
     {
