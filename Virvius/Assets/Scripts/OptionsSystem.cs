@@ -412,8 +412,8 @@ public class OptionsSystem : MonoBehaviour
     public Color currentVisorColor = new Color(1, 0.98f, 0.7f, 0.1f);
     private Color[] visorColor = new Color[11]
     {
-         //DEFAULT - navy green
-        new Color(1f, 1f, 0.7f, 0.1f),
+         //DEFAULT - Dark Grey
+        new Color(0.25f, 0.25f, 0.25f, 0.75f),
       
         //MARINE - navy green
         new Color(0.6f, 0.66f, 0.37f, 0.1f),
@@ -448,7 +448,7 @@ public class OptionsSystem : MonoBehaviour
     private Color[] visorColor2 = new Color[11]
 {
          //DEFAULT - fire red
-        new Color(1f, 0.15f, 0f, 0.6f),
+        new Color(1f, 0.2f, 0f, 0.5f),
 
         //MARINE - dark Green theme
         new Color(0.26f, 0.41f, 0.25f, 0.3f),

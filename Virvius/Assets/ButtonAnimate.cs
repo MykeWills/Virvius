@@ -3,11 +3,13 @@ using UnityEngine.UI;
 
 public class ButtonAnimate : MonoBehaviour
 {
+    private GameSystem gameSystem;
     [SerializeField]
     private Image buttonImage;
     [SerializeField]
     private Image buttonLogo;
-
+    [SerializeField]
+    private int buttonIndex = 0;
     [SerializeField]
     private float[] frameRate = new float[2] 
     {

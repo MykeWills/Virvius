@@ -1658,6 +1658,7 @@ public class WeaponSystem : MonoBehaviour
                     {
                         if (noAmmoHolstered) return;
                         if (bobSystem[weaponIndex].isRecoiling) return;
+                        inputSystem.SetScreenShakeEffect(Random.Range(0.5f, 1), 0.1f);
                         inputSystem.RecoilEffect(-3, 0, 0, 40);
                         bobSystem[weaponIndex].isRecoiling = true;
                         isShooting = true;
@@ -1685,6 +1686,7 @@ public class WeaponSystem : MonoBehaviour
                             }
                         }
                         if (bobSystem[weaponIndex].isRecoiling) return;
+                        inputSystem.SetScreenShakeEffect(Random.Range(0.05f, 0.25f), 0.05f);
                         inputSystem.RecoilEffect(-1f, 0, 0, 100);
                         bobSystem[weaponIndex].isRecoiling = true;
                         isShooting = true;
@@ -1698,6 +1700,7 @@ public class WeaponSystem : MonoBehaviour
                         if (noAmmoHolstered) return;
                         if (bobSystem[weaponIndex].isRecoiling) return;
                         inputSystem.RecoilEffect(-4, 0, 0, 50);
+                        inputSystem.SetScreenShakeEffect(Random.Range(1f, 2), 0.05f);
                         if (ammo > 0 && ammo < 2) { AutoSelectWeapon(1); return; }
                         bobSystem[weaponIndex].isRecoiling = true;
                         isShooting = true;
@@ -1726,6 +1729,7 @@ public class WeaponSystem : MonoBehaviour
                         }
                         if (bobSystem[weaponIndex].isRecoiling) return;
                         inputSystem.RecoilEffect(-0.75f, 0, 0, 90);
+                        inputSystem.SetScreenShakeEffect(Random.Range(0.15f, 0.5f), 0.015f);
                         beginReving = true;
                         if (revTimer >= revTime)
                         {
@@ -1744,6 +1748,7 @@ public class WeaponSystem : MonoBehaviour
                         if (bobSystem[weaponIndex].isRecoiling) return;
                         rotateDrum = true;
                         inputSystem.RecoilEffect(-3, 0, 0, 40);
+                        inputSystem.SetScreenShakeEffect(Random.Range(1f, 2), 0.05f);
                         bobSystem[weaponIndex].isRecoiling = true;
                         isShooting = true;
                         gunFlash = true;
@@ -1763,6 +1768,7 @@ public class WeaponSystem : MonoBehaviour
                         if (bobSystem[weaponIndex].isRecoiling) return;
                         LaunchRockets();
                         inputSystem.RecoilEffect(-3, 0, 0, 40);
+                        inputSystem.SetScreenShakeEffect(Random.Range(2f, 3), 0.2f);
                         bobSystem[weaponIndex].isRecoiling = true;
                         isShooting = true;
                         gunFlash = true;
@@ -1781,6 +1787,7 @@ public class WeaponSystem : MonoBehaviour
                         if (noAmmoHolstered) return;
                         if (bobSystem[weaponIndex].isRecoiling) return;
                         inputSystem.RecoilEffect(-5, 0, 0, 45);
+                        inputSystem.SetScreenShakeEffect(Random.Range(0.25f, 0.75f), 0.05f);
                         bobSystem[weaponIndex].isRecoiling = true;
                         isShooting = true;
                         gunFlash = true;
@@ -1812,6 +1819,7 @@ public class WeaponSystem : MonoBehaviour
                             }
                             if (bobSystem[weaponIndex].isRecoiling) return;
                             inputSystem.RecoilEffect(-1, 0, 0, 50);
+                            inputSystem.SetScreenShakeEffect(Random.Range(1f, 1.5f), 0.1f);
                             bobSystem[weaponIndex].isRecoiling = true;
                             isShooting = true;
                             gunFlash = true;
@@ -1842,6 +1850,7 @@ public class WeaponSystem : MonoBehaviour
                             }
                             if (bobSystem[weaponIndex].isRecoiling) return;
                             inputSystem.RecoilEffect(-1, 0, 0, 50);
+                            inputSystem.SetScreenShakeEffect(Random.Range(4f, 5), 0.5f);
                             bobSystem[weaponIndex].isRecoiling = true;
                             isShooting = true;
                             gunFlash = true;
