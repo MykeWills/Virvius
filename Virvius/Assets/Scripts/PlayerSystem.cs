@@ -467,6 +467,26 @@ public class PlayerSystem : MonoBehaviour
                 other.transform.parent.gameObject.SetActive(false);
             }
         }
+        else if (other.gameObject.CompareTag("ElitePack"))
+        {
+            if (weaponSystem.weaponAmmo[5] < weaponSystem.weaponMaxAmmo[5])
+            {
+                playerSystem.SetFlash(true);
+                if (weaponSystem.weaponObtained[5] && !weaponSystem.weaponObtained[5])
+                {
+                    if (weaponSystem.ReEquipWeapon())
+                        weaponSystem.AutoSelectWeapon(5);
+                }
+                else if (weaponSystem.weaponObtained[5] && weaponSystem.weaponObtained[5])
+                {
+                    if (weaponSystem.ReEquipWeapon())
+                        weaponSystem.AutoSelectWeapon(5);
+                }
+                weaponSystem.GetAmmo(5, 2);
+                messageSystem.SetMessage(BuildFixedMessages("got 2 Grenades."), MessageSystem.MessageType.Top);
+                other.transform.parent.gameObject.SetActive(false);
+            }
+        }
         // Player collisions with Keys
         else if (other.gameObject.CompareTag("BlueKey"))
         {
@@ -574,6 +594,27 @@ public class PlayerSystem : MonoBehaviour
             if (health < rndDamage + 1) overKill = true;
             Damage(rndDamage);
             collision.gameObject.SetActive(false);
+        }
+        if (collision.gameObject.CompareTag("GrenadeEBullet"))
+        {
+            if (collision.gameObject.TryGetComponent(out GrenadeSystem grenadeSystem))
+            {
+                grenadeSystem.Detonate();
+                if (health < 26) overKill = true;
+                Damage(Random.Range(10, 15)); playerImpact.AddImpact(-transform.forward, impactForce);
+            }
+        }
+        if (collision.gameObject.CompareTag("SawBlade"))
+        {
+            int rangeMultiplier = optionsSystem.difficultyActive[0] ? 12 :
+                                    optionsSystem.difficultyActive[1] ? 21 :
+                                    optionsSystem.difficultyActive[2] ? 31 :
+                                    optionsSystem.difficultyActive[3] ? 41 : 1;
+            int rndDamage = Random.Range(1, rangeMultiplier);
+            if (health < rndDamage + 1) overKill = true;
+            Damage(rndDamage);
+            playerImpact.AddImpact(-transform.forward, impactForce);
+            isHit = true;
         }
         if (collision.gameObject.CompareTag("DinEnemy") && !isHit)
         {

@@ -95,6 +95,7 @@ public class ExplodingCrateSystem : MonoBehaviour
                 if (objectType == ObjectType.wall) return;
                 if (collision.gameObject.TryGetComponent(out PlayerSystem playerSystem)) playerSystem.Damage(Mathf.FloorToInt(damage));
                 if (collision.gameObject.TryGetComponent(out EnemyGSystem gruntSystem)) gruntSystem.Damage(damage);
+                if (collision.gameObject.TryGetComponent(out EnemyESystem eliteSystem)) eliteSystem.Damage(damage);
                 if (collision.gameObject.TryGetComponent(out DinSubSystem dinSubSystem)) dinSubSystem.Damage(damage);
                 if (collision.gameObject.TryGetComponent(out ExplodingCrateSystem explodingCrate)) explodingCrate.Explode();
                 if (collision.gameObject.TryGetComponent(out GrenadeSystem grenadeSystem)) grenadeSystem.Detonate();

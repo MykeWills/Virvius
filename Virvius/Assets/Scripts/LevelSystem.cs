@@ -5,6 +5,7 @@ public class LevelSystem : MonoBehaviour
     public AmbushSystem[] ambushSystems;
     public EnemyGSystem[] gruntSystems;
     public EnemyDSystem[] dinSystems;
+    public EnemyESystem[] eliteSystems;
     public SecretDoorSystem[] secretDoorSystems;
     public SwitchSystem[] switches;
     public GameObject[] pickupItems;
@@ -26,6 +27,8 @@ public class LevelSystem : MonoBehaviour
             if (gruntSystems[a] != null || gruntSystems[a].gameObject.activeInHierarchy) gruntSystems[a].ResetObject(true);
         for (int a = 0; a < dinSystems.Length; a++)
             if (dinSystems[a] != null || dinSystems[a].gameObject.activeInHierarchy) dinSystems[a].ResetObject(true);
+        for (int a = 0; a < eliteSystems.Length; a++)
+            if (eliteSystems[a] != null || eliteSystems[a].gameObject.activeInHierarchy) eliteSystems[a].ResetObject(true);
         for (int a = 0; a < secretDoorSystems.Length; a++)
             if (secretDoorSystems[a] != null || secretDoorSystems[a].gameObject.activeInHierarchy) secretDoorSystems[a].ResetObject();
         for (int a = 0; a < messageTriggerSystems.Length; a++)

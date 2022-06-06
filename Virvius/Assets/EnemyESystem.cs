@@ -78,15 +78,17 @@ public class EnemyESystem : MonoBehaviour
     private EnemyState enemyState;
     private EnemyState activeState;
     private int walkPositionIndex = 0;
+    private int distanceIndex = 0;
 
-    private string[] animStates = new string[6]
+    private string[] animStates = new string[7]
     {
         "Idle",
         "Walk",
         "Chase",
         "Shoot",
         "Damage",
-        "Death"
+        "Death",
+        "Attack"
     };
     private string[] collisionTags = new string[12]
     {
@@ -115,7 +117,7 @@ public class EnemyESystem : MonoBehaviour
     private float[] movementSpeeds = new float[4]
     {
         0,
-        5,
+        10,
         25,
         50
     };
@@ -152,7 +154,6 @@ public class EnemyESystem : MonoBehaviour
     }
     private void Update()
     {
-
         if (gameSystem.BlockedAttributesActive()) return;
         if (isDead) return;
         if (ShutdownEnemy()) return;
@@ -256,9 +257,9 @@ public class EnemyESystem : MonoBehaviour
                     //minigun
                     case 3: dmgAmt = Random.Range(0.25f, 1.25f); break;
                     //grenade
-                    case 4: if (health <= (maxHealth / 4)) OverKill(); else dmgAmt = Random.Range(5f, 10f); break;
+                    case 4: if (health <= (maxHealth / 4)) OverKill(); else dmgAmt = Random.Range(5f, 10.1f); break;
                     //rocket
-                    case 5: if (health <= (maxHealth / 4)) OverKill(); else dmgAmt = Random.Range(10f, 15); break;
+                    case 5: if (health <= (maxHealth / 4)) OverKill(); else dmgAmt = Random.Range(10f, 15.1f); break;
                     //railgun
                     case 6: if (health <= (maxHealth / 4)) OverKill(); else dmgAmt = Random.Range(30.75f, 41.01f); break;
                     //photon
@@ -350,17 +351,22 @@ public class EnemyESystem : MonoBehaviour
             updateNextPosition = true;
         }
     }
+    public void PlaySawBladeSound()
+    {
+        audioSrc.PlayOneShot(enemySounds[5]);
+    }
     private void CheckDistance()
     {
         if (PlayerSystem.playerSystem == null || PlayerDistance() == 0) return;
         if (!updateNextPosition) return;
-        if (AnimatorIsPlaying("Shoot") || enemyState == EnemyState.damage || enemyState == EnemyState.death) return;
+        if (AnimatorIsPlaying("Shoot") || AnimatorIsPlaying("Attack") || enemyState == EnemyState.damage || enemyState == EnemyState.death) return;
 
         //SHOOT IN CLOSE RANGE
         if (PlayerDistance() <= distanceRanges[0])
         {
             EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
             enemyState = state;
+            distanceIndex = 0;
             ActiveState();
         }
         //SHOOT IN LONG RANGE
@@ -368,6 +374,7 @@ public class EnemyESystem : MonoBehaviour
         {
             EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
             enemyState = state;
+            distanceIndex = 1;
             ActiveState();
         }
         //SHOOT ONLY IF HARD OR VERYHARD [EASY & NORMAL WILL CHASE]
@@ -379,6 +386,7 @@ public class EnemyESystem : MonoBehaviour
                 enemyState = state;
             }
             else enemyState = EnemyState.chase;
+            distanceIndex = 1;
             ActiveState();
         }
         //SHOOT ONLY IF VERYHARD [EASY, NORMAL & HARD WILL CHASE]
@@ -390,6 +398,7 @@ public class EnemyESystem : MonoBehaviour
                 enemyState = state;
             }
             else enemyState = EnemyState.chase;
+            distanceIndex = 1;
             ActiveState();
         }
         //HAS LOST THE PLAYER - ANIMATION SET TO BACK DEFAULT [WALK OR IDLE]
@@ -410,6 +419,7 @@ public class EnemyESystem : MonoBehaviour
     }
     private void ActiveState()
     {
+        if (!gameObject.activeInHierarchy) return;
         activeState = enemyState;
         switch (activeState)
         {
@@ -432,7 +442,7 @@ public class EnemyESystem : MonoBehaviour
                 }
             case EnemyState.chase:
                 {
-                    if (!AnimatorIsPlaying("Shoot") && !AnimatorIsPlaying("Damage"))
+                    if (!AnimatorIsPlaying("Shoot") && !AnimatorIsPlaying("Damage") && !AnimatorIsPlaying("Attack"))
                     {
                         if (animator.GetFloat("Speed") != 2f)
                             animator.SetFloat("Speed", 2f);
@@ -463,8 +473,15 @@ public class EnemyESystem : MonoBehaviour
                     if (animator.GetFloat("Speed") != difficultyInterval)
                         animator.SetFloat("Speed", difficultyInterval);
 
-                    SetAnimation(3);
-                    HaltMovement();
+                    int attackID = (distanceIndex != 0) ? 3 : 6;
+                    SetAnimation(attackID);
+                    movementSpeed = (distanceIndex != 0) ? movementSpeeds[0] : movementSpeeds[1];
+                    stoppingDistance = (distanceIndex != 0) ? 12.2f : 0;
+                    autoBraking = false;
+
+                    if (distanceIndex != 0) HaltMovement();
+                    else SetNav(playerSystem.transform.position, true);
+
                     break;
                 }
             case EnemyState.damage:
@@ -502,6 +519,7 @@ public class EnemyESystem : MonoBehaviour
     }
     private void SetNav(Vector3 nextPosition, bool active)
     {
+        if (!gameObject.activeInHierarchy) return;
         if (!enemyBody.activeInHierarchy) return;
         Vector3 newPos = active ? nextPosition : transform.position;
         if (isDead) { navAgent.destination = transform.position; return; }
@@ -588,38 +606,34 @@ public class EnemyESystem : MonoBehaviour
     {
         //Method is triggered in animation.
         if (isDead) return;
+
+
+        Vector3 lookVector = PlayerPosition() - transform.position;
+        lookVector.y = transform.position.y - 5;
+        Quaternion rot = Quaternion.LookRotation(lookVector);
+        Quaternion newRotation = Quaternion.Slerp(transform.rotation, rot, 1f);
+        newRotation.x = 0;
+        newRotation.z = 0;
+        transform.rotation = newRotation;
+        navAgent.transform.rotation = newRotation;
         gunFlash = true;
         audioSrc.PlayOneShot(enemySounds[1]);
         GameObject bullet = AccessPool(bulletPool, bulletPrefab);
         if (characterController == null) { playerSystem = PlayerSystem.playerSystem; characterController = playerSystem.GetComponent<CharacterController>(); }
         Physics.IgnoreCollision(bullet.GetComponent<Collider>(), characterController);
-        BulletSystem bulletSystem = bullet.GetComponent<BulletSystem>();
         Rigidbody rb = bullet.GetComponent<Rigidbody>();
-        emitter.transform.LookAt(Camera.main.transform.position);
+        //emitter.transform.LookAt(Camera.main.transform.position);
         rb.velocity = Vector3.zero;
         bullet.transform.position = emitter.position;
-        bullet.transform.rotation = emitter.rotation;
+        bullet.transform.localRotation = emitter.localRotation;
         bullet.SetActive(true);
-        bulletSystem.SetupLifeTime(5);
-        float bulletforce = 0;
-        //VERYHARD
-        if (optionsSystem.difficultyActive[3])
-            bulletforce = 20000f;
-        //HARD
-        else if (optionsSystem.difficultyActive[2])
-            bulletforce = 15000f;
-        //NORMAL
-        else if (optionsSystem.difficultyActive[1])
-            bulletforce = 10000f;
-        //EASY
-        else if (optionsSystem.difficultyActive[0])
-            bulletforce = 7500;
+        float bulletforce = 20000f;
         rb.AddForce(emitter.transform.forward * bulletforce);
     }
     private void LookAtPlayerShooting()
     {
         if (commandSystem.masterCodesActive[2]) return;
-        if (!AnimatorIsPlaying("Shoot") && !AnimatorIsPlaying("Damage")) return;
+        if (!AnimatorIsPlaying("Shoot") && !AnimatorIsPlaying("Attack")) return;
         Vector3 lookVector = PlayerPosition() - transform.position;
         lookVector.y = transform.position.y - 5;
         Quaternion rot = Quaternion.LookRotation(lookVector);

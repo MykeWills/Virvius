@@ -7,7 +7,8 @@ public class SpawnSystem : MonoBehaviour
                              Armor0, Armor1, Armor2, Armor3, 
                              Power0, Power1, Power2, Power3, Power4, Power5, 
                              Weapon1, Weapon2, Weapon3, Weapon4, Weapon5, Weapon6, Weapon7, Weapon8, Weapon9,
-                             Ammo1, Ammo2, Ammo4, Ammo5, Ammo6, Ammo7, Ammo8, Ammo9, None }
+                             Ammo1, Ammo2, Ammo4, Ammo5, Ammo6, Ammo7, Ammo8, Ammo9, None, Elite,
+    }
     private PlayerSystem playerSystem;
     [SerializeField]
     private AudioClip warpSoundSfx;
@@ -113,6 +114,7 @@ public class SpawnSystem : MonoBehaviour
             case ObjectType.Ammo7: objectID = 30; break;
             case ObjectType.Ammo8: objectID = 31; break;
             case ObjectType.Ammo9: objectID = 32; break;
+            case ObjectType.Elite: objectID = 33; break;
             
         }
         AccessSpawn(objectID);
@@ -132,7 +134,7 @@ public class SpawnSystem : MonoBehaviour
                 posIndex++;
         }
         //set the position of the spawned object
-        if (index < 2)
+        if (index < 2 || index == 33)
         {
             //try to access the enemy systems and reset them, set the spawn point then engage player right away.
             if (spawnedObject.TryGetComponent(out EnemyGSystem gruntSystem))
@@ -148,6 +150,13 @@ public class SpawnSystem : MonoBehaviour
                 dinSystem.navAgent.Warp(spawnPoints[posIndex].transform.position);
                 dinSystem.transform.localPosition = spawnPoints[posIndex].transform.localPosition;
                 dinSystem.EngagePlayer();
+            }
+            else if (spawnedObject.TryGetComponent(out EnemyESystem eliteSystem))
+            {
+                eliteSystem.ResetObject(false);
+                eliteSystem.navAgent.Warp(spawnPoints[posIndex].transform.position);
+                eliteSystem.transform.localPosition = spawnPoints[posIndex].transform.localPosition;
+                eliteSystem.EngagePlayer();
             }
         }
         else 
@@ -233,6 +242,9 @@ public class SpawnSystem : MonoBehaviour
                 {
                     if (spawnPool[s].GetChild(obj).gameObject.activeInHierarchy)
                     {
+                        if (spawnPool[s].GetChild(obj).gameObject.TryGetComponent(out EnemyGSystem gruntSystem)) gruntSystem.ResetObject(true);
+                        if (spawnPool[s].GetChild(obj).gameObject.TryGetComponent(out EnemyESystem eliteSystem)) eliteSystem.ResetObject(true);
+                        if (spawnPool[s].GetChild(obj).gameObject.TryGetComponent(out DinSystem dinSystem)) dinSystem.ResetObject(true);
                         spawnPool[s].GetChild(obj).gameObject.SetActive(false);
                     }
                 }

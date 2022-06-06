@@ -67,6 +67,9 @@ TagManager:
   - SigmaBullet
   - Crate
   - LavaChunk
+  - ElitePack
+  - GrenadeEBullet
+  - SawBlade
   layers:
   - Default
   - TransparentFX

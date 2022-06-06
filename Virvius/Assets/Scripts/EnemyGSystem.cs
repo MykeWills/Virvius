@@ -619,7 +619,7 @@ public class EnemyGSystem : MonoBehaviour
     private void LookAtPlayerShooting()
     {
         if (commandSystem.masterCodesActive[2]) return;
-        if (!AnimatorIsPlaying("Shoot") && !AnimatorIsPlaying("Damage")) return;
+        if (!AnimatorIsPlaying("Shoot")) return;
         Vector3 lookVector = PlayerPosition() - transform.position;
         lookVector.y = transform.position.y - 5;
         Quaternion rot = Quaternion.LookRotation(lookVector);
