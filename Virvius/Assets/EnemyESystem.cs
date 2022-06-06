@@ -117,7 +117,7 @@ public class EnemyESystem : MonoBehaviour
     private float[] movementSpeeds = new float[4]
     {
         0,
-        10,
+        6,
         25,
         50
     };
@@ -457,6 +457,7 @@ public class EnemyESystem : MonoBehaviour
             case EnemyState.attack:
                 {
                     float difficultyInterval = 1;
+
                     //VERYHARD
                     if (optionsSystem.difficultyActive[3])
                         difficultyInterval = 2f;
@@ -470,8 +471,7 @@ public class EnemyESystem : MonoBehaviour
                     else if (optionsSystem.difficultyActive[0])
                         difficultyInterval = 1;
 
-                    if (animator.GetFloat("Speed") != difficultyInterval)
-                        animator.SetFloat("Speed", difficultyInterval);
+                    animator.SetFloat("Speed", (distanceIndex != 0) ? difficultyInterval : 1);
 
                     int attackID = (distanceIndex != 0) ? 3 : 6;
                     SetAnimation(attackID);
