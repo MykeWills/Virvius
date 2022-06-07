@@ -606,8 +606,6 @@ public class EnemyESystem : MonoBehaviour
     {
         //Method is triggered in animation.
         if (isDead) return;
-
-
         Vector3 lookVector = PlayerPosition() - transform.position;
         lookVector.y = transform.position.y - 5;
         Quaternion rot = Quaternion.LookRotation(lookVector);
@@ -625,9 +623,9 @@ public class EnemyESystem : MonoBehaviour
         //emitter.transform.LookAt(Camera.main.transform.position);
         rb.velocity = Vector3.zero;
         bullet.transform.position = emitter.position;
-        bullet.transform.localRotation = emitter.localRotation;
+        //bullet.transform.localRotation = emitter.localRotation;
         bullet.SetActive(true);
-        float bulletforce = 20000f;
+        float bulletforce = 10000f;
         rb.AddForce(emitter.transform.forward * bulletforce);
     }
     private void LookAtPlayerShooting()

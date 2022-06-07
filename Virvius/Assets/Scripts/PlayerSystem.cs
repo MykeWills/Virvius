@@ -1204,6 +1204,7 @@ public class PlayerSystem : MonoBehaviour
         HUD.SetActive(true);
         overKill = false;
         SetSigmaFlash(false);
+        goreExplode.SetActive(false);
         if (flashSigmaUI.enabled) flashSigmaUI.enabled = false;
         //=======================================================
         characterController.enabled = false;
@@ -1289,6 +1290,7 @@ public class PlayerSystem : MonoBehaviour
             for(int kc = 0; kc < 3; kc++) SetActiveKey(kc, false);
             UIVersion(versionIndex);
             HUD.SetActive(true);
+            goreExplode.SetActive(false);
             //=======================================================
             characterController.enabled = false;
             fallDamage = false;

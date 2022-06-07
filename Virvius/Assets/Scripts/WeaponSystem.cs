@@ -1700,7 +1700,7 @@ public class WeaponSystem : MonoBehaviour
                         if (noAmmoHolstered) return;
                         if (bobSystem[weaponIndex].isRecoiling) return;
                         inputSystem.RecoilEffect(-4, 0, 0, 50);
-                        inputSystem.SetScreenShakeEffect(Random.Range(1f, 2), 0.05f);
+                        inputSystem.SetScreenShakeEffect(Random.Range(1f, 2f), 0.1f);
                         if (ammo > 0 && ammo < 2) { AutoSelectWeapon(1); return; }
                         bobSystem[weaponIndex].isRecoiling = true;
                         isShooting = true;

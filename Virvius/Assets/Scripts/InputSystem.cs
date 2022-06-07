@@ -278,17 +278,17 @@ public class InputSystem : MonoBehaviour
             playLedgeJumpSound = false;
             if (other.gameObject.CompareTag(environmentSystem.environmentTag[e]))
             {
-                if(e == 2)
+                if (e != 0)
                 {
-                    isJumping = false;
                     int rng = Random.Range(0, playerFSWaterSounds.Length);
                     audioSystem.PlayAudioSource(playerFSWaterSounds[rng], Random.Range(0.6f, 0.8f), Random.Range(0.5f, 0.8f), 128);
-                    // Stop jitter on entering water
-                    moveDirection.x = 0;
-                    moveDirection.z = 0;
-                    moveDirection.y = -7;
-                    swimDir = Vector3.zero;
                 }
+                isJumping = false;
+                // Stop jitter on entering water
+                moveDirection.x = 0;
+                moveDirection.z = 0;
+                moveDirection.y -= 35;
+                swimDir = Vector3.zero;
                 environmentSystem.ActivateSwimming(true);
             }
         }
@@ -399,7 +399,7 @@ public class InputSystem : MonoBehaviour
                     isSinking = false;
                 }
                 // Move speed in the water
-                float waterSpeed = 45;
+                float waterSpeed = 55;
                 // Move Horizontal
                 moveDirection.x = inputX * waterSpeed * inputModifyFactor;
                 // Move Applicate

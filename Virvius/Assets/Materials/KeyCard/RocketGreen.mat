@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: RocketGreen
   m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
-  m_ShaderKeywords: _NORMALMAP _PARALLAXMAP
+  m_ShaderKeywords: _DETAIL_MULX2 _NORMALMAP _PARALLAXMAP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -24,8 +24,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: 72f708a04aa1cbc4c98da3143fe74aef, type: 3}
+        m_Scale: {x: -1.02, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailMask:
         m_Texture: {fileID: 2800000, guid: 72f708a04aa1cbc4c98da3143fe74aef, type: 3}
@@ -37,18 +37,18 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
         m_Texture: {fileID: 2800000, guid: 4b913cc7336de4d429937e2929201b3f, type: 3}
-        m_Scale: {x: 1.1, y: -0.87}
-        m_Offset: {x: 0.5, y: 0.2}
+        m_Scale: {x: -1.5, y: 1.34}
+        m_Offset: {x: 1.31, y: 1.02}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 4b913cc7336de4d429937e2929201b3f, type: 3}
-        m_Scale: {x: 1.1, y: -0.87}
-        m_Offset: {x: 0.5, y: 0.2}
+        m_Texture: {fileID: 2800000, guid: 463d26ba56b80ba4590081932f192651, type: 3}
+        m_Scale: {x: -1.5, y: 1.34}
+        m_Offset: {x: 1.31, y: 1.02}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
-        m_Texture: {fileID: 2800000, guid: 4b913cc7336de4d429937e2929201b3f, type: 3}
+        m_Texture: {fileID: 2800000, guid: 72f708a04aa1cbc4c98da3143fe74aef, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
@@ -56,23 +56,23 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _BumpScale: 1
+    - _BumpScale: 1.13
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 13.4
     - _DstBlend: 0
     - _GlossMapScale: 0.496
     - _Glossiness: 0.395
     - _GlossyReflections: 1
-    - _Metallic: 0
+    - _Metallic: 0.398
     - _Mode: 0
-    - _OcclusionStrength: 0.292
-    - _Parallax: 0.005
+    - _OcclusionStrength: 0.442
+    - _Parallax: 0.038
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.20714569, g: 1, b: 0, a: 1}
+    - _Color: {r: 0.27722523, g: 0.4056604, b: 0, a: 1}
     - _EmissionColor: {r: 1, g: 0.7365159, b: 0.5896226, a: 1}
   m_BuildTextureStacks: []
