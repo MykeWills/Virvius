@@ -726,15 +726,22 @@ public class InputSystem : MonoBehaviour
     private void FallingDamageAlert(float fallDistance)
     {
         fallDamage = true;
-        if(fallDistance > 24 && fallDistance < 50)
+        if(fallDistance > 24 && fallDistance < 76)
         {
             audioSystem.PlayAudioSource(playerSWSound[3], Random.Range(0.6f, 1), 1, 128);
         }
-        else if (fallDistance > 49)
+        else if (fallDistance > 75 && fallDistance < 126)
         {
             if (powerupSystem.powerEnabled[5]) return;
             playerSystem.fallDamage = true;
             playerSystem.Damage(25);
+            DamageAnimation();
+        }
+        else if (fallDistance > 125)
+        {
+            if (powerupSystem.powerEnabled[5]) return;
+            playerSystem.fallDamage = true;
+            playerSystem.Damage(999);
             DamageAnimation();
         }
     }
