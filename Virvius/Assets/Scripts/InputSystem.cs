@@ -287,7 +287,7 @@ public class InputSystem : MonoBehaviour
                 // Stop jitter on entering water
                 moveDirection.x = 0;
                 moveDirection.z = 0;
-                moveDirection.y -= 35;
+                moveDirection.y -= 75;
                 swimDir = Vector3.zero;
                 environmentSystem.ActivateSwimming(true);
             }
@@ -351,22 +351,22 @@ public class InputSystem : MonoBehaviour
                
                 Vector3 touchingWall = transform.position + transform.forward;
                 touchingWall.y += 2;
-                LayerMask mask = LayerMask.GetMask("Level");
+                //LayerMask mask = LayerMask.GetMask("Level");
                 Debug.DrawRay(touchingWall, transform.forward * 5, Color.white);
-                if (Physics.Raycast(touchingWall, transform.forward, out playerHit, 5, mask))
+                if (Physics.Raycast(touchingWall, transform.forward, out playerHit, 5))
                 {
                     // Set the position of the second raycast to the head
                     Vector3 aboveLedge = head.position + transform.forward * 2.5f;
-                    // Add hieght adjustment a bit above the head
+                    // Add height adjustment a bit above the head
                     aboveLedge.y += 1.1f;
                     // Draw second ray in the editor from the head
                     
                     // Check if second raycast collides with a ledge or not
-                    if (Physics.Raycast(aboveLedge, transform.forward, out wallHit, 10, mask))
+                    if (Physics.Raycast(aboveLedge, transform.forward, out wallHit, 10))
                     {
                         //Dont Jump up if something is there
                     }
-                    else if (!Physics.Raycast(aboveLedge, transform.forward, out wallHit, 10, mask))
+                    else if (!Physics.Raycast(aboveLedge, transform.forward, out wallHit, 10))
                     {
                         // Time to jump up nothing is there
                         breathOut = false;
