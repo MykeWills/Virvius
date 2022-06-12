@@ -4,7 +4,7 @@ public class SwordAnimCollision : MonoBehaviour
 {
     private InputSystem inputSystem;
     private PowerupSystem powerupSystem;
-    private AudioSystem audioSsytem;
+    private AudioSystem audioSystem;
     private EnvironmentSystem environmentSystem;
     [SerializeField]
     private float[] returnRate;
@@ -15,7 +15,7 @@ public class SwordAnimCollision : MonoBehaviour
     private void Start()
     {
         inputSystem = InputSystem.inputSystem;
-        audioSsytem = AudioSystem.audioSystem;
+        audioSystem = AudioSystem.audioSystem;
         powerupSystem = PowerupSystem.powerupSystem;
         environmentSystem = EnvironmentSystem.environmentSystem;
     }
@@ -26,12 +26,13 @@ public class SwordAnimCollision : MonoBehaviour
     }
     public void PlaySwordSwipe()
     {
+        if (powerupSystem == null) Start();
         if (powerupSystem.powerEnabled[powerupSystem.powerIndex])
-            audioSsytem.PlayAudioSource(powerupSystem.powerSound[powerupSystem.powerIndex], 1, 0.5f, 128);
+            audioSystem.PlayAudioSource(powerupSystem.powerSound[powerupSystem.powerIndex], 1, 0.5f, 128);
         if(environmentSystem.headUnderWater)
-            audioSsytem.PlayAudioSource(swordSwipeFx[1], 1, 0.7f, 150);
+            audioSystem.PlayAudioSource(swordSwipeFx[1], 1, 0.7f, 150);
         else
-            audioSsytem.PlayAudioSource(swordSwipeFx[0], 1, 0.7f, 150);
+            audioSystem.PlayAudioSource(swordSwipeFx[0], 1, 0.7f, 150);
     }
    public void PlayHeadAnim()
     {

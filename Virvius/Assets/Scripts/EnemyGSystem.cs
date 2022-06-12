@@ -248,13 +248,13 @@ public class EnemyGSystem : MonoBehaviour
                 switch (t)
                 {
                     //sword
-                    case 0: dmgAmt = Random.Range(1.50f, 2.01f); break;
+                    case 0: dmgAmt = Random.Range(2.50f, 3.01f); break;
                     //shotgun
-                    case 1: dmgAmt = !weaponSystem.weaponEquipped[3] ? Random.Range(0.5f, 1.01f) : Random.Range(0.5f, 1.51f); break;
+                    case 1: dmgAmt = !weaponSystem.weaponEquipped[3] ? Random.Range(0.5f, 1.1f) : Random.Range(1f, 1.6f); break;
                     //spiker
                     case 2: dmgAmt = Random.Range(1.90f, 2.01f); break;
                     //minigun
-                    case 3: dmgAmt = Random.Range(0.25f, 1.25f); break;
+                    case 3: dmgAmt = Random.Range(1.25f, 2.25f); break;
                     //grenade
                     case 4: if (health <= (maxHealth / 4)) OverKill(); else dmgAmt = Random.Range(5f, 10f); break;
                     //rocket
@@ -737,7 +737,7 @@ public class EnemyGSystem : MonoBehaviour
     private void DropAmmo()
     {
         GameObject ammoPack = AccessPool(ammoDropPool, ammoDropPrefab);
-        ammoPack.transform.localPosition = Vector3.zero;
+        ammoPack.transform.position = transform.position;
         ammoPack.transform.localRotation = Quaternion.identity;
         ammoPack.SetActive(true);
     }

@@ -50,6 +50,7 @@ public class PowerupSystem : MonoBehaviour
     public Text[] powerAmt = new Text[2];
     public Text[] powerNameText = new Text[2];
     public GameObject[] powerBanner = new GameObject[2];
+    private int weaponIndex = 0;
     [HideInInspector]
     public int BPowerMultiplier = 1;
     public enum Powers { VDamage, Vanisher, Punisher, Berserker, Reviver, Divinity }
@@ -124,6 +125,7 @@ public class PowerupSystem : MonoBehaviour
                 weaponSystem.AutoSelectWeapon(0);
             else if (powerEnabled[4])
                 playerSystem.ActivateReviver();
+            weaponIndex = weaponSystem.weaponIndex;
         }
     }
     private void ActivatePower(Powers power)
@@ -227,7 +229,7 @@ public class PowerupSystem : MonoBehaviour
                     if (p == 2)
                     {
                         if(curWeaponID != 0) weaponSystem.AutoSelectWeapon(curWeaponID);
-                        else weaponSystem.AutoSelectWeapon(1);
+                        else weaponSystem.AutoSelectWeapon(weaponIndex);
                     }
                 }
 
@@ -269,6 +271,7 @@ public class PowerupSystem : MonoBehaviour
     public void Cheat(int val)
     {
         Powers[] powers = new Powers[6] { Powers.VDamage, Powers.Vanisher, Powers.Berserker, Powers.Punisher, Powers.Reviver, Powers.Divinity };
+        weaponIndex = weaponSystem.weaponIndex;
         powerActive = true;
         ActivatePower(powers[val]);
         if (powerEnabled[2])

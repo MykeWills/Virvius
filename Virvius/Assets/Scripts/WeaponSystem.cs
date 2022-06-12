@@ -82,7 +82,7 @@ public class WeaponSystem : MonoBehaviour
     };
     private RaycastHit raycastHit;
     private RaycastHit enemyHit;
-    private LayerMask levelMask;
+    private LayerMask[] levelMask;
     private Vector3 holsterRayPoint;
     private Vector3 newTiltPosition;
     private Quaternion[] currentFinRotation = new Quaternion[4];
@@ -410,11 +410,17 @@ public class WeaponSystem : MonoBehaviour
     }
     public void Start()
     {
-        for(int w = 0; w < weapons.Length; w++)
+        levelMask = new LayerMask[4] 
+        { 
+            1 << LayerMask.NameToLayer("Level"), 
+            1 << LayerMask.NameToLayer("Door"), 
+            1 << LayerMask.NameToLayer("Elevator"), 
+            1 << LayerMask.NameToLayer("Default") 
+        };
+        for (int w = 0; w < weapons.Length; w++)
         {
             weapons[w].SetActive(false);
         }
-        levelMask = 1 << LayerMask.NameToLayer("Level");
         gunflashTimer = gunflashTime;
         for (int sr = 0; sr < 4; sr++)
             shaftStartRotations[sr] = photonShafts[sr].localRotation;
@@ -422,10 +428,10 @@ public class WeaponSystem : MonoBehaviour
             doorStartRotations[sr] = sigmaDoors[sr].localRotation;
         shaftEndRotations = new Vector3[4]
         {
-            new Vector3(-8, 0, 0),
-            new Vector3(8, 0, 180),
-            new Vector3(0, -8, 90),
-            new Vector3(0, 8, -90)
+            new Vector3(-16, 0, 0),
+            new Vector3(16, 0, 180),
+            new Vector3(0, -16, 90),
+            new Vector3(0, 16, -90)
         };
         doorEndRotations = new Vector3[2]
         {
@@ -435,12 +441,12 @@ public class WeaponSystem : MonoBehaviour
         for (int p = 0; p < holsteredReturnPos.Length; p++)
             weapons[p].transform.localPosition = holsteredReturnPos[p];
         // Set the default weapon for the game
-        weaponObtained = new bool[10] { true, false, false, false, false, false, false, false, false, false };
+        weaponObtained = new bool[10] { true, true, false, false, false, false, false, false, false, false };
         weaponEquipped = new bool[10] { false, false, false, false, false, false, false, false, false, false };
         defaultWeaponAmmo = new int[10] { 0, 25, 50, 25, 75, 5, 2, 4, 50, 1 };
-        weaponAmmo = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        weaponAmmo = new int[10] { 0, 25, 0, 0, 0, 0, 0, 0, 0, 0 };
         weaponMaxAmmo = new int[10] { 0, 100, 150, 100, 300, 50, 20, 30, 200, 4 };
-        AutoSelectWeapon(0);
+        AutoSelectWeapon(1);
     }
     private void Update()
     {
@@ -477,7 +483,6 @@ public class WeaponSystem : MonoBehaviour
         railShieldRend.materials[0].SetColor("_EmissionColor", Color.Lerp(shieldColors[0], shieldColors[1], railShieldTimer) * 2);
         if (railShieldTimer == 0)
         {
-          
             railShieldTimer = railShieldTime;
             railShot = false;
         }
@@ -705,9 +710,7 @@ public class WeaponSystem : MonoBehaviour
             else if (ammoIsEmpty && ammo > 0)
             {
                 if (wType == WeaponType.RocketLauncher)
-                {
                     LaunchRockets();
-                }
                 ammoIsEmpty = false;
                 isHolstered = false;
             }
@@ -717,12 +720,9 @@ public class WeaponSystem : MonoBehaviour
             if (ammoIsEmpty)
             {
                 if (wType == WeaponType.RocketLauncher)
-                {
                     LaunchRockets();
-                }
                 ammoIsEmpty = false;
                 isHolstered = false;
-
             }
         }
         if (weaponAmmoText[versionIndex].text != FormatValues(ammo))
@@ -771,10 +771,10 @@ public class WeaponSystem : MonoBehaviour
             //
             if (w < 10)
             {
-                if (w == 0)
+                if (w < 2)
                 {
                     weaponSystem.weaponObtained[w] = true;
-                    weaponSystem.weaponAmmo[w] = 0;
+                    weaponSystem.weaponAmmo[w] = defaultWeaponAmmo[w];
                     weaponSystem.ApplyAmmo();
                     weaponSystem.WeaponSetup(weaponSystem.weaponList[w]);
                 }
@@ -833,21 +833,21 @@ public class WeaponSystem : MonoBehaviour
         }
         else
         {
-            for (int w = weaponIndex - 1; w > -1; w--)
+            for (int w = 9; w > -1; w--)
             {
                 if (weaponObtained[w] && weaponAmmo[w] > 0) return w;
             }
         }
         return 0;
     }
-    private bool CheckWeaponAvailable()
-    {
-        for (int w = weaponIndex; w < 10; w++)
-        {
-            if (weaponObtained[w] && weaponAmmo[w] > 0) return true;
-        }
-        return false;
-    }
+    //private bool CheckWeaponAvailable()
+    //{
+    //    for (int w = weaponIndex; w < 10; w++)
+    //    {
+    //        if (weaponObtained[w] && weaponAmmo[w] > 0) return true;
+    //    }
+    //    return false;
+    //}
     private void ShiftWeapon()
     {
         //IF WEAPON RUNS OUT OF AMMO THE SHIFT TO THE NEXT WEAPON ============>>>
@@ -862,10 +862,7 @@ public class WeaponSystem : MonoBehaviour
                     if (weaponObtained[2] && weaponAmmo[2] > 0)
                         AutoSelectWeapon(2);
                     else
-                    {
-                        //upshift
-                        AutoSelectWeapon(CheckWeaponAvailable() ? CheckWeaponAvailableID(false) : 0);
-                    }
+                        AutoSelectWeapon(CheckWeaponAvailableID(false));
                     break;
                 }
             //spiker
@@ -875,10 +872,7 @@ public class WeaponSystem : MonoBehaviour
                     if (weaponObtained[1] && weaponAmmo[1] > 0)
                         AutoSelectWeapon(1);
                     else
-
-                    {   //upshift
-                        AutoSelectWeapon(CheckWeaponAvailable() ? CheckWeaponAvailableID(false) : 0);
-                    }
+                        AutoSelectWeapon(CheckWeaponAvailableID(false));
                     break;
                 }
             //ultrashotgun
@@ -888,10 +882,7 @@ public class WeaponSystem : MonoBehaviour
                     if (weaponObtained[2] && weaponAmmo[2] > 0)
                         AutoSelectWeapon(2);
                     else
-                    {
-                        //upshift
-                        AutoSelectWeapon(CheckWeaponAvailable() ? CheckWeaponAvailableID(false) : 0);
-                    }
+                        AutoSelectWeapon(CheckWeaponAvailableID(false));
                     break;
                 }
             //minigun
@@ -901,10 +892,7 @@ public class WeaponSystem : MonoBehaviour
                     if (weaponObtained[3] && weaponAmmo[3] > 0)
                         AutoSelectWeapon(3);
                     else
-                    {
-                        //downshift
-                        AutoSelectWeapon(CheckWeaponAvailable() ? CheckWeaponAvailableID(true) : 0);
-                    }
+                        AutoSelectWeapon(CheckWeaponAvailableID(true));
                     break;
                 }
             //grenadelauncher
@@ -914,9 +902,7 @@ public class WeaponSystem : MonoBehaviour
                     if (weaponObtained[4] && weaponAmmo[4] > 0)
                         AutoSelectWeapon(4);
                     else
-                    {
-                        AutoSelectWeapon(CheckWeaponAvailable() ? CheckWeaponAvailableID(true) : 0);
-                    }
+                        AutoSelectWeapon(CheckWeaponAvailableID(true));
                     break;
                 }
             //rocketlauncher
@@ -926,9 +912,7 @@ public class WeaponSystem : MonoBehaviour
                     if (weaponObtained[5] && weaponAmmo[5] > 0)
                         AutoSelectWeapon(5);
                     else
-                    {
-                        AutoSelectWeapon(CheckWeaponAvailable() ? CheckWeaponAvailableID(true) : 0);
-                    }
+                        AutoSelectWeapon(CheckWeaponAvailableID(true));
                     break;
                 }
             //Railgun
@@ -938,9 +922,7 @@ public class WeaponSystem : MonoBehaviour
                     if (weaponObtained[6] && weaponAmmo[6] > 0)
                         AutoSelectWeapon(6);
                     else
-                    {
-                        AutoSelectWeapon(CheckWeaponAvailable() ? CheckWeaponAvailableID(true) : 0);
-                    }
+                        AutoSelectWeapon(CheckWeaponAvailableID(true));
                     break;
                 }
             //PhotonCannon
@@ -950,9 +932,7 @@ public class WeaponSystem : MonoBehaviour
                     if (weaponObtained[7] && weaponAmmo[7] > 0)
                         AutoSelectWeapon(7);
                     else
-                    {
-                        AutoSelectWeapon(CheckWeaponAvailable() ? CheckWeaponAvailableID(true) : 0);
-                    }
+                        AutoSelectWeapon(CheckWeaponAvailableID(true));
                     break;
                 }
             //MSigma
@@ -962,9 +942,7 @@ public class WeaponSystem : MonoBehaviour
                     if (weaponObtained[8] && weaponAmmo[8] > 0)
                         AutoSelectWeapon(8);
                     else
-                    {
-                        AutoSelectWeapon(CheckWeaponAvailable() ? CheckWeaponAvailableID(true) : 0);
-                    }
+                        AutoSelectWeapon(CheckWeaponAvailableID(true));
                     break;
                 }
         }
@@ -1413,7 +1391,7 @@ public class WeaponSystem : MonoBehaviour
             if (currentFinRotation[sr] != (beginShafting ? Quaternion.Euler(shaftEndRotations[sr]) : shaftStartRotations[sr]))
                 currentFinRotation[sr] = beginShafting ? Quaternion.Euler(shaftEndRotations[sr]) : shaftStartRotations[sr];
             if (photonShafts[sr].localRotation != currentFinRotation[sr])
-                photonShafts[sr].localRotation = Quaternion.RotateTowards(photonShafts[sr].localRotation, currentFinRotation[sr], time * 50);
+                photonShafts[sr].localRotation = Quaternion.RotateTowards(photonShafts[sr].localRotation, currentFinRotation[sr], time * 75);
             if (!photonReady)
             {
                 if (photonShafts[3].localRotation == Quaternion.Euler(shaftEndRotations[3]))
@@ -1498,7 +1476,7 @@ public class WeaponSystem : MonoBehaviour
                 // create the angle variable, keep it the same if player is not within raypoint
                 float distance = 0;
                 // when player is [IN] distance of the raycast
-                if (Physics.Raycast(holsterRayPoint, playerSystem.transform.forward, out raycastHit, holsterDistance, levelMask))
+                if (CheckRaycast())
                 {
                     // grab the value between max distance and current distance
                     distance = 5 - raycastHit.distance;
@@ -1510,7 +1488,7 @@ public class WeaponSystem : MonoBehaviour
                     holsterActive = true;
                 }
                 // when player is [OUT] from distance of the raycast
-                else if (!Physics.Raycast(holsterRayPoint, playerSystem.transform.forward, out raycastHit, holsterDistance, levelMask))
+                else 
                 {
                     // deactivate the holstered values
                     isHolstered = false;
@@ -1571,6 +1549,14 @@ public class WeaponSystem : MonoBehaviour
             }
             
         }
+    }
+    private bool CheckRaycast()
+    {
+        for(int rc = 0; rc < levelMask.Length; rc++)
+        {
+            if (Physics.Raycast(holsterRayPoint, playerSystem.transform.forward, out raycastHit, holsterDistance, levelMask[rc])) return true;
+        }
+        return false;
     }
     private void TiltWeapon()
     {

@@ -749,7 +749,7 @@ public class EnemyESystem : MonoBehaviour
     private void DropAmmo()
     {
         GameObject ammoPack = AccessPool(ammoDropPool, ammoDropPrefab);
-        ammoPack.transform.localPosition = Vector3.zero;
+        ammoPack.transform.position = transform.position;
         ammoPack.transform.localRotation = Quaternion.identity;
         ammoPack.SetActive(true);
     }

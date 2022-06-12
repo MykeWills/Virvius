@@ -646,7 +646,8 @@ public class PlayerSystem : MonoBehaviour
                 {
                     suicideDamage = true;
                     if (health < 26) overKill = true;
-                    Damage(25); playerImpact.AddImpact(-transform.forward, impactForce);
+                    int damage = powerupSystem.powerEnabled[0] ? 25 * 5 : 25;
+                    Damage(damage); playerImpact.AddImpact(-transform.forward, impactForce / 2);
                 }
             }
         }
@@ -658,7 +659,8 @@ public class PlayerSystem : MonoBehaviour
                 {
                     suicideDamage = true;
                     if (health < 26) overKill = true;
-                    Damage(25); playerImpact.AddImpact(-transform.forward, impactForce);
+                    int damage = powerupSystem.powerEnabled[0] ? 25 * 5 : 25;
+                    Damage(damage); playerImpact.AddImpact(-transform.forward, impactForce / 2);
                 }
             }
         }
@@ -670,7 +672,8 @@ public class PlayerSystem : MonoBehaviour
                 {
                     suicideDamage = true;
                     if (health < 16) overKill = true;
-                    Damage(15); playerImpact.AddImpact(-transform.forward, impactForce);
+                    int damage = powerupSystem.powerEnabled[0] ? 15 * 5 : 15;
+                    Damage(damage); playerImpact.AddImpact(-transform.forward, impactForce / 3);
                 }
             }
         }
@@ -682,7 +685,8 @@ public class PlayerSystem : MonoBehaviour
                 {
                     suicideDamage = true;
                     if (health < 51) overKill = true;
-                    Damage(50); playerImpact.AddImpact(-transform.forward, impactForce * 2);
+                    int damage = powerupSystem.powerEnabled[0] ? 50 * 5 : 50;
+                    Damage(damage); playerImpact.AddImpact(-transform.forward, impactForce * 1.5f);
                 }
             }
         }

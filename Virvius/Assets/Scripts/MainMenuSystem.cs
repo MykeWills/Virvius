@@ -30,8 +30,6 @@ public class MainMenuSystem : MonoBehaviour
     private float fadeInterval = 0;
     [SerializeField]
     private VideoPlayer videoPlayer;
-    private AudioSource videoAudioSrc;
-    private bool animationUIActive = false;
     [SerializeField]
     private VideoClip previewClip;
     [SerializeField]
@@ -42,7 +40,6 @@ public class MainMenuSystem : MonoBehaviour
         inputPlayer = ReInput.players.GetPlayer(0);
         gameSystem = GameSystem.gameSystem;
         optionsSystem = OptionsSystem.optionsSystem;
-        videoAudioSrc = videoPlayer.GetComponent<AudioSource>();
         videoPlayer.audioOutputMode = VideoAudioOutputMode.Direct;
         pressStartBG.enabled = false;
         optionsSystem.CheckMouseActive();
