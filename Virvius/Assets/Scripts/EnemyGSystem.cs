@@ -152,7 +152,6 @@ public class EnemyGSystem : MonoBehaviour
     }
     private void Update()
     {
-       
         if (gameSystem.BlockedAttributesActive()) return;
         if (isDead) return;
         if (ShutdownEnemy()) return;
@@ -195,7 +194,7 @@ public class EnemyGSystem : MonoBehaviour
     {
         if (activeState != EnemyState.idle) return;
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]); FoundPlayer(); } }
+        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) LineOfSight(); } }
     }
     private void WalkDistance()
     {
@@ -203,7 +202,7 @@ public class EnemyGSystem : MonoBehaviour
         float dist = Vector3.Distance(WalkDestination(), transform.position);
         if (dist < walkPositionDistance) { ChangeDestination(); ActiveState(); }
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[1]) { if(playerVisible) { if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]); FoundPlayer(); } }
+        if (PlayerDistance() <= distanceRanges[1]) { if(playerVisible) { if (!playerFound) LineOfSight(); } }
     }
     private void RebootEnemy()
     {
@@ -237,6 +236,7 @@ public class EnemyGSystem : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
+        if (rebootEnemy) return;
         if (collisionTag.Length > 0) collisionTag.Clear();
         collisionTag = collisionTag.Append(collision.gameObject.tag);
         for (int t = 0; t < collisionTags.Length; t++)
@@ -325,9 +325,10 @@ public class EnemyGSystem : MonoBehaviour
                 //if the raycast hit the player player is now found, activate shooting if player is within range
                 if (playerHit.collider.gameObject.CompareTag("Player"))
                 {
-                    if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]);
-                    FoundPlayer();
+                    if (playerVisible) return;
                     playerVisible = true;
+                    if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]);
+                    EngagePlayer();
                 }
                 else playerVisible = false;
             }
@@ -694,7 +695,7 @@ public class EnemyGSystem : MonoBehaviour
         if (!isDamaged)
         {
             isDamaged = true;
-            FoundPlayer();
+            if (!playerFound) FoundPlayer();
             if (currentState.Length > 0) currentState.Clear();
             enemyState = EnemyState.damage;
             audioSrc.PlayOneShot(enemySounds[2]);
@@ -724,8 +725,8 @@ public class EnemyGSystem : MonoBehaviour
             }
             enemyState = EnemyState.death;
             ActiveState();
-            navAgent.enabled = false;
             boxCollider.enabled = false;
+            navAgent.enabled = false;
             gunFlash = false;
             shotgunMuzzle.transform.Rotate(0, 30, 0);
             shotgunMuzzle.enabled = false;
@@ -761,8 +762,8 @@ public class EnemyGSystem : MonoBehaviour
         goreExplosion.SetActive(false);
         enemyBody.SetActive(true);
         animator.Rebind();
-        navAgent.enabled = true;
         boxCollider.enabled = true;
+        navAgent.enabled = true;
         damageResistanceTimer = damageResistanceTime;
         gunFlash = false;
         gunflashTimer = gunflashTime;

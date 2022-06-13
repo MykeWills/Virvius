@@ -165,7 +165,7 @@ public class EnemyDSystem : MonoBehaviour
         float dist = Vector3.Distance(WalkDestination(), transform.position);
         if (dist < walkPositionDistance) { ChangeDestination(); ActiveState(); }
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]); FoundPlayer(); } }
+        if (PlayerDistance() <= distanceRanges[2]) { if (playerVisible) { if (!playerFound) LineOfSight(); } }
     }
     private bool DefaultEnemy()
     {
@@ -184,7 +184,10 @@ public class EnemyDSystem : MonoBehaviour
     {
         if (activeState != EnemyState.idle) return;
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]); FoundPlayer(); } }
+        if (PlayerDistance() <= distanceRanges[2]) 
+        {
+             if (playerVisible) { if (!playerFound) LineOfSight(); } 
+        }
     }
     private void RebootEnemy()
     {
@@ -209,6 +212,7 @@ public class EnemyDSystem : MonoBehaviour
     }
     public void CollisionDamage(string tag, GameObject colGameObject)
     {
+        if (rebootEnemy) return;
         if (collisionTag.Length > 0) collisionTag.Clear();
         collisionTag = collisionTag.Append(tag);
         for (int t = 0; t < collisionTags.Length; t++)
@@ -295,9 +299,10 @@ public class EnemyDSystem : MonoBehaviour
                 //if the raycast hit the player player is now found, activate shooting if player is within range
                 if (playerHit.collider.gameObject.CompareTag("Player"))
                 {
-                    if(!playerFound) audioSrc.PlayOneShot(enemySounds[0]);
-                    FoundPlayer();
+                    if (playerVisible) return;
                     playerVisible = true;
+                    if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]);
+                    EngagePlayer();
                 }
                 else playerVisible = false;
             }
@@ -307,6 +312,7 @@ public class EnemyDSystem : MonoBehaviour
     {
         if (powerupSystem.powerEnabled[1]) return;
         if (playerFound) return;
+        audioSrc.PlayOneShot(enemySounds[0]);
         updateNextPosition = true;
         playerFound = true;
     }
@@ -446,8 +452,8 @@ public class EnemyDSystem : MonoBehaviour
                 }
             case EnemyState.damage:
                 {
+                 
                     SetAnimation(4);
-                    HaltMovement();
                     break;
                 }
             case EnemyState.death:
@@ -548,15 +554,17 @@ public class EnemyDSystem : MonoBehaviour
     private void LookAtPlayerShooting()
     {
         if (commandSystem.masterCodesActive[2]) return;
-        if (!AnimatorIsPlaying("Attack") && !AnimatorIsPlaying("Jump")) return;
-        Vector3 lookVector = PlayerPosition() - transform.position;
-        lookVector.y = transform.position.y - 5;
-        Quaternion rot = Quaternion.LookRotation(lookVector);
-        Quaternion newRotation = Quaternion.Slerp(transform.rotation, rot, 1f);
-        newRotation.x = 0;
-        newRotation.z = 0;
-        transform.rotation = newRotation;
-        navAgent.transform.rotation = newRotation;
+        if (AnimatorIsPlaying("Attack") || AnimatorIsPlaying("Jump"))
+        {
+            Vector3 lookVector = PlayerPosition() - transform.position;
+            lookVector.y = transform.position.y - 5;
+            Quaternion rot = Quaternion.LookRotation(lookVector);
+            Quaternion newRotation = Quaternion.Slerp(transform.rotation, rot, 1f);
+            newRotation.x = 0;
+            newRotation.z = 0;
+            transform.rotation = newRotation;
+            navAgent.transform.rotation = newRotation;
+        }
     }
     public void OverKill()
     {
@@ -598,7 +606,7 @@ public class EnemyDSystem : MonoBehaviour
         if (!isDamaged)
         {
             isDamaged = true;
-            FoundPlayer();
+            if(!playerFound) FoundPlayer();
             if (currentState.Length > 0) currentState.Clear();
             enemyState = EnemyState.damage;
             audioSrc.PlayOneShot(enemySounds[2]);
@@ -624,9 +632,9 @@ public class EnemyDSystem : MonoBehaviour
         {
             if (meshColliders[mc].enabled) meshColliders[mc].enabled = false;
         }
+        navAgent.enabled = false;
         enemyState = EnemyState.death;
         ActiveState();
-        navAgent.enabled = false;
     }
     public void ResetObject(bool setOrgPos)
     {
@@ -650,6 +658,7 @@ public class EnemyDSystem : MonoBehaviour
         ActiveState();
         for (int mc = 0; mc < meshColliders.Length; mc++)
             meshColliders[mc].enabled = true;
+        navAgent.enabled = true;
         if (!setOrgPos) return;
         navAgent.Warp(originalPosition);
         transform.position = originalPosition;

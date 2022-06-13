@@ -132,7 +132,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   isDead: 0
-  LOSDistance: 70
+  LOSDistance: 120
   angularSpeed: 300
   damageResistanceTime: 5
   health: 35

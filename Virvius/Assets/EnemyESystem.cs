@@ -117,7 +117,7 @@ public class EnemyESystem : MonoBehaviour
     private float[] movementSpeeds = new float[4]
     {
         0,
-        6,
+        10,
         25,
         50
     };
@@ -196,7 +196,7 @@ public class EnemyESystem : MonoBehaviour
     {
         if (activeState != EnemyState.idle) return;
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]); FoundPlayer(); } }
+        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) LineOfSight(); } }
     }
     private void WalkDistance()
     {
@@ -204,7 +204,7 @@ public class EnemyESystem : MonoBehaviour
         float dist = Vector3.Distance(WalkDestination(), transform.position);
         if (dist < walkPositionDistance) { ChangeDestination(); ActiveState(); }
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]); FoundPlayer(); } }
+        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) LineOfSight(); } }
     }
     private void RebootEnemy()
     {
@@ -238,6 +238,7 @@ public class EnemyESystem : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
+        if (rebootEnemy) return;
         if (collisionTag.Length > 0) collisionTag.Clear();
         collisionTag = collisionTag.Append(collision.gameObject.tag);
         for (int t = 0; t < collisionTags.Length; t++)
@@ -326,9 +327,10 @@ public class EnemyESystem : MonoBehaviour
                 //if the raycast hit the player player is now found, activate shooting if player is within range
                 if (playerHit.collider.gameObject.CompareTag("Player"))
                 {
-                    if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]);
-                    FoundPlayer();
+                    if (playerVisible) return;
                     playerVisible = true;
+                    if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]);
+                    EngagePlayer();
                 }
                 else playerVisible = false;
             }
@@ -359,7 +361,7 @@ public class EnemyESystem : MonoBehaviour
     {
         if (PlayerSystem.playerSystem == null || PlayerDistance() == 0) return;
         if (!updateNextPosition) return;
-        if (AnimatorIsPlaying("Shoot") || AnimatorIsPlaying("Attack") || enemyState == EnemyState.damage || enemyState == EnemyState.death) return;
+        if (enemyState == EnemyState.attack || enemyState == EnemyState.death || enemyState == EnemyState.damage) return;
 
         //SHOOT IN CLOSE RANGE
         if (PlayerDistance() <= distanceRanges[0])
@@ -372,9 +374,7 @@ public class EnemyESystem : MonoBehaviour
         //SHOOT IN LONG RANGE
         if (PlayerDistance() > distanceRanges[0] && PlayerDistance() <= distanceRanges[1])
         {
-            EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
-            enemyState = state;
-            distanceIndex = 1;
+            enemyState = EnemyState.chase;
             ActiveState();
         }
         //SHOOT ONLY IF HARD OR VERYHARD [EASY & NORMAL WILL CHASE]
@@ -470,8 +470,8 @@ public class EnemyESystem : MonoBehaviour
                     //EASY
                     else if (optionsSystem.difficultyActive[0])
                         difficultyInterval = 1;
-
-                    animator.SetFloat("Speed", (distanceIndex != 0) ? difficultyInterval : 1);
+                    if (animator.GetFloat("Speed") != difficultyInterval)
+                        animator.SetFloat("Speed", (difficultyInterval));
 
                     int attackID = (distanceIndex != 0) ? 3 : 6;
                     SetAnimation(attackID);
@@ -606,14 +606,6 @@ public class EnemyESystem : MonoBehaviour
     {
         //Method is triggered in animation.
         if (isDead) return;
-        Vector3 lookVector = PlayerPosition() - transform.position;
-        lookVector.y = transform.position.y - 5;
-        Quaternion rot = Quaternion.LookRotation(lookVector);
-        Quaternion newRotation = Quaternion.Slerp(transform.rotation, rot, 1f);
-        newRotation.x = 0;
-        newRotation.z = 0;
-        transform.rotation = newRotation;
-        navAgent.transform.rotation = newRotation;
         gunFlash = true;
         audioSrc.PlayOneShot(enemySounds[1]);
         GameObject bullet = AccessPool(bulletPool, bulletPrefab);
@@ -625,13 +617,12 @@ public class EnemyESystem : MonoBehaviour
         bullet.transform.position = emitter.position;
         //bullet.transform.localRotation = emitter.localRotation;
         bullet.SetActive(true);
-        float bulletforce = 10000f;
-        rb.AddForce(emitter.transform.forward * bulletforce);
+        rb.AddForce(emitter.transform.forward * 15000f);
     }
     private void LookAtPlayerShooting()
     {
         if (commandSystem.masterCodesActive[2]) return;
-        if (!AnimatorIsPlaying("Shoot") && !AnimatorIsPlaying("Attack")) return;
+        if (enemyState != EnemyState.attack) return;
         Vector3 lookVector = PlayerPosition() - transform.position;
         lookVector.y = transform.position.y - 5;
         Quaternion rot = Quaternion.LookRotation(lookVector);
@@ -672,6 +663,7 @@ public class EnemyESystem : MonoBehaviour
             OnDeath();
             enemyBody.SetActive(false);
             boxCollider.enabled = false;
+            navAgent.enabled = false;
             grenadeMuzzle.transform.Rotate(0, 30, 0);
             grenadeMuzzle.enabled = false;
             gunFlash = false;
@@ -706,7 +698,7 @@ public class EnemyESystem : MonoBehaviour
         if (!isDamaged)
         {
             isDamaged = true;
-            FoundPlayer();
+            if (!playerFound) FoundPlayer();
             if (currentState.Length > 0) currentState.Clear();
             enemyState = EnemyState.damage;
             audioSrc.PlayOneShot(enemySounds[2]);
@@ -773,8 +765,8 @@ public class EnemyESystem : MonoBehaviour
         goreExplosion.SetActive(false);
         enemyBody.SetActive(true);
         animator.Rebind();
-        navAgent.enabled = true;
         boxCollider.enabled = true;
+        navAgent.enabled = true;
         damageResistanceTimer = damageResistanceTime;
         gunFlash = false;
         gunflashTimer = gunflashTime;
