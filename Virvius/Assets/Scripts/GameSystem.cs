@@ -41,12 +41,12 @@ public class GameSystem : MonoBehaviour
     [SerializeField]
     private OptionsSystem optionsSystem;
     private Player inputPlayer;
-    [HideInInspector]
+    //[HideInInspector]
     public Vector3[] scenePositions = new Vector3[3]
     {
         new Vector3(0, 15, -245),
         new Vector3(0, 18, -245),
-        new Vector3(0, 18, -245)
+        new Vector3(0, 11, 0)
     };
     [HideInInspector]
     public Vector3[] sceneRotations = new Vector3[3]
@@ -107,7 +107,6 @@ public class GameSystem : MonoBehaviour
     private Image loadingBar;
     [HideInInspector]
     public bool mainmenuOpen = false;
-    private ButtonHighlight buttonHighlight;
     private void Awake()
     {
         if (gameSystem == null)
@@ -307,7 +306,7 @@ public class GameSystem : MonoBehaviour
         curSceneIndex = 0;
         loadingBar.fillAmount = 0;
         if (loadSb.Length > 0) loadSb.Clear();
-        LoadGame(1);
+        LoadGame(2);
     }
     public bool BlockedAttributesActive()
     {

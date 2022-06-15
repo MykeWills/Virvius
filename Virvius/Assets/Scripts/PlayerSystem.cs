@@ -106,10 +106,11 @@ public class PlayerSystem : MonoBehaviour
         "Standard UI Enabled.",
         "Standard Visor Enabled."
     };
-    private string[] levelTitle = new string[2]
+    private string[] levelTitle = new string[3]
     {
         "The Debug Mode",
         "The Fallen Scourge",
+        "Welcome",
     };
     //[structs]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
     
