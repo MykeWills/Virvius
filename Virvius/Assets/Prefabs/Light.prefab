@@ -5943,6 +5943,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7470280245337967152}
   - component: {fileID: 8245073523837643875}
+  - component: {fileID: 5634417839122155380}
   m_Layer: 0
   m_Name: Spot Light
   m_TagString: Untagged
@@ -5976,8 +5977,8 @@ Light:
   m_Type: 0
   m_Shape: 0
   m_Color: {r: 1, g: 0.84359974, b: 0.5801887, a: 1}
-  m_Intensity: 7
-  m_Range: 51.675552
+  m_Intensity: 10
+  m_Range: 50
   m_SpotAngle: 80
   m_InnerSpotAngle: 6
   m_CookieSize: 10
@@ -6018,13 +6019,45 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
-  m_BounceIntensity: 1
+  m_BounceIntensity: 0
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+--- !u!114 &5634417839122155380
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5723750739505302426}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57f24a4aaa0761b45ba25e7e5108e2c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  UID: 164000770
+  color: {r: 1, g: 0.84359974, b: 0.5801887, a: 1}
+  intensity: 10
+  shadowSpread: 0.05
+  cutoff: 50
+  realisticFalloff: 0
+  samples: 8
+  projMode: 1
+  cookie: {fileID: 2800000, guid: 3a66602b8cc7fdd4ab57d07b4176432b, type: 3}
+  angle: 80
+  innerAngle: 0
+  cubemap: {fileID: 0}
+  iesFile: {fileID: 0}
+  bitmask: 1
+  bakeToIndirect: 0
+  shadowmask: 0
+  indirectIntensity: 0
+  falloffMinRadius: 1
+  shadowmaskGroupID: 0
+  directionMode: 0
 --- !u!1 &7609066261945741261
 GameObject:
   m_ObjectHideFlags: 0
@@ -6039,6 +6072,7 @@ GameObject:
   - component: {fileID: 3606919881830082408}
   - component: {fileID: 2621409664905273825}
   - component: {fileID: 4608749394910855267}
+  - component: {fileID: 3315086705186490424}
   m_Layer: 0
   m_Name: Light
   m_TagString: Untagged
@@ -8154,10 +8188,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 924778c7bf1921f45b664140295180b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spotLight: {fileID: 0}
+  spotLight: {fileID: 8245073523837643875}
   lightEffect: 0
+  lightType: 0
   flashSpeed: 1
-  lightIntensity: 1
-  flickerTime: 0
-  flickerRange: 0
-  pulseTime: 0
+  lightIntensity: 10
+  lightRange: 50
+  flickerMinRange: 0.1
+  flickerMaxRange: 3
+  pulseTime: 1
+  strobeTime: 1
+  fadeTime: 1
+  lightOn: 0
+--- !u!65 &3315086705186490424
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7609066261945741261}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 25, y: 25, z: 25}
+  m_Center: {x: 0, y: -20, z: 0}
