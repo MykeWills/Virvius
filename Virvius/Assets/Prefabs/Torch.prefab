@@ -6569,13 +6569,13 @@ Light:
   m_Type: 2
   m_Shape: 0
   m_Color: {r: 1, g: 0.4363277, b: 0, a: 1}
-  m_Intensity: 6
+  m_Intensity: 50
   m_Range: 50
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -6601,7 +6601,7 @@ Light:
       e33: 1
     m_UseCullingMatrixOverride: 0
   m_Cookie: {fileID: 0}
-  m_DrawHalo: 1
+  m_DrawHalo: 0
   m_Flare: {fileID: 12100000, guid: 1e1b18952af75a64ea7672154f4983ae, type: 2}
   m_RenderMode: 0
   m_CullingMask:
@@ -6611,7 +6611,7 @@ Light:
   m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
-  m_BounceIntensity: 1
+  m_BounceIntensity: 0
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 4.214566e-23, y: NaN, z: 0, w: 6.759188e+13}
@@ -6630,11 +6630,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57f24a4aaa0761b45ba25e7e5108e2c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UID: 1574248272
+  UID: 1417502970
   color: {r: 1, g: 0.4363277, b: 0, a: 1}
-  intensity: 5
+  intensity: 50
   shadowSpread: 0.05
-  cutoff: 25
+  cutoff: 50
   realisticFalloff: 0
   samples: 8
   projMode: 0
@@ -6646,7 +6646,7 @@ MonoBehaviour:
   bitmask: 1
   bakeToIndirect: 0
   shadowmask: 0
-  indirectIntensity: 1
+  indirectIntensity: 0
   falloffMinRadius: 1
   shadowmaskGroupID: 0
   directionMode: 0
