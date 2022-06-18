@@ -108,7 +108,7 @@ public class BobSystem : MonoBehaviour
                     float inputModifyFactor = (inputSystem.inputX != 0.0f && inputSystem.inputY != 0.0f && inputSystem.limitDiagonalSpeed) ? 0.7071f : 1.0f;
                     if (fall) fall = false; if (idle) idle = false;
                     float curBobSpeed = inputSystem.isRunning ? bobSpeed * 1.35f : bobSpeed;
-                    float bobSpeedModule = environmentSystem.headUnderWater ? curBobSpeed / 4 : curBobSpeed;
+                    float bobSpeedModule = inputSystem.isSwimming ? environmentSystem.headUnderWater ? curBobSpeed / 4f: curBobSpeed * 1.5f : curBobSpeed;
                     float X = HolsteredWeapon() ? weaponSystem.holsteredPos[weaponSystem.weaponIndex].x : bobVectors[bobIndex].x;
                     //float Y = HolsteredWeapon() ? weaponSystem.holsteredPos[weaponSystem.weaponIndex].y : bobVectors[bobIndex].y;
                     float Z = HolsteredWeapon() ? weaponSystem.holsteredPos[weaponSystem.weaponIndex].z : bobVectors[bobIndex].z;

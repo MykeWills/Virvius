@@ -9,6 +9,12 @@ public class SwitchSystem : MonoBehaviour
     private MessageSystem messageSystem;
     private AudioSystem audioSystem;
     [SerializeField]
+    private string customMessage = "";
+    [SerializeField]
+    private bool setCustomFinalMessage = false;
+    private string normalMessage = "Sequence Completed.";
+
+    [SerializeField]
     private AudioSource moveObjectSrc;
     [SerializeField]
     private AudioClip[] moveObjectSound = new AudioClip[3];
@@ -337,7 +343,7 @@ public class SwitchSystem : MonoBehaviour
                         if (isActive)
                         {
                             audioSystem.PlayAudioSource(messageSoundFx[1], 1, 1, 128); 
-                            messageSystem.SetMessage("Sequence completed.", MessageSystem.MessageType.Center);
+                            messageSystem.SetMessage(setCustomFinalMessage ? customMessage : normalMessage, MessageSystem.MessageType.Center);
                         }
                         SetActivationType(activationType);
                     }
@@ -390,7 +396,8 @@ public class SwitchSystem : MonoBehaviour
             case SwitchActivationType.Activation:
                 {
                     if (activationObject == null) { Debug.LogError("No Activation Object to Activate!"); return; }
-                    activationObject.gameObject.SetActive(isActive);
+                    bool active = activationObject.activeInHierarchy;
+                    activationObject.gameObject.SetActive(!active);
                     ActivateEvent(0, isActive);
                     break;
                 }
@@ -464,7 +471,7 @@ public class SwitchSystem : MonoBehaviour
         if (switchCounter < 1)
         {
             audioSystem.PlayAudioSource(messageSoundFx[1], 1, 1, 128);
-            messageSystem.SetMessage("Sequence completed.", MessageSystem.MessageType.Center);
+            messageSystem.SetMessage(setCustomFinalMessage ? customMessage : normalMessage, MessageSystem.MessageType.Center);
             SetActivationType(activationType);
             ActivateEvent(1, isCoActive);
         }
@@ -546,7 +553,14 @@ public class SwitchSystem : MonoBehaviour
         }
         if (activationObject != null)
             activationObject.transform.localPosition = updatedPosition;
-        if (activationType == SwitchActivationType.Activation) { if (activationObject != null) activationObject.gameObject.SetActive(false); }
+        if (activationType == SwitchActivationType.Activation) 
+        { 
+            if (activationObject != null) 
+            {
+                bool active = activationObject.activeInHierarchy;
+                activationObject.gameObject.SetActive(active); 
+            } 
+        }
         if (switchType == SwitchType.Press || switchType == SwitchType.Step)
             boxCollider.isTrigger = true;
         else boxCollider.isTrigger = false;

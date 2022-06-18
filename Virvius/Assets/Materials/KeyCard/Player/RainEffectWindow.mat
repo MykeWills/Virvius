@@ -37,15 +37,15 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _Blend: 0.586
-    - _Blur: 0.157
+    - _Blur: 0.089
     - _Distortion: 10
     - _DropSizeX: -14.35
     - _DropSizeY: -16.18
-    - _Size: 40
+    - _Size: 15
     - _Speed: 1
     - _Strength: 1238.1
     - _T: 0
     - _TrailSizeX: 3.8
-    - _TrailSizeY: 0.6
+    - _TrailSizeY: -3.62
     m_Colors: []
   m_BuildTextureStacks: []

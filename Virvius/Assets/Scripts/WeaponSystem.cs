@@ -441,12 +441,12 @@ public class WeaponSystem : MonoBehaviour
         for (int p = 0; p < holsteredReturnPos.Length; p++)
             weapons[p].transform.localPosition = holsteredReturnPos[p];
         // Set the default weapon for the game
-        weaponObtained = new bool[10] { true, true, false, false, false, false, false, false, false, false };
+        weaponObtained = new bool[10] { true, false, false, false, false, false, false, false, false, false };
         weaponEquipped = new bool[10] { false, false, false, false, false, false, false, false, false, false };
         defaultWeaponAmmo = new int[10] { 0, 25, 50, 25, 75, 5, 2, 4, 50, 1 };
-        weaponAmmo = new int[10] { 0, 25, 0, 0, 0, 0, 0, 0, 0, 0 };
+        weaponAmmo = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         weaponMaxAmmo = new int[10] { 0, 100, 150, 100, 300, 50, 20, 30, 200, 4 };
-        AutoSelectWeapon(1);
+        AutoSelectWeapon(0);
     }
     private void Update()
     {

@@ -314,18 +314,18 @@ Light:
   serializedVersion: 10
   m_Type: 2
   m_Shape: 0
-  m_Color: {r: 1, g: 0.30580878, b: 0, a: 1}
-  m_Intensity: 5
-  m_Range: 2
+  m_Color: {r: 1, g: 0.4363277, b: 0, a: 1}
+  m_Intensity: 20
+  m_Range: 20
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
-    m_Bias: 0.05
+    m_Bias: 0
     m_NormalBias: 0.4
     m_NearPlane: 0.2
     m_CullingMatrixOverride:
@@ -348,7 +348,7 @@ Light:
     m_UseCullingMatrixOverride: 0
   m_Cookie: {fileID: 0}
   m_DrawHalo: 0
-  m_Flare: {fileID: 0}
+  m_Flare: {fileID: 12100000, guid: 1e1b18952af75a64ea7672154f4983ae, type: 2}
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
@@ -360,9 +360,9 @@ Light:
   m_BounceIntensity: 0
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 4.214566e-23, y: NaN, z: 0, w: 6.759188e+13}
   m_UseBoundingSphereOverride: 0
-  m_ShadowRadius: 0
+  m_ShadowRadius: 1
   m_ShadowAngle: 0
 --- !u!1 &3793411402798995060
 GameObject:
@@ -2307,18 +2307,18 @@ Light:
   serializedVersion: 10
   m_Type: 2
   m_Shape: 0
-  m_Color: {r: 1, g: 0.30580878, b: 0, a: 1}
-  m_Intensity: 5
-  m_Range: 2
+  m_Color: {r: 1, g: 0.4363277, b: 0, a: 1}
+  m_Intensity: 20
+  m_Range: 20
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
-    m_Bias: 0.05
+    m_Bias: 0
     m_NormalBias: 0.4
     m_NearPlane: 0.2
     m_CullingMatrixOverride:
@@ -2341,7 +2341,7 @@ Light:
     m_UseCullingMatrixOverride: 0
   m_Cookie: {fileID: 0}
   m_DrawHalo: 0
-  m_Flare: {fileID: 0}
+  m_Flare: {fileID: 12100000, guid: 1e1b18952af75a64ea7672154f4983ae, type: 2}
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
@@ -2353,9 +2353,9 @@ Light:
   m_BounceIntensity: 0
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 4.214566e-23, y: NaN, z: 0, w: 6.759188e+13}
   m_UseBoundingSphereOverride: 0
-  m_ShadowRadius: 0
+  m_ShadowRadius: 1
   m_ShadowAngle: 0
 --- !u!1 &3793411404102929375
 GameObject:
@@ -2416,6 +2416,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b82ca5dbe6dee624e9e2225c8c39ffcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  customMessage: 
+  setCustomFinalMessage: 0
   moveObjectSrc: {fileID: 0}
   moveObjectSound:
   - {fileID: 0}

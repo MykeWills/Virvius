@@ -108,6 +108,7 @@ public class InputSystem : MonoBehaviour
     private Vector3 returnPosition = Vector3.zero;
     private Vector3 onePointPosition;
     private Vector3 twoPointPosition;
+    private LayerMask[] levelMask;
     private bool twoPoint = false;
     private float twoPointReturnRate;
     [HideInInspector]
@@ -189,6 +190,13 @@ public class InputSystem : MonoBehaviour
         headBob = head.transform.GetChild(0);
         headStartPos = headBob.localPosition;
         bobVectors[0] = WeaponAnimation(weaponAnimType.up);
+        levelMask = new LayerMask[4]
+         {
+            1 << LayerMask.NameToLayer("Level"),
+            1 << LayerMask.NameToLayer("Door"),
+            1 << LayerMask.NameToLayer("Elevator"),
+            1 << LayerMask.NameToLayer("Default")
+         };
         // get the player input system from rewired
         inputPlayer = ReInput.players.GetPlayer(0);
         // grab character controller component
@@ -232,6 +240,7 @@ public class InputSystem : MonoBehaviour
 
     public bool IsOffGround()
     {
+        if (isSwimming) return false;
         if (isJumping) return true;
         RaycastHit hit;
         Vector3 touchingFloor = transform.position + (-transform.up);
@@ -262,11 +271,7 @@ public class InputSystem : MonoBehaviour
         {
             if (other.gameObject.CompareTag(environmentSystem.environmentTag[e]))
             {
-                if(e == 2)
-                {
-                    if (moveDirection.y > 0)
-                        moveDirection.y = 0;
-                }
+
                 environmentSystem.ActivateSwimming(false);
             }
         }
@@ -283,11 +288,18 @@ public class InputSystem : MonoBehaviour
                     int rng = Random.Range(0, playerFSWaterSounds.Length);
                     audioSystem.PlayAudioSource(playerFSWaterSounds[rng], Random.Range(0.6f, 0.8f), Random.Range(0.5f, 0.8f), 128);
                 }
+                environmentSystem.headUnderWater = false;
+                breathOut = false;
+                breathOutActive = false;
+                swimTimer = swimTime;
+                startSwimTimer = false;
+                if (startSwimSound) startSwimSound = false;
+                isSinking = false;
                 isJumping = false;
                 // Stop jitter on entering water
                 moveDirection.x = 0;
                 moveDirection.z = 0;
-                moveDirection.y -= 75;
+                moveDirection.y -= 55;
                 swimDir = Vector3.zero;
                 environmentSystem.ActivateSwimming(true);
             }
@@ -351,9 +363,8 @@ public class InputSystem : MonoBehaviour
                
                 Vector3 touchingWall = transform.position + transform.forward;
                 touchingWall.y += 2;
-                //LayerMask mask = LayerMask.GetMask("Level");
-                Debug.DrawRay(touchingWall, transform.forward * 5, Color.white);
-                if (Physics.Raycast(touchingWall, transform.forward, out playerHit, 5))
+                //Debug.DrawRay(touchingWall, transform.forward * 5, Color.white);
+                if (CheckRaycast(touchingWall, transform.forward, playerHit, 5))
                 {
                     // Set the position of the second raycast to the head
                     Vector3 aboveLedge = head.position + transform.forward * 2.5f;
@@ -362,11 +373,11 @@ public class InputSystem : MonoBehaviour
                     // Draw second ray in the editor from the head
                     
                     // Check if second raycast collides with a ledge or not
-                    if (Physics.Raycast(aboveLedge, transform.forward, out wallHit, 10))
+                    if(CheckRaycast(aboveLedge, transform.forward, wallHit, 10))
                     {
                         //Dont Jump up if something is there
                     }
-                    else if (!Physics.Raycast(aboveLedge, transform.forward, out wallHit, 10))
+                    else if (!CheckRaycast(aboveLedge, transform.forward, wallHit, 10))
                     {
                         // Time to jump up nothing is there
                         breathOut = false;
@@ -399,7 +410,7 @@ public class InputSystem : MonoBehaviour
                     isSinking = false;
                 }
                 // Move speed in the water
-                float waterSpeed = 55;
+                float waterSpeed = moveSpeed / 2;
                 // Move Horizontal
                 moveDirection.x = inputX * waterSpeed * inputModifyFactor;
                 // Move Applicate
@@ -408,11 +419,15 @@ public class InputSystem : MonoBehaviour
                 if(!breathOut)
                 {
                     // Jump normally
-                    if (!inputPlayer.GetButton("A") && !isSliding) jumpTimer++;
+                    if (!inputPlayer.GetButton("A"))
+                    { // Apply Gravity
+                        float appliedGravity = gravity * 1.3f * time;
+                        moveDirection.y -= appliedGravity; jumpTimer++; 
+                    }
                     else if (inputPlayer.GetButton("A") && jumpTimer >= antiJumpFactor && swimGrounded)
                     {
                         isJumping = true;
-                        moveDirection.y = jumpSpeed;
+                        moveDirection.y = (lookRotation[1] < -21) ? jumpSpeed : -jumpSpeed;
                         jumpTimer = 0;
                         audioSystem.PlayAudioSource(playerJSound, 1f, 1, 128);
                         // play splash sound when jumping in water
@@ -420,9 +435,7 @@ public class InputSystem : MonoBehaviour
                         audioSystem.PlayAudioSource(playerFSWaterSounds[rng], Random.Range(0.6f, 0.8f), Random.Range(0.5f, 0.8f), 128);
                     }
                    
-                    // Apply Gravity
-                    float appliedGravity = gravity * 1.3f * time;
-                    moveDirection.y -= appliedGravity;
+                   
                 }
                 // When player is above water and [NOT] grounded
                 else moveDirection.y = 0; 
@@ -435,7 +448,7 @@ public class InputSystem : MonoBehaviour
                     breathOutActive = false;
                 }
                 // when player directs camera into water start diving
-                if (breathOutActive && lookRotation[1] < -21) breathOut = false;
+                if (breathOutActive && lookRotation[1] < -21) { breathOut = false; }
                 // when player direct camera away from water, stay above water
                 else if (breathOutActive && lookRotation[1] > -20) breathOut = true;
                 // Collision flags if player is touching bottom inside water but not underwater
@@ -466,8 +479,9 @@ public class InputSystem : MonoBehaviour
                 // convert forward/horizontal movement value opposite of rotation value 0.25
                 float haDir = Mathf.Abs(AxisModule(rotVal) - vDir);
                 // Pressing jump activates swim timer.
-                if (inputPlayer.GetButton("A"))
+                if (inputPlayer.GetButton("A") && lookRotation[1] > -21)
                 {
+                    
                     if (!startSwimTimer)
                     {
                         startSwimSound = false;
@@ -657,6 +671,14 @@ public class InputSystem : MonoBehaviour
         }
         else currentFootstepsWaitingPeriod = Mathf.Infinity;
     }
+    private bool CheckRaycast(Vector3 origin, Vector3 direction, RaycastHit hit, float maxDistance)
+    {
+        for (int rc = 0; rc < levelMask.Length; rc++)
+        {
+            if (Physics.Raycast(origin, direction, out hit, maxDistance, levelMask[rc])) return true;
+        }
+        return false;
+    }
     private int AxisModule(float axis)
     {
         if (axis > 0) return 1;
@@ -842,7 +864,8 @@ public class InputSystem : MonoBehaviour
         isJumping = true;
         isSliding = false;
         isFalling = false;
-        isSwimming = false;
+        breathOut = false;
+        environmentSystem.ActivateSwimming(false);
         isSinking = false;
         jumpTimer = antiJumpFactor;
         gravity = gravityPull;

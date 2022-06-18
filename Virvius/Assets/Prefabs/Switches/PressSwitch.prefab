@@ -42,18 +42,18 @@ Light:
   serializedVersion: 10
   m_Type: 2
   m_Shape: 0
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
-  m_Intensity: 10
-  m_Range: 4.5
+  m_Color: {r: 1, g: 0.039154608, b: 0, a: 1}
+  m_Intensity: 50
+  m_Range: 50
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 2
+    m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
-    m_Bias: 0.05
+    m_Bias: 0
     m_NormalBias: 0.4
     m_NearPlane: 0.2
     m_CullingMatrixOverride:
@@ -76,7 +76,7 @@ Light:
     m_UseCullingMatrixOverride: 0
   m_Cookie: {fileID: 0}
   m_DrawHalo: 0
-  m_Flare: {fileID: 0}
+  m_Flare: {fileID: 12100000, guid: 1e1b18952af75a64ea7672154f4983ae, type: 2}
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
@@ -88,9 +88,9 @@ Light:
   m_BounceIntensity: 0
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 4.214566e-23, y: NaN, z: 0, w: 6.759188e+13}
   m_UseBoundingSphereOverride: 0
-  m_ShadowRadius: 0
+  m_ShadowRadius: 1
   m_ShadowAngle: 0
 --- !u!1 &3304647966242089436
 GameObject:
@@ -1105,18 +1105,18 @@ Light:
   serializedVersion: 10
   m_Type: 2
   m_Shape: 0
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
-  m_Intensity: 10
-  m_Range: 4.5
+  m_Color: {r: 1, g: 0.039154608, b: 0, a: 1}
+  m_Intensity: 50
+  m_Range: 50
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 2
+    m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
-    m_Bias: 0.05
+    m_Bias: 0
     m_NormalBias: 0.4
     m_NearPlane: 0.2
     m_CullingMatrixOverride:
@@ -1139,7 +1139,7 @@ Light:
     m_UseCullingMatrixOverride: 0
   m_Cookie: {fileID: 0}
   m_DrawHalo: 0
-  m_Flare: {fileID: 0}
+  m_Flare: {fileID: 12100000, guid: 1e1b18952af75a64ea7672154f4983ae, type: 2}
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
@@ -1151,9 +1151,9 @@ Light:
   m_BounceIntensity: 0
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_BoundingSphereOverride: {x: 4.214566e-23, y: NaN, z: 0, w: 6.759188e+13}
   m_UseBoundingSphereOverride: 0
-  m_ShadowRadius: 0
+  m_ShadowRadius: 1
   m_ShadowAngle: 0
 --- !u!1 &7159679703844635625
 GameObject:
@@ -1882,6 +1882,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b82ca5dbe6dee624e9e2225c8c39ffcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  customMessage: 
+  setCustomFinalMessage: 0
   moveObjectSrc: {fileID: 0}
   moveObjectSound:
   - {fileID: 0}
@@ -1890,14 +1892,23 @@ MonoBehaviour:
   hasMoved: 0
   isActive: 0
   isCoActive: 0
+  messageTrigger: {fileID: 0}
   isMoving: 0
   switchTime: 5
-  currentSwitchType: 0
-  curentSwitchSubType: 0
+  switchType: 0
+  switchSubType: 0
+  activationType: 0
   moveDirection: 0
+  rotateDirection: 0
   maxXYZ: 0
   minXYZ: 0
   moveSpeed: 50
+  rotateMoveObj: 0
+  rotateSpeed: 0
+  rotateAmt: 1
+  reverseUpdatedPos: 0
+  activationObject: {fileID: 0}
+  eventObject: []
   pressSoundFx: {fileID: 8300000, guid: 90e975bed89b9b4438c0f03fd80ceb14, type: 3}
   messageSoundFx:
   - {fileID: 0}
@@ -1914,7 +1925,15 @@ MonoBehaviour:
   - {fileID: 1105617026963747496}
   - {fileID: 6728489586235514535}
   correspondingSwitch: {fileID: 3304647966979605640}
-  moveObject: {fileID: 0}
+  instantiationPos: {fileID: 0}
+  instantiationPool: {fileID: 0}
+  dropCranePosIndex: 0
+  navMeshLinkUpper: []
+  allowLinkValueChangeUpper: 0
+  navMeshLinkLower: []
+  allowLinkValueChangeLower: 0
+  lockedDoorEvent: 0
+  multipleDoors: 0
 --- !u!1 &9217710256795306655
 GameObject:
   m_ObjectHideFlags: 0
