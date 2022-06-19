@@ -646,16 +646,16 @@ public class OptionsSystem : MonoBehaviour
     }; 
     [HideInInspector]
     public int soundtrackIndex = 0;
-    [HideInInspector]
+    //[HideInInspector]
     public string[] songName = new string[7]
     {
-        "The Grind",
-        "Gates of Dispair",
-        "Beast Within",
+        "Dark Omen",
         "Damp Halls",
+        "The Choice",
+        "The Grind",
         "The Crypt",
         "Technical Chaos",
-        "Dark Omen",
+        "Beast Within",
     };
     private string[] resolutionIDs = new string[3]
     {
@@ -1531,7 +1531,16 @@ public class OptionsSystem : MonoBehaviour
         if (player.activeInHierarchy) { player.SetActive(false); }
         if (gameUI.activeInHierarchy) { gameUI.SetActive(false); }
     }
-  
+    public void SetSceneMusic(int sceneIndex)
+    {
+        soundtrackIndex = sceneIndex;
+        SetMusicSoundtrack();
+    }
+    public void SetSceneDifficulty(int difficultyID)
+    {
+        difficultyIndex = difficultyID;
+        SetDifficulty();
+    }
     private string InstantMessages()
     {
         // Build messages per char into string builder

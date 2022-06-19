@@ -103,7 +103,7 @@ public class EnvironmentSystem : MonoBehaviour
         environmentTimer = Mathf.Clamp(environmentTimer, 0.0f, time);
         if (environmentTimer == 0)
         {
-            environmentSoundIndex++;
+            //environmentSoundIndex++;
             if (environmentSoundIndex > 1) environmentSoundIndex = 0;
             if (isDrowning)
                 audioSystem.PlayAudioSource(playerDrSound, Random.Range(0.7f, 1), 1, 128);
@@ -116,9 +116,7 @@ public class EnvironmentSystem : MonoBehaviour
     {
         environmentIndex = index;
         environmentTime = time;
-        if (index < 3)
-            environmentTimer = 0;
-        else environmentTimer = environmentTime;
+        environmentTimer = environmentTime;
         if (isDrowning) isDrowning = false;
         environmentSoundIndex = 0;
         if (environmentDamage) environmentDamage = false;

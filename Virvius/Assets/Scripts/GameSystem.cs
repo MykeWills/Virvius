@@ -42,15 +42,17 @@ public class GameSystem : MonoBehaviour
     private OptionsSystem optionsSystem;
     private Player inputPlayer;
     //[HideInInspector]
-    public Vector3[] scenePositions = new Vector3[3]
+    public Vector3[] scenePositions = new Vector3[4]
     {
-        new Vector3(0, 15, -245),
+        new Vector3(0, 0, 0),
+        new Vector3(0, 0, 0),
+        new Vector3(0, 11, 0),
         new Vector3(0, 18, -245),
-        new Vector3(0, 11, 0)
     };
-    [HideInInspector]
-    public Vector3[] sceneRotations = new Vector3[3]
+    //[HideInInspector]
+    public Vector3[] sceneRotations = new Vector3[4]
     {
+        new Vector3(0, 0, 0),
         new Vector3(0, 0, 0),
         new Vector3(0, 0, 0),
         new Vector3(0, 0, 0)
@@ -307,6 +309,32 @@ public class GameSystem : MonoBehaviour
         loadingBar.fillAmount = 0;
         if (loadSb.Length > 0) loadSb.Clear();
         LoadGame(2);
+    }
+    public void SetNewLevel(int sceneID)
+    {
+        isLoading = true;
+        // Shut off LoadSelection
+        if (optionsSystem.fileSelectionOpen) optionsSystem.OpenFileSelection(false);
+        // Shut off BootIntro
+        if (bootIntro.activeInHierarchy) bootIntro.SetActive(false);
+        // Shut off GameUI
+        if (gameUI.activeInHierarchy) gameUI.SetActive(false);
+        // Shut off Player object
+        if (player.activeInHierarchy) player.SetActive(false);
+        // Shut off Player object
+        if (mainSelection.activeInHierarchy) mainSelection.SetActive(false);
+        // Shut off Video UI
+        if (videoUI.enabled) videoUI.enabled = false;
+        // Shut off Video Player
+        if (videoPlayer.isPlaying) videoPlayer.Stop();
+        if (mainmenuOpen) mainmenuOpen = false;
+        // Shut off NavigationUI
+        if (mainNavigation.activeInHierarchy) mainNavigation.SetActive(false);
+        // Load the first Scene
+        curSceneIndex = 0;
+        loadingBar.fillAmount = 0;
+        if (loadSb.Length > 0) loadSb.Clear();
+        LoadGame(sceneID);
     }
     public bool BlockedAttributesActive()
     {

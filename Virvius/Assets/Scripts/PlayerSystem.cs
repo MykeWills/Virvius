@@ -106,11 +106,12 @@ public class PlayerSystem : MonoBehaviour
         "Standard UI Enabled.",
         "Standard Visor Enabled."
     };
-    private string[] levelTitle = new string[3]
+    private string[] levelTitle = new string[4]
     {
-        "The Debug Mode",
-        "The Fallen Scourge",
         "Welcome",
+        "The Debug Mode",
+        "Prologue",
+        "The Fallen Scourge",
     };
     //[structs]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
     
@@ -368,8 +369,9 @@ public class PlayerSystem : MonoBehaviour
     {
         // Player Collisions with Environment
         string tag = other.gameObject.tag;
+        Physics.IgnoreCollision(other.gameObject.GetComponent<Collider>(), characterController);
         if (other.gameObject.CompareTag("Lava")) environmentSystem.SetEnvironment(0.5f, 1);
-        else if (other.gameObject.CompareTag("Acid")) environmentSystem.SetEnvironment(1f, 2);
+        else if (other.gameObject.CompareTag("Acid")) environmentSystem.SetEnvironment(1.45f, 2);
         // Player Collisions with Items
         if (other.gameObject.CompareTag("Health100"))
         {
@@ -1219,7 +1221,7 @@ public class PlayerSystem : MonoBehaviour
         isDamaged = false;
         suicideDamage = false;
         SetFlash(false);
-        audioSystem.PlayGameMusic(optionsSystem.musicClip, 1, 1, true);
+        optionsSystem.SetSceneMusic(gameSystem.sceneIndex);
         for (int kc = 0; kc < 3; kc++) SetActiveKey(kc, false);
         Vector3 headLoc = Vector3.zero;
         Vector3 headRot = Vector3.zero;
