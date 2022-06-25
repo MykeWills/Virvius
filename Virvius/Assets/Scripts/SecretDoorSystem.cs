@@ -203,8 +203,8 @@ public class SecretDoorSystem : MonoBehaviour
         {
             if(tags[t] == tagSb.ToString())
             {
-                if (!open) open = true;
-                if (t != 0 && t != 8) collision.gameObject.SetActive(false);
+                open = true;
+                //if (t != 0 && t != 8) collision.gameObject.SetActive(false);
                 break;
             }
         }

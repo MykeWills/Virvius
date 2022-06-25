@@ -351,12 +351,8 @@ public class EnemyGSystem : MonoBehaviour
             updateNextPosition = true;
         }
     }
-    private void CheckDistance()
+    private void PlayerRangeDistance()
     {
-        if (PlayerSystem.playerSystem == null || PlayerDistance() == 0) return;
-        if (!updateNextPosition) return;
-        if (AnimatorIsPlaying("Shoot") || enemyState == EnemyState.damage || enemyState == EnemyState.death) return;
-
         //SHOOT IN CLOSE RANGE
         if (PlayerDistance() <= distanceRanges[0])
         {
@@ -401,12 +397,19 @@ public class EnemyGSystem : MonoBehaviour
             enemyState = startState;
             ActiveState();
         }
+    }
+    private void CheckDistance()
+    {
+        if (PlayerSystem.playerSystem == null || PlayerDistance() == 0) return;
+        if (!updateNextPosition) return;
+        if (AnimatorIsPlaying("Shoot") || enemyState == EnemyState.damage || enemyState == EnemyState.death) return;
+        PlayerRangeDistance();
         updateNextPosition = false;
     }
     public void AnimationFinished()
     {
         if (currentState.Length > 0) currentState.Clear();
-        enemyState = EnemyState.chase;
+        PlayerRangeDistance();
         if (!damageResistance) isDamaged = false;
     }
     private void ActiveState()
@@ -447,25 +450,28 @@ public class EnemyGSystem : MonoBehaviour
                 }
             case EnemyState.attack:
                 {
-                    float difficultyInterval = 1;
-                    //VERYHARD
-                    if (optionsSystem.difficultyActive[3])
-                        difficultyInterval = 2f;
-                    //HARD
-                    else if (optionsSystem.difficultyActive[2])
-                        difficultyInterval = 1.5f;
-                    //NORMAL
-                    else if (optionsSystem.difficultyActive[1])
-                        difficultyInterval = 1.25f;
-                    //EASY
-                    else if (optionsSystem.difficultyActive[0])
-                        difficultyInterval = 1;
+                    if (!AnimatorIsPlaying("Damage"))
+                    {
+                        float difficultyInterval = 1;
+                        //VERYHARD
+                        if (optionsSystem.difficultyActive[3])
+                            difficultyInterval = 2f;
+                        //HARD
+                        else if (optionsSystem.difficultyActive[2])
+                            difficultyInterval = 1.5f;
+                        //NORMAL
+                        else if (optionsSystem.difficultyActive[1])
+                            difficultyInterval = 1.25f;
+                        //EASY
+                        else if (optionsSystem.difficultyActive[0])
+                            difficultyInterval = 1;
 
-                    if (animator.GetFloat("Speed") != difficultyInterval)
-                        animator.SetFloat("Speed", difficultyInterval);
+                        if (animator.GetFloat("Speed") != difficultyInterval)
+                            animator.SetFloat("Speed", difficultyInterval);
 
-                    SetAnimation(3);
-                    HaltMovement();
+                        SetAnimation(3);
+                        HaltMovement();
+                    }
                     break;
                 }
             case EnemyState.damage:
