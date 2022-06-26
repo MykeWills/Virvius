@@ -652,8 +652,8 @@ public class OptionsSystem : MonoBehaviour
         "Dark Omen",
         "Damp Halls",
         "The Choice",
-        "The Grind",
         "The Crypt",
+        "The Grind",
         "Technical Chaos",
         "Beast Within",
     };

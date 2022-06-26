@@ -42,16 +42,18 @@ public class GameSystem : MonoBehaviour
     private OptionsSystem optionsSystem;
     private Player inputPlayer;
     //[HideInInspector]
-    public Vector3[] scenePositions = new Vector3[4]
+    public Vector3[] scenePositions = new Vector3[5]
     {
         new Vector3(0, 0, 0),
         new Vector3(0, 0, 0),
         new Vector3(0, 11, 0),
         new Vector3(0, 18, -245),
+        new Vector3(0, 18, -245)
     };
     //[HideInInspector]
-    public Vector3[] sceneRotations = new Vector3[4]
+    public Vector3[] sceneRotations = new Vector3[5]
     {
+        new Vector3(0, 0, 0),
         new Vector3(0, 0, 0),
         new Vector3(0, 0, 0),
         new Vector3(0, 0, 0),
