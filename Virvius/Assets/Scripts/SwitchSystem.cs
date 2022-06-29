@@ -142,7 +142,7 @@ public class SwitchSystem : MonoBehaviour
                     }
                 }
                 ActivateSwitch(switchSubType);
-                audioSystem.PlayAudioSource(pressSoundFx, 1, 1, 128);
+                if (pressSoundFx != null) audioSystem.PlayAudioSource(pressSoundFx, 1, 1, 128);
             }
 
         }

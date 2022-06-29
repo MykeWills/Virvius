@@ -71,6 +71,11 @@ public class EnemyGSystem : MonoBehaviour
     [SerializeField]
     private float offMeshLinkSpeed = 20f;
     private float walkPositionDistance = 2;
+    [SerializeField]
+    private bool randomizePositions = false;
+    [SerializeField]
+    private bool backtrackPositions = false;
+    private bool backtrack = false;
 
     private RaycastHit playerHit;
     private Vector3 randomPosition;
@@ -152,7 +157,10 @@ public class EnemyGSystem : MonoBehaviour
     }
     private void Update()
     {
-        if (gameSystem.BlockedAttributesActive()) return;
+        if (gameSystem != null)
+        {
+            if (gameSystem.BlockedAttributesActive()) return;
+        }
         if (isDead) return;
         if (ShutdownEnemy()) return;
         RebootEnemy();
@@ -198,7 +206,9 @@ public class EnemyGSystem : MonoBehaviour
     }
     private void WalkDistance()
     {
+     
         if (activeState != EnemyState.walk) return;
+       
         float dist = Vector3.Distance(WalkDestination(), transform.position);
         if (dist < walkPositionDistance) { ChangeDestination(); ActiveState(); }
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
@@ -215,7 +225,9 @@ public class EnemyGSystem : MonoBehaviour
     }
     private bool DefaultEnemy()
     {
-        bool playerActive = playerSystem.isDead ? false : true;
+        bool playerActive = false;
+
+        if(playerSystem != null) playerActive = playerSystem.isDead ? false : true;
         if (!returnToDefault)
         {
             if (currentState.Length > 0) currentState.Clear();
@@ -444,7 +456,7 @@ public class EnemyGSystem : MonoBehaviour
                         movementSpeed = movementSpeeds[2];
                         stoppingDistance = 0;
                         autoBraking = false;
-                        SetNav(RandomDestination(), true);
+                        SetNav(TargetDestination(), true);
                     }
                     break;
                 }
@@ -490,10 +502,20 @@ public class EnemyGSystem : MonoBehaviour
     }
     private void ChangeDestination()
     {
+       
         if (walkPositions[0] == null) return;
-        walkPositionIndex++;
-        if (walkPositionIndex > walkPositions.Length - 1) walkPositionIndex = 0;
-        else if (walkPositionIndex < 0) walkPositionIndex = walkPositions.Length - 1;
+        int index = randomizePositions ? Random.Range(0, walkPositions.Length) : backtrack ? (walkPositionIndex - 1) : (walkPositionIndex + 1);
+        if (index > walkPositions.Length - 1)
+        {
+            if (backtrackPositions) backtrack = true;
+            index = backtrackPositions ? walkPositions.Length - 1 : 0;
+        }
+        else if (index < 0)
+        {
+            if (backtrackPositions) backtrack = false;
+            index = backtrackPositions ? 0 : walkPositions.Length - 1;
+        }
+        walkPositionIndex = index;
     }
     private void HaltMovement()
     {
@@ -546,14 +568,36 @@ public class EnemyGSystem : MonoBehaviour
         Vector3 direction = new Vector3(walkPositions[walkPositionIndex].position.x, transform.position.y, walkPositions[walkPositionIndex].position.z);
         return direction;
     }
-    private Vector3 RandomDestination()
+    private Vector3 TargetDestination()
     {
-        if (optionsSystem.difficultyActive[3]) randomPosition = PlayerPosition();
-        else randomPosition = MoveInPlayerRadius(Random.Range(-15, 15), transform.TransformDirection(Vector3.forward).z * Random.Range(-4, 4));
+        switch (DifficultyIndex())
+        {
+            case 0: 
+                randomPosition = MoveInPlayerRadius(Random.Range(-15, 15), transform.TransformDirection(Vector3.forward).z * Random.Range(-4, 4)); 
+                break;
+            case 1:
+                int rnd = Random.Range(0, 2);
+                if (rnd == 0) randomPosition = MoveInPlayerRadius(Random.Range(-15, 15), transform.TransformDirection(Vector3.forward).z * Random.Range(-4, 4));
+                else randomPosition = PlayerPosition(); 
+                break;
+            case 2: randomPosition = PlayerPosition(); 
+                break;
+            case 3: randomPosition = PlayerPosition(); 
+                break;
+        }
         Vector3 direction = new Vector3(randomPosition.x, transform.position.y, randomPosition.z);
         return direction;
-        
     }
+    private int DifficultyIndex()
+    {
+        if(optionsSystem == null) return 0;
+        for (int d = 0; d < optionsSystem.difficultyActive.Length; d++)
+        {
+            if (optionsSystem.difficultyActive[d]) return d;
+        }
+        return 0;
+    }
+
     private float PlayerDistance()
     {
         Vector3 player = (PlayerSystem.playerSystem != null) ? PlayerSystem.playerSystem.transform.position : Vector3.zero;

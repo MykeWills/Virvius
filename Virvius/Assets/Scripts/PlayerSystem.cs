@@ -593,7 +593,7 @@ public class PlayerSystem : MonoBehaviour
             int rangeMultiplier = optionsSystem.difficultyActive[0] ? 6 :
                                      optionsSystem.difficultyActive[1] ? 11 :
                                      optionsSystem.difficultyActive[2] ? 21 :
-                                     optionsSystem.difficultyActive[3] ? 31 : 1;
+                                     optionsSystem.difficultyActive[3] ? 26 : 1;
             int rndDamage = Random.Range(1, rangeMultiplier);
             if (health < rndDamage + 1) overKill = true;
             Damage(rndDamage);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 public class LevelSystem : MonoBehaviour
 {
+    private OptionsSystem optionsSystem;
     public AmbushSystem[] ambushSystems;
     public EnemyGSystem[] gruntSystems;
     public EnemyDSystem[] dinSystems;
@@ -18,9 +19,15 @@ public class LevelSystem : MonoBehaviour
     public ExplodingCrateSystem[] explodingCrateSystems;
     public ExplodeTrigger[] explodingTriggerSystems;
     public DoorTrigger[] doorTriggers;
+    public GameObject[] difficulty0Enemies;
+    public GameObject[] difficulty1Enemies;
+    public GameObject[] difficulty2Enemies;
+    public GameObject[] difficulty3Enemies;
 
     public void ResetLevel()
     {
+
+        SetDifficultyEnemies(ActiveDifficulty());
         for (int a = 0; a < ambushSystems.Length; a++)
             if (ambushSystems[a] != null || ambushSystems[a].gameObject.activeInHierarchy) ambushSystems[a].ResetObject();
         for (int a = 0; a < gruntSystems.Length; a++)
@@ -57,5 +64,57 @@ public class LevelSystem : MonoBehaviour
         {
             if (!levelEnvironment[a].isPlaying) levelEnvironment[a].Play();
         }
+    }
+    private void SetDifficultyEnemies(int index)
+    {
+        if (difficulty0Enemies == null) return;
+        if (difficulty1Enemies == null) return;
+        if (difficulty2Enemies == null) return;
+        if (difficulty3Enemies == null) return;
+        switch (index)
+        {
+            case 0: 
+                {
+                    for (int e = 0; e < difficulty0Enemies.Length; e++) difficulty0Enemies[e].SetActive(true);
+                    for (int e = 0; e < difficulty1Enemies.Length; e++) difficulty1Enemies[e].SetActive(false);
+                    for (int e = 0; e < difficulty2Enemies.Length; e++) difficulty2Enemies[e].SetActive(false);
+                    for (int e = 0; e < difficulty3Enemies.Length; e++) difficulty3Enemies[e].SetActive(false);
+                    break; 
+                }
+            case 1:
+                {
+                    for (int e = 0; e < difficulty0Enemies.Length; e++) difficulty0Enemies[e].SetActive(true);
+                    for (int e = 0; e < difficulty1Enemies.Length; e++) difficulty1Enemies[e].SetActive(true);
+                    for (int e = 0; e < difficulty2Enemies.Length; e++) difficulty2Enemies[e].SetActive(false);
+                    for (int e = 0; e < difficulty3Enemies.Length; e++) difficulty3Enemies[e].SetActive(false);
+                    break;
+                }
+            case 2:
+                {
+                    for (int e = 0; e < difficulty0Enemies.Length; e++) difficulty0Enemies[e].SetActive(true);
+                    for (int e = 0; e < difficulty1Enemies.Length; e++) difficulty1Enemies[e].SetActive(true);
+                    for (int e = 0; e < difficulty2Enemies.Length; e++) difficulty2Enemies[e].SetActive(true);
+                    for (int e = 0; e < difficulty3Enemies.Length; e++) difficulty3Enemies[e].SetActive(false);
+                    break;
+                }
+            case 3:
+                {
+                    for (int e = 0; e < difficulty0Enemies.Length; e++) difficulty0Enemies[e].SetActive(true);
+                    for (int e = 0; e < difficulty1Enemies.Length; e++) difficulty1Enemies[e].SetActive(true);
+                    for (int e = 0; e < difficulty2Enemies.Length; e++) difficulty2Enemies[e].SetActive(true);
+                    for (int e = 0; e < difficulty3Enemies.Length; e++) difficulty3Enemies[e].SetActive(true);
+                    break;
+                }
+        }
+        
+    }
+    private int ActiveDifficulty()
+    {
+        if (optionsSystem == null) optionsSystem = OptionsSystem.optionsSystem;
+        for(int d = 0; d < optionsSystem.difficultyActive.Length; d++)
+        {
+            if (optionsSystem.difficultyActive[d]) return d;
+        }
+        return 3;
     }
 }

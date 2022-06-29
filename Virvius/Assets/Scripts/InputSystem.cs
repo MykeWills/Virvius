@@ -410,7 +410,7 @@ public class InputSystem : MonoBehaviour
                     isSinking = false;
                 }
                 // Move speed in the water
-                float waterSpeed = moveSpeed / 1.25f;
+                float waterSpeed = moveSpeed / 1.05f;
                 // Move Horizontal
                 moveDirection.x = inputX * waterSpeed * inputModifyFactor;
                 // Move Applicate

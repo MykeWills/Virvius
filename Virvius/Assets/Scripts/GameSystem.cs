@@ -111,6 +111,7 @@ public class GameSystem : MonoBehaviour
     private Image loadingBar;
     [HideInInspector]
     public bool mainmenuOpen = false;
+    private Transform defaultTransform;
     private void Awake()
     {
         if (gameSystem == null)
@@ -127,7 +128,7 @@ public class GameSystem : MonoBehaviour
     private void Start()
     {
         inputPlayer = ReInput.players.GetPlayer(0);
-
+        defaultTransform = GameObject.Find("GameSystem/Game").transform;
 
         //load normally
         GameMouseActive(false, CursorLockMode.Locked);
@@ -263,8 +264,6 @@ public class GameSystem : MonoBehaviour
         // turn on Player Object
         player.transform.localPosition = scenePositions[sceneIndex];
         player.SetActive(true);
-       
-        
         // Shut off Loading Screen
         if (loadingMenu.activeInHierarchy) loadingMenu.SetActive(false);
 
@@ -272,8 +271,6 @@ public class GameSystem : MonoBehaviour
         gameUI.SetActive(true);
  
         // Loading is now finished
-        
-     
         if (isPaused)
         {
             isPaused = !isPaused;
@@ -289,8 +286,10 @@ public class GameSystem : MonoBehaviour
     public void SetNewGame()
     {
         isLoading = true;
+        if(playerSystem.transform.parent != defaultTransform)
+            playerSystem.transform.parent = defaultTransform;
         // Shut off LoadSelection
-        if(optionsSystem.fileSelectionOpen) optionsSystem.OpenFileSelection(false);
+        if (optionsSystem.fileSelectionOpen) optionsSystem.OpenFileSelection(false);
         // Shut off BootIntro
         if (bootIntro.activeInHierarchy) bootIntro.SetActive(false);
         // Shut off GameUI
@@ -315,6 +314,8 @@ public class GameSystem : MonoBehaviour
     public void SetNewLevel(int sceneID)
     {
         isLoading = true;
+        if (playerSystem.transform.parent != defaultTransform)
+            playerSystem.transform.parent = defaultTransform;
         // Shut off LoadSelection
         if (optionsSystem.fileSelectionOpen) optionsSystem.OpenFileSelection(false);
         // Shut off BootIntro

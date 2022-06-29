@@ -102,12 +102,14 @@ public class DoorSystem : MonoBehaviour
             if (other.gameObject.CompareTag(tags[t]))
             {
                 obstructions[t] = true;
-                if (playerSystem == null)
+                if (tag == "Player")
                 {
-                    playerSystem = PlayerSystem.playerSystem;
-                    messageSystem = playerSystem.GetComponent<MessageSystem>();
+                    if (playerSystem == null)
+                    {
+                        playerSystem = PlayerSystem.playerSystem;
+                        messageSystem = playerSystem.GetComponent<MessageSystem>();
+                    }
                 }
-        
                 switch (doorType)
                 {
                     case DoorType.Normal:

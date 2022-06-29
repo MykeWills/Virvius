@@ -2868,7 +2868,6 @@ public class OptionsSystem : MonoBehaviour
     {
         musicClip = musicTracks[soundtrackIndex];
         audioContentSubText[10].text = songName[soundtrackIndex];
-        if (audioSystem.M_audioSrc.clip == musicClip) return;
         audioSystem.PlayGameMusic(musicClip, 1, 1, true);
     }
     public void ApplyMusicSoundTrack()
