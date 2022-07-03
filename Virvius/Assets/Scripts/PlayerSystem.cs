@@ -106,10 +106,9 @@ public class PlayerSystem : MonoBehaviour
         "Standard UI Enabled.",
         "Standard Visor Enabled."
     };
-    private string[] levelTitle = new string[5]
+    private string[] levelTitle = new string[4]
     {
         "Welcome",
-        "Debug Mode",
         "Prologue",
         "Fallen Scourge",
         "Virulent Vault"
@@ -1277,6 +1276,47 @@ public class PlayerSystem : MonoBehaviour
         characterController.enabled = true;
         crosshair.enabled = true;
         ApplyPlayerHealthAndArmor();
+        messageSystem.SetMessage(levelTitle[gameSystem.sceneIndex], MessageSystem.MessageType.Display);
+    }
+    public void SetupLevel()
+    {
+        messageSystem.EraseMessages();
+        inputSystem.ResetInputSystem();
+        powerupSystem.ResetPowerupSystem();
+        UIVersion(versionIndex);
+        HUD.SetActive(true);
+        overKill = false;
+        SetSigmaFlash(false);
+        goreExplode.SetActive(false);
+        if (flashSigmaUI.enabled) flashSigmaUI.enabled = false;
+        characterController.enabled = false;
+        fallDamage = false;
+        transform.SetParent(originParent);
+        gameSystem.SetPlayerScenePosition(gameSystem.sceneIndex);
+        isDamaged = false;
+        suicideDamage = false;
+        SetFlash(false);
+        optionsSystem.SetSceneMusic(gameSystem.sceneIndex);
+        for (int kc = 0; kc < 3; kc++) SetActiveKey(kc, false);
+        Vector3 headLoc = Vector3.zero;
+        Vector3 headRot = Vector3.zero;
+        Quaternion rot = Quaternion.Euler(headRot);
+        head.localRotation = rot;
+        head.localPosition = headLoc;
+        SetKeyBannerColor(visorColor);
+        for (int et = 0; et < 4; et++)
+        {
+            enviromentUIActiveImage[et].enabled = false;
+            enviromentUIActiveImage[et].color = Color.white;
+            fadeEnviroTime[et] = 1;
+            enviroUIActive[et] = false;
+        }
+        environmentSystem.SetEnvironment(0, 0);
+        environmentSystem.ActivateEnvironment(0);
+        environmentSystem.ActiveEnvironmentUI(false);
+        levelSystem = AccessLevel();
+        if (levelSystem != null) levelSystem.ResetLevel();
+        characterController.enabled = true;
         messageSystem.SetMessage(levelTitle[gameSystem.sceneIndex], MessageSystem.MessageType.Display);
     }
     public void ActivateLevelEnviromentSounds()

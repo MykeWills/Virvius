@@ -13,6 +13,7 @@ using System.Threading;
 public class GameSystem : MonoBehaviour
 {
     private StringBuilder loadSb = new StringBuilder();
+    private StringBuilder[] resultSb = new StringBuilder[3];
     public static GameSystem gameSystem;
     public static bool expandBulletPool = true;
     public bool isGameStarted = false;
@@ -42,18 +43,16 @@ public class GameSystem : MonoBehaviour
     private OptionsSystem optionsSystem;
     private Player inputPlayer;
     //[HideInInspector]
-    public Vector3[] scenePositions = new Vector3[5]
+    public Vector3[] scenePositions = new Vector3[4]
     {
-        new Vector3(0, 0, 0),
         new Vector3(0, 0, 0),
         new Vector3(0, 11, 0),
-        new Vector3(0, 18, -245),
-        new Vector3(0, 18, -245)
+        new Vector3(0, 18,-245),
+        new Vector3(0, -2, 0)
     };
     //[HideInInspector]
-    public Vector3[] sceneRotations = new Vector3[5]
+    public Vector3[] sceneRotations = new Vector3[4]
     {
-        new Vector3(0, 0, 0),
         new Vector3(0, 0, 0),
         new Vector3(0, 0, 0),
         new Vector3(0, 0, 0),
@@ -112,6 +111,37 @@ public class GameSystem : MonoBehaviour
     [HideInInspector]
     public bool mainmenuOpen = false;
     private Transform defaultTransform;
+    [Space]
+    [Header("Results Screen")]
+    [SerializeField]
+    private GameObject resultsScreen;
+    public int totalLevelSecrets = 0;
+    public int totalLevelEnemies = 0;
+    [HideInInspector]
+    public float levelTime = 0;
+    private bool levelActive = false;
+    [HideInInspector]
+    public int totalKills = 0;
+    [HideInInspector]
+    public int secretsFound = 0;
+    [SerializeField]
+    private Text gameTimeText;
+    [SerializeField]
+    private Text secretsAmtText;
+    [SerializeField]
+    private Text killsAmtText;
+    [SerializeField]
+    private Camera mainCamera;
+    [SerializeField]
+    private Camera clipCamera;
+    [HideInInspector]
+    public bool showResults = false;
+    [SerializeField]
+    private Transform resultCamera;
+    [HideInInspector]
+    public Vector3 resultCamPosition;
+    [HideInInspector]
+    public Quaternion resultCamRotation;
     private void Awake()
     {
         if (gameSystem == null)
@@ -129,7 +159,7 @@ public class GameSystem : MonoBehaviour
     {
         inputPlayer = ReInput.players.GetPlayer(0);
         defaultTransform = GameObject.Find("GameSystem/Game").transform;
-
+        for(int sb = 0; sb < resultSb.Length; sb++) resultSb[sb] = new StringBuilder();
         //load normally
         GameMouseActive(false, CursorLockMode.Locked);
         //load debug
@@ -137,9 +167,40 @@ public class GameSystem : MonoBehaviour
     }
     private void Update()
     {
+        LevelTime();
         LoadScene(sceneIndex);
         Pause();
     }
+    private void LevelTime()
+    {
+        if (!levelActive)
+        {
+            if (levelTime != 0) levelTime = 0;
+            if (totalKills > 0) totalKills = 0;
+            if (secretsFound > 0) secretsFound = 0;
+            return;
+        }
+        levelTime += Time.unscaledDeltaTime;
+    }
+    public void ShowResults(bool active)
+    {
+        showResults = active;
+        resultsScreen.SetActive(active);
+        SetLevelResultCamPosition();
+        gameUI.SetActive(!active);
+        for (int sb = 0; sb < resultSb.Length; sb++) if(resultSb[sb].Length > 0) resultSb[sb].Clear();
+        resultSb[0].Append(optionsSystem.SetTime(levelTime));
+        resultSb[1].Append(secretsFound + " / " + totalLevelSecrets);
+        resultSb[2].Append(totalKills + " / " + totalLevelEnemies);
+        gameTimeText.text = active ? resultSb[0].ToString() : null;
+        secretsAmtText.text = active ? resultSb[1].ToString(): null; 
+        killsAmtText.text = active ? resultSb[2].ToString(): null;
+        mainCamera.enabled = !active;
+        clipCamera.enabled = !active;
+        audioSystem.MusicPlayStop(false);
+    }
+   
+
     private void Pause()
     {
         if (isLoading) return;
@@ -222,6 +283,7 @@ public class GameSystem : MonoBehaviour
         audioSystem.MusicPlayStop(false);
         audioSystem.EnvironmentPlayStop(false);
         audioSystem.VideoPlayStop(false);
+        levelActive = false;
         if (!loadingMenu.activeInHierarchy) loadingMenu.SetActive(true);
         if (!loadingCamera.activeInHierarchy) loadingCamera.SetActive(true);
     }
@@ -277,10 +339,12 @@ public class GameSystem : MonoBehaviour
             GameMouseActive(isPaused, isPaused ? CursorLockMode.Confined : CursorLockMode.Locked);
             Time.timeScale = isPaused ? 0 : 1;
         }
-        SetMasterStart();
-        playerSystem.SetupNewLevel();
+
+        if (sceneIndex > 1) playerSystem.SetupLevel();
+        else { SetMasterStart(); playerSystem.SetupNewLevel(); }
         isLoading = false;
         isGameStarted = true;
+        levelActive = true;
         mainMenuSystem.FadeBlackScreen(false);
     }
     public void SetNewGame()
@@ -309,7 +373,7 @@ public class GameSystem : MonoBehaviour
         curSceneIndex = 0;
         loadingBar.fillAmount = 0;
         if (loadSb.Length > 0) loadSb.Clear();
-        LoadGame(2);
+        LoadGame(1);
     }
     public void SetNewLevel(int sceneID)
     {
@@ -344,6 +408,7 @@ public class GameSystem : MonoBehaviour
         if (!isGameStarted) return true;
         else if (isPaused) return true;
         else if (isLoading) return true;
+        else if (showResults) return true;
         else if (CommandSystem.commandOpen) return true;
         else return false;
     }
@@ -540,6 +605,11 @@ public class GameSystem : MonoBehaviour
         player.transform.localPosition = scenePositions[index]; 
         player.transform.localRotation = Quaternion.Euler(sceneRotations[index]); 
 
+    }
+    public void SetLevelResultCamPosition()
+    {
+        resultCamera.transform.position = resultCamPosition;
+        resultCamera.transform.rotation = resultCamRotation;
     }
 }
 [Serializable]

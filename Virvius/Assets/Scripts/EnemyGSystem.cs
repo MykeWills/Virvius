@@ -646,7 +646,8 @@ public class EnemyGSystem : MonoBehaviour
         Physics.IgnoreCollision(bullet.GetComponent<Collider>(), characterController);
         BulletSystem bulletSystem = bullet.GetComponent<BulletSystem>();
         Rigidbody rb = bullet.GetComponent<Rigidbody>();
-        emitter.transform.LookAt(Camera.main.transform.position);
+        if(Camera.main != null)
+            emitter.transform.LookAt(Camera.main.transform.position);
         rb.velocity = Vector3.zero;
         bullet.transform.position = emitter.position;
         bullet.transform.rotation = emitter.rotation;
@@ -768,6 +769,8 @@ public class EnemyGSystem : MonoBehaviour
     {
         if (boxCollider.enabled)
         {
+            gameSystem.totalKills++;
+            Debug.Log(gameSystem.totalKills);
             for (int b = 0; b < bulletPool.childCount; b++)
             {
                 if (bulletPool.GetChild(b).gameObject.activeInHierarchy)

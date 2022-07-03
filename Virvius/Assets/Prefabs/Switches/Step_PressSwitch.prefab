@@ -1306,6 +1306,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b82ca5dbe6dee624e9e2225c8c39ffcb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  customMessage: 
+  setCustomFinalMessage: 0
   moveObjectSrc: {fileID: 0}
   moveObjectSound:
   - {fileID: 0}
@@ -1333,8 +1335,8 @@ MonoBehaviour:
   eventObject: []
   pressSoundFx: {fileID: 8300000, guid: 90e975bed89b9b4438c0f03fd80ceb14, type: 3}
   messageSoundFx:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 8300000, guid: 8681a4e712ae5a241ac3369178bd67d1, type: 3}
+  - {fileID: 8300000, guid: 49c299a5127f11041b441e05d9b0725d, type: 3}
   pressInObject:
   - {fileID: 4008530783404932898}
   - {fileID: 9137157379440448515}

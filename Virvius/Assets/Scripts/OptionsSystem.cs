@@ -278,7 +278,7 @@ public class OptionsSystem : MonoBehaviour
         "EASY",
         "NORMAL",
         "HARD",
-        "VERYHARD"
+        "DEMONIC"
     };
     [HideInInspector]
     public bool[] difficultyActive = new bool[4] { false, false, false, false };
@@ -2048,10 +2048,17 @@ public class OptionsSystem : MonoBehaviour
         timeActiveIndex = showTime ? 1 : 0;
         uiContentSubText[1].text = ONOFFSubText(showTime);
     }
+    public string SetTime(float amount)
+    {
+        float gameSeconds = Mathf.FloorToInt(amount % 60);
+        float gameMinutes = Mathf.FloorToInt((amount / 60) % 60);
+        float gameHours = Mathf.FloorToInt((amount / 3600f) % 24);
+        return string.Format("{0:00}:{1:00}:{2:00}", gameHours, gameMinutes, gameSeconds);
+    }
     public string DateTime()
     {
         stringBuilderTime.Clear();
-        stringBuilderTime.Append(date + System.DateTime.Now.ToString(timeFormat));
+        stringBuilderTime.Append(date + System.DateTime.Now.ToString(timeFormat) + " Leveltime: " + SetTime(gameSystem.levelTime));
         return stringBuilderTime.ToString();
     }
     public void ShowDateTime()

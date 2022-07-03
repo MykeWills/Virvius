@@ -456,6 +456,12 @@ public class SwitchSystem : MonoBehaviour
             craneDropSystem.SelectDropPosition(dropCranePosIndex);
             return;
         }
+        if (eventObject[0].TryGetComponent(out MultiSwitchSystem multiSwitchSystem))
+        {
+            if(!active) multiSwitchSystem.ResetObject();
+            else multiSwitchSystem.PressSwitch();
+            return;
+        }
         Debug.LogError("No Light, Door or Auto Moving component on event Object!");
     }
     public void CoSwitchCounter()
@@ -494,7 +500,8 @@ public class SwitchSystem : MonoBehaviour
         {
             if (eventObject[0] == null) break;
             if (!eventObject[0].TryGetComponent(out CraneDropSystem craneDropSystem))
-                ActivateEvent(e, false); 
+                ActivateEvent(e, false);
+           
         }
         switchCounter = 2;
         if (switchSubType == SwitchSubType.Counter)

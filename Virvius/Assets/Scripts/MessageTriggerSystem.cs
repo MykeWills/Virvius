@@ -1,12 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MessageTriggerSystem : MonoBehaviour
 {
     private MessageSystem messageSystem;
+    private GameSystem gameSystem;
     private AudioSystem audioSystem;
     public enum TriggerType { Instance, Continuous };
+    public bool isSecret = false;
     private BoxCollider boxCollider;
     [Header("Set the message to pop up on screen")]
     public string triggerMessage;
@@ -71,6 +71,13 @@ public class MessageTriggerSystem : MonoBehaviour
                     messageSystem.SetMessage(triggerMessage, MessageSystem.MessageType.Center);
                     audioSystem.PlayAudioSource(triggerSounds[0], 1, 1, 128);
                     boxCollider.enabled = false;
+                    if (isSecret) 
+                    { 
+                        if (gameSystem == null) 
+                            gameSystem = GameSystem.gameSystem; 
+                        gameSystem.secretsFound++;
+                        Debug.Log(gameSystem.secretsFound);
+                    }
                     break;
                 }
             case TriggerType.Continuous:

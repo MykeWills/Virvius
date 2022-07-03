@@ -43991,17 +43991,9 @@ MonoBehaviour:
   assetGuid: 
   m_Mesh: {fileID: 0}
   m_IsSelectable: 1
-  m_SelectedFaces: 03050000
-  m_SelectedEdges:
-  - a: 3852
-    b: 3853
-  - a: 3854
-    b: 3852
-  - a: 3853
-    b: 3855
-  - a: 3855
-    b: 3854
-  m_SelectedVertices: 0c0f00000d0f00000e0f00000f0f0000
+  m_SelectedFaces: 
+  m_SelectedEdges: []
+  m_SelectedVertices: 
 --- !u!23 &7842950873679796679
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -44104,6 +44096,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3821480716160286579}
   - component: {fileID: 3240017712857642784}
+  - component: {fileID: 1732048470784864498}
   m_Layer: 0
   m_Name: Point Light
   m_TagString: Untagged
@@ -44119,7 +44112,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8728525382657726575}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.0000076293945, y: -1.000001, z: 0}
+  m_LocalPosition: {x: -0.0000076293945, y: 0.99999905, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 7388814916808010722}
@@ -44137,13 +44130,13 @@ Light:
   m_Type: 2
   m_Shape: 0
   m_Color: {r: 0.52512383, g: 1, b: 0, a: 1}
-  m_Intensity: 2
+  m_Intensity: 5
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -44186,3 +44179,35 @@ Light:
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+--- !u!114 &1732048470784864498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8728525382657726575}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57f24a4aaa0761b45ba25e7e5108e2c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  UID: 1369074446
+  color: {r: 0.52512383, g: 1, b: 0, a: 1}
+  intensity: 2
+  shadowSpread: 0.05
+  cutoff: 10
+  realisticFalloff: 0
+  samples: 8
+  projMode: 0
+  cookie: {fileID: 0}
+  angle: 30
+  innerAngle: 0
+  cubemap: {fileID: 0}
+  iesFile: {fileID: 0}
+  bitmask: 1
+  bakeToIndirect: 0
+  shadowmask: 0
+  indirectIntensity: 0
+  falloffMinRadius: 1
+  shadowmaskGroupID: 0
+  directionMode: 0
