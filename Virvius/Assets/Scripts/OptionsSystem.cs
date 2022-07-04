@@ -785,7 +785,7 @@ public class OptionsSystem : MonoBehaviour
         {
             canQuit = false;
             if (inputPlayer.GetButtonDown("RSB") && !selectingOption) { DefaultOptions(); selectingOption = true; }
-            if (Input.GetKeyDown(KeyCode.Escape) && !selectingOption || inputPlayer.GetButtonDown("B") && !selectingOption)
+            if (Input.GetKeyUp(KeyCode.Escape) || inputPlayer.GetButtonUp("B"))
             {
                 BackButton();
                 audioSystem.PlayAudioSource(selectFx, 1, 1, 128);
