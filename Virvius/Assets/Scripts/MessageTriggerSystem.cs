@@ -76,7 +76,6 @@ public class MessageTriggerSystem : MonoBehaviour
                         if (gameSystem == null) 
                             gameSystem = GameSystem.gameSystem; 
                         gameSystem.secretsFound++;
-                        Debug.Log(gameSystem.secretsFound);
                     }
                     break;
                 }

@@ -28,6 +28,10 @@ public class LevelSystem : MonoBehaviour
     private Transform resultCameraPlaceholder;
     private Vector3 resultCameraPosition;
     private Quaternion resultCameraRotation;
+    //private void Start()
+    //{
+    //    SetDifficultyEnemies(4);
+    //}
     public void ResetLevel()
     {
 
@@ -42,7 +46,6 @@ public class LevelSystem : MonoBehaviour
             gameSystem.resultCamRotation = resultCameraRotation;
         }
         SetDifficultyEnemies(ActiveDifficulty());
-        gameSystem.totalLevelSecrets = secretDoorSystems.Length;
         for (int a = 0; a < ambushSystems.Length; a++)
             if (ambushSystems[a] != null || ambushSystems[a].gameObject.activeInHierarchy) ambushSystems[a].ResetObject();
         for (int a = 0; a < gruntSystems.Length; a++)
@@ -130,8 +133,18 @@ public class LevelSystem : MonoBehaviour
                    
                     break;
                 }
+            case 4:
+                {
+                    //for testing purposes to check if and difficulty active enemies are missing from list
+                    for (int e = 0; e < difficulty0Enemies.Length; e++) difficulty0Enemies[e].SetActive(false);
+                    for (int e = 0; e < difficulty1Enemies.Length; e++) difficulty1Enemies[e].SetActive(false);
+                    for (int e = 0; e < difficulty2Enemies.Length; e++) difficulty2Enemies[e].SetActive(false);
+                    for (int e = 0; e < difficulty3Enemies.Length; e++) difficulty3Enemies[e].SetActive(false);
+                    gameSystem.totalLevelEnemies = 0;
+                    break;
+                }
         }
-        Debug.Log(gameSystem.totalLevelEnemies);
+
     }
     private int ActiveDifficulty()
     {

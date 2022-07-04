@@ -50220,7 +50220,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1125648877444475536, guid: 606ee6ae220fa974baed4c03cbb1bc5e, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1364336066957925512, guid: 606ee6ae220fa974baed4c03cbb1bc5e, type: 3}
       propertyPath: m_audioClip

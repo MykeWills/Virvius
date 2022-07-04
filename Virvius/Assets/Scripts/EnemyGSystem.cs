@@ -30,17 +30,15 @@ public class EnemyGSystem : MonoBehaviour
     [Space]
     [Header("Inspector Assignment")]
     [SerializeField]
-    private Transform bulletPool;
-    [SerializeField]
     private MeshRenderer shotgunMuzzle;
     [SerializeField]
     private Light shotgunLight;
     [SerializeField]
-    private Transform ammoDropPool;
-    [SerializeField]
     private Transform emitter;
     [SerializeField]
     private GameObject bulletPrefab;
+    [SerializeField]
+    private GameObject weaponDropPrefab; 
     [SerializeField]
     private GameObject ammoDropPrefab;
     [SerializeField]
@@ -150,6 +148,7 @@ public class EnemyGSystem : MonoBehaviour
     private void Start()
     {
         CheckActiveComponents();
+
         originalPosition = transform.position;
         enemyState = startState;
         maxHealth = health;
@@ -163,10 +162,10 @@ public class EnemyGSystem : MonoBehaviour
         }
         if (isDead) return;
         if (ShutdownEnemy()) return;
+    
         RebootEnemy();
         IdleDistance();
         WalkDistance();
-        if (DefaultEnemy()) return;
         LineOfSight();
         if (!playerFound) return;
         CheckDistance();
@@ -223,25 +222,11 @@ public class EnemyGSystem : MonoBehaviour
         playerFound = false;
         rebootEnemy = false;
     }
-    private bool DefaultEnemy()
-    {
-        bool playerActive = false;
-
-        if(playerSystem != null) playerActive = playerSystem.isDead ? false : true;
-        if (!returnToDefault)
-        {
-            if (currentState.Length > 0) currentState.Clear();
-            enemyState = startState;
-            ActiveState();
-            playerFound = false;
-            returnToDefault = true;
-        }
-        return !playerActive;
-    }
     private bool ShutdownEnemy()
     {
         bool enemyActive = PlayerDistance() > 300 ? false : true;
-        if (!enemyActive) rebootEnemy = true;
+        bool playerActive = playerSystem.isDead ? false : true;
+        if (!enemyActive || !playerActive) rebootEnemy = true;
         animator.enabled = enemyActive;
         navAgent.enabled = enemyActive;
         return !enemyActive;
@@ -268,19 +253,19 @@ public class EnemyGSystem : MonoBehaviour
                     //minigun
                     case 3: dmgAmt = Random.Range(1.25f, 2.25f); break;
                     //grenade
-                    case 4: if (health <= (maxHealth / 4)) OverKill(); else dmgAmt = Random.Range(5f, 10f); break;
+                    case 4: if (health <= (maxHealth / 4)) Death(true); else dmgAmt = Random.Range(5f, 10f); break;
                     //rocket
-                    case 5: if (health <= (maxHealth / 4)) OverKill(); else dmgAmt = Random.Range(10f, 15); break;
+                    case 5: if (health <= (maxHealth / 4)) Death(true); else dmgAmt = Random.Range(10f, 15); break;
                     //railgun
-                    case 6: if (health <= (maxHealth / 4)) OverKill(); else dmgAmt = Random.Range(30.75f, 41.01f); break;
+                    case 6: if (health <= (maxHealth / 4)) Death(true); else dmgAmt = Random.Range(30.75f, 41.01f); break;
                     //photon
                     case 7: dmgAmt = Random.Range(3.60f, 5.1f); break;
                     //Sigma
-                    case 8: OverKill(); break;
+                    case 8: Death(true); break;
                     //Obstacle
                     case 9: dmgAmt = 1; break;
                     //MiniRocket
-                    case 10: if (health <= (maxHealth / 4)) OverKill(); else dmgAmt = Random.Range(2.5f, 5); break;
+                    case 10: if (health <= (maxHealth / 4)) Death(true); else dmgAmt = Random.Range(2.5f, 5); break;
                 }
                 float damage = powerupSystem.powerEnabled[2] ? 999 : powerupSystem.powerEnabled[0] ? Mathf.CeilToInt(dmgAmt) * 5 : dmgAmt;
                 Damage(damage);
@@ -531,6 +516,7 @@ public class EnemyGSystem : MonoBehaviour
     }
     private void SetNav(Vector3 nextPosition, bool active)
     {
+        if (!navAgent.enabled) return;
         if (!enemyBody.activeInHierarchy) return;
         Vector3 newPos = active ? nextPosition : transform.position;
         if (isDead) { navAgent.destination = transform.position; return; }
@@ -641,7 +627,7 @@ public class EnemyGSystem : MonoBehaviour
         if (isDead) return;
         gunFlash = true;
         audioSrc.PlayOneShot(enemySounds[1]);
-        GameObject bullet = AccessPool(bulletPool, bulletPrefab);
+        GameObject bullet = AccessPool(gameSystem.enemyBulletPools[0], bulletPrefab);
         if (characterController == null) { playerSystem = PlayerSystem.playerSystem; characterController = playerSystem.GetComponent<CharacterController>(); }
         Physics.IgnoreCollision(bullet.GetComponent<Collider>(), characterController);
         BulletSystem bulletSystem = bullet.GetComponent<BulletSystem>();
@@ -697,24 +683,29 @@ public class EnemyGSystem : MonoBehaviour
             gunflashTimer = gunflashTime;
         }
     }
-    public void OverKill()
+    private void Death(bool overKill)
     {
         if (boxCollider.enabled)
         {
-            for (int b = 0; b < bulletPool.childCount; b++)
+            gameSystem.totalKills++;
+            if (overKill)
             {
-                if (bulletPool.GetChild(b).gameObject.activeInHierarchy)
-                    bulletPool.GetChild(b).gameObject.SetActive(false);
+                health = 0;
+                goreExplosion.SetActive(true);
+                isDead = true;
+                enemyBody.SetActive(false);
             }
-            health = 0;
-            goreExplosion.SetActive(true);
-            isDead = true;
-            OnDeath();
-            enemyBody.SetActive(false);
+            else
+            {
+                enemyState = EnemyState.death;
+                ActiveState();
+                
+            }
             boxCollider.enabled = false;
+            navAgent.enabled = false;
+            gunFlash = false;
             shotgunMuzzle.transform.Rotate(0, 30, 0);
             shotgunMuzzle.enabled = false;
-            gunFlash = false;
             shotgunLight.enabled = false;
             gunflashTimer = gunflashTime;
             DropAmmo();
@@ -733,13 +724,13 @@ public class EnemyGSystem : MonoBehaviour
         dmgTaken += amt;
         if (amt >= health)
         {
-            if (EligibleForOverKill()) { OverKill(); return; }
+            if (EligibleForOverKill()) { Death(true); return; }
         }
         health -= amt;
         health = Mathf.Clamp(health, 0, maxHealth);
         isDead = health < 1 ? true : false;
         if (!isDead) OnDamaged();
-        else { audioSrc.PlayOneShot(enemySounds[3]); OnDeath(); }
+        else { audioSrc.PlayOneShot(enemySounds[3]); Death(false); }
     }
     private void OnDamaged()
     {
@@ -765,32 +756,18 @@ public class EnemyGSystem : MonoBehaviour
             isDamaged = false;
         }
     }
-    private void OnDeath()
-    {
-        if (boxCollider.enabled)
-        {
-            gameSystem.totalKills++;
-            Debug.Log(gameSystem.totalKills);
-            for (int b = 0; b < bulletPool.childCount; b++)
-            {
-                if (bulletPool.GetChild(b).gameObject.activeInHierarchy)
-                    bulletPool.GetChild(b).gameObject.SetActive(false);
-            }
-            enemyState = EnemyState.death;
-            ActiveState();
-            boxCollider.enabled = false;
-            navAgent.enabled = false;
-            gunFlash = false;
-            shotgunMuzzle.transform.Rotate(0, 30, 0);
-            shotgunMuzzle.enabled = false;
-            shotgunLight.enabled = false;
-            gunflashTimer = gunflashTime;
-            DropAmmo();
-        }
-    }
+ 
     private void DropAmmo()
     {
-        GameObject ammoPack = AccessPool(ammoDropPool, ammoDropPrefab);
+        GameObject ammoPack = null;
+        int rnd = Random.Range(0, 26);
+        if (rnd == 5)
+            ammoPack = AccessPool(gameSystem.enemyWeaponPools[0], weaponDropPrefab);
+        else
+        {
+            ammoPack = AccessPool(gameSystem.enemyAmmoPool, ammoDropPrefab);
+            if (ammoPack.tag != "GruntPack") ammoPack.tag = "GruntPack";
+        }
         ammoPack.transform.position = transform.position;
         ammoPack.transform.localRotation = Quaternion.identity;
         ammoPack.SetActive(true);
@@ -807,7 +784,7 @@ public class EnemyGSystem : MonoBehaviour
             GameObject newObj = Instantiate(instantiateObj, pool);
             return newObj;
         }
-        else return null;
+        return null;
     }
     public void ResetObject(bool setOrgPos)
     {
@@ -832,11 +809,6 @@ public class EnemyGSystem : MonoBehaviour
         shotgunLight.enabled = false;
         shotgunMuzzle.enabled = false;
         audioSrc.Stop();
-        for (int a = 0; a < ammoDropPool.childCount; a++)
-        {
-            if (ammoDropPool.GetChild(a).gameObject.activeInHierarchy)
-                ammoDropPool.GetChild(a).gameObject.SetActive(false);
-        }
         if (currentState.Length > 0) currentState.Clear();
         enemyState = startState;
         ActiveState();

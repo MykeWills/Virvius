@@ -452,7 +452,7 @@ public class InputSystem : MonoBehaviour
                 // when player direct camera away from water, stay above water
                 else if (breathOutActive && lookRotation[1] > -20) breathOut = true;
                 // Collision flags if player is touching bottom inside water but not underwater
-                swimGrounded = (controller.Move(moveDirection * time * 0.5f) & CollisionFlags.Below) != 0;
+                swimGrounded = (controller.Move(moveDirection * time * 0.75f) & CollisionFlags.Below) != 0;
             }
             // when the players head is [IS] underwater
             else

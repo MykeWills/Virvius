@@ -19,6 +19,7 @@ public class PlayerSystem : MonoBehaviour
     private ImpactReceiver playerImpact;
     [SerializeField]
     private float impactForce = 20f;
+    private PlayerGoreSystem goreSystem;
     private Renderer rainRenderer;
     private AudioSystem audioSystem;
     private LevelSystem levelSystem;
@@ -225,6 +226,8 @@ public class PlayerSystem : MonoBehaviour
     private Sprite[] flashSprites = new Sprite[4];
     [SerializeField]
     private Image[] enviromentUIActiveImage = new Image[3];
+    [SerializeField]
+    private Camera[] gameCameras = new Camera[2];
     [Space]
     [Header("Player Sound")]
     [SerializeField]
@@ -317,6 +320,7 @@ public class PlayerSystem : MonoBehaviour
         environmentSystem = EnvironmentSystem.environmentSystem;
         audioSystem = AudioSystem.audioSystem;
         commandSystem = CommandSystem.commandSystem;
+        goreSystem = goreExplode.GetComponent<PlayerGoreSystem>();
         characterController = GetComponent<CharacterController>();
         gameSystem.SetPlayerScenePosition(gameSystem.sceneIndex);
         versionIndex = 3;
@@ -1198,8 +1202,12 @@ public class PlayerSystem : MonoBehaviour
     public void MutilatePlayer()
     {
         if (commandSystem.masterCodesActive[0]) return;
-        goreExplode.transform.position = transform.position;
-        goreExplode.SetActive(true);
+        for(int c = 0; c < gameCameras.Length; c++)
+        {
+            gameCameras[c].enabled = false;
+        }
+        if (goreExplode.TryGetComponent(out PlayerGoreSystem goreSystem))
+            goreSystem.ActivateGore(true);
     }
     public void SetupNewLevel()
     {
@@ -1211,7 +1219,8 @@ public class PlayerSystem : MonoBehaviour
         HUD.SetActive(true);
         overKill = false;
         SetSigmaFlash(false);
-        goreExplode.SetActive(false);
+        if (goreExplode.TryGetComponent(out PlayerGoreSystem goreSystem))
+            goreSystem.ActivateGore(false);
         if (flashSigmaUI.enabled) flashSigmaUI.enabled = false;
         //=======================================================
         characterController.enabled = false;
@@ -1287,7 +1296,8 @@ public class PlayerSystem : MonoBehaviour
         HUD.SetActive(true);
         overKill = false;
         SetSigmaFlash(false);
-        goreExplode.SetActive(false);
+        if (goreSystem == null) goreSystem = goreExplode.GetComponent<PlayerGoreSystem>();
+        goreSystem.ActivateGore(false);
         if (flashSigmaUI.enabled) flashSigmaUI.enabled = false;
         characterController.enabled = false;
         fallDamage = false;
@@ -1331,6 +1341,7 @@ public class PlayerSystem : MonoBehaviour
         if (!isDead) return;
         if (inputSystem.inputPlayer.GetButtonUp("Start") && isDead || inputSystem.inputPlayer.GetButtonUp("Select") && isDead)
         {
+            gameSystem.ResetPools();
             messageSystem.EraseMessages();
             inputSystem.ResetInputSystem();
             weaponSystem.ResetWeaponSystem();
@@ -1338,7 +1349,9 @@ public class PlayerSystem : MonoBehaviour
             for(int kc = 0; kc < 3; kc++) SetActiveKey(kc, false);
             UIVersion(versionIndex);
             HUD.SetActive(true);
-            goreExplode.SetActive(false);
+            if (goreSystem == null) goreSystem = goreExplode.GetComponent<PlayerGoreSystem>();
+            goreSystem.ActivateGore(false);
+            for (int c = 0; c < gameCameras.Length; c++) gameCameras[c].enabled = true;
             //=======================================================
             characterController.enabled = false;
             fallDamage = false;

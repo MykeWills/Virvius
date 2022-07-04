@@ -142,6 +142,12 @@ public class GameSystem : MonoBehaviour
     public Vector3 resultCamPosition;
     [HideInInspector]
     public Quaternion resultCamRotation;
+    [Space]
+    [Header("Enemy Access")]
+    public Transform[] enemyBulletPools = new Transform[2];
+    public Transform enemyAmmoPool;
+    public Transform[] enemyWeaponPools = new Transform[2];
+
     private void Awake()
     {
         if (gameSystem == null)
@@ -162,6 +168,7 @@ public class GameSystem : MonoBehaviour
         for(int sb = 0; sb < resultSb.Length; sb++) resultSb[sb] = new StringBuilder();
         //load normally
         GameMouseActive(false, CursorLockMode.Locked);
+        ResetPools();
         //load debug
         //GameMouseActive(true, CursorLockMode.Confined);
     }
@@ -296,6 +303,7 @@ public class GameSystem : MonoBehaviour
             async = SceneManager.LoadSceneAsync(sceneIndex, LoadSceneMode.Single);
             async.allowSceneActivation = false;
             curSceneIndex = sceneIndex;
+            ResetPools();
         }
         else
         {
@@ -318,6 +326,32 @@ public class GameSystem : MonoBehaviour
             else if(SceneManager.GetActiveScene().isLoaded) StartLevel();
         }
         
+    }
+    public void ResetPools()
+    {
+        for(int p = 0; p < enemyBulletPools.Length; p++)
+        {
+            for (int c = 0; c < enemyBulletPools[p].childCount; c++) 
+            {
+                if (enemyBulletPools[p].GetChild(c).gameObject.activeInHierarchy)
+                    enemyBulletPools[p].GetChild(c).gameObject.SetActive(false);
+            }
+
+        }
+        for (int p = 0; p < enemyWeaponPools.Length; p++)
+        {
+            for (int c = 0; c < enemyWeaponPools[p].childCount; c++)
+            {
+                if (enemyWeaponPools[p].GetChild(c).gameObject.activeInHierarchy)
+                    enemyWeaponPools[p].GetChild(c).gameObject.SetActive(false);
+            }
+
+        }
+        for (int c = 0; c < enemyAmmoPool.childCount; c++)
+        {
+            if (enemyAmmoPool.GetChild(c).gameObject.activeInHierarchy)
+                enemyAmmoPool.GetChild(c).gameObject.SetActive(false);
+        }
     }
     private void StartLevel()
     {

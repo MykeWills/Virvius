@@ -136,7 +136,6 @@ public class EnemyDSystem : MonoBehaviour
         RebootEnemy();
         IdleDistance();
         WalkDistance();
-        if (DefaultEnemy()) return;
         LineOfSight();
         if (!playerFound) return;
         CheckDistance();
@@ -201,7 +200,8 @@ public class EnemyDSystem : MonoBehaviour
     private bool ShutdownEnemy()
     {
         bool enemyActive = PlayerDistance() > 300 ? false : true;
-        if (!enemyActive) rebootEnemy = true;
+        bool playerActive = playerSystem.isDead ? false : true;
+        if (!enemyActive || !playerActive) rebootEnemy = true;
         animator.enabled = enemyActive;
         navAgent.enabled = enemyActive;
         return !enemyActive;
@@ -232,19 +232,19 @@ public class EnemyDSystem : MonoBehaviour
                     //minigun
                     case 3: dmgAmt = Random.Range(0.25f, 1.25f); break;
                     //grenade
-                    case 4: if (health <= (maxHealth / 4)) OverKill(); else dmgAmt = Random.Range(5f, 10f); break;
+                    case 4: if (health <= (maxHealth / 4)) Death(true); else dmgAmt = Random.Range(5f, 10f); break;
                     //rocket
-                    case 5: if (health <= (maxHealth / 4)) OverKill(); else dmgAmt = Random.Range(10f, 15); break;
+                    case 5: if (health <= (maxHealth / 4)) Death(true); else dmgAmt = Random.Range(10f, 15); break;
                     //railgun
-                    case 6: if (health <= (maxHealth / 4)) OverKill(); else dmgAmt = Random.Range(30.75f, 41.01f); break;
+                    case 6: if (health <= (maxHealth / 4)) Death(true); else dmgAmt = Random.Range(30.75f, 41.01f); break;
                     //photon
                     case 7: dmgAmt = Random.Range(3.60f, 5.1f); break;
                     //Sigma
-                    case 8: OverKill(); break;
+                    case 8: Death(true); break;
                     //Obstacle
                     case 9: dmgAmt = 1; break;
                     //MiniRocket
-                    case 10: if (health <= (maxHealth / 4)) OverKill(); else dmgAmt = Random.Range(2.5f, 5); break;
+                    case 10: if (health <= (maxHealth / 4)) Death(true); else dmgAmt = Random.Range(2.5f, 5); break;
                 }
                 float damage = powerupSystem.powerEnabled[2] ? 999 : powerupSystem.powerEnabled[0] ? Mathf.CeilToInt(dmgAmt) * 5 : dmgAmt;
                 Damage(damage);
@@ -452,8 +452,8 @@ public class EnemyDSystem : MonoBehaviour
                 }
             case EnemyState.damage:
                 {
-                 
                     SetAnimation(4);
+                    HaltMovement();
                     break;
                 }
             case EnemyState.death:
@@ -566,19 +566,30 @@ public class EnemyDSystem : MonoBehaviour
             navAgent.transform.rotation = newRotation;
         }
     }
-    public void OverKill()
+    private void Death(bool overKill)
     {
-      
-        for (int mc = 0; mc < meshColliders.Length; mc++)
+        if (MeshEnabled())
         {
-            if (meshColliders[mc].enabled) meshColliders[mc].enabled = false;
-        }
-        health = 0;
-        goreExplosion.SetActive(true);
-        isDead = true;
-        OnDeath();
-        enemyBody.SetActive(false);
+            gameSystem.totalKills++;
+            if (overKill)
+            {
+                health = 0;
+                goreExplosion.SetActive(true);
+                isDead = true;
+                enemyBody.SetActive(false);
+            }
+            else
+            {
+                enemyState = EnemyState.death;
+                ActiveState();
 
+            }
+            for (int mc = 0; mc < meshColliders.Length; mc++)
+            {
+                if (meshColliders[mc].enabled) meshColliders[mc].enabled = false;
+            }
+            navAgent.enabled = false;
+        }
     }
     private bool EligibleForOverKill()
     {
@@ -593,13 +604,13 @@ public class EnemyDSystem : MonoBehaviour
         dmgTaken += amt;
         if (amt >= health)
         {
-            if (EligibleForOverKill()) { OverKill(); return; }
+            if (EligibleForOverKill()) { Death(true); return; }
         }
         health -= amt;
         health = Mathf.Clamp(health, 0, maxHealth);
         isDead = health < 1 ? true : false;
         if (!isDead) OnDamaged();
-        else { audioSrc.PlayOneShot(enemySounds[3]); OnDeath(); }
+        else { audioSrc.PlayOneShot(enemySounds[3]); Death(false); }
     }
     private void OnDamaged()
     {
@@ -626,22 +637,25 @@ public class EnemyDSystem : MonoBehaviour
         }
 
     }
-    private void OnDeath()
+    private bool MeshEnabled()
     {
         for (int mc = 0; mc < meshColliders.Length; mc++)
         {
-            if (meshColliders[mc].enabled) meshColliders[mc].enabled = false;
+            if (meshColliders[mc].enabled) return true;
         }
-        navAgent.enabled = false;
-        enemyState = EnemyState.death;
-        ActiveState();
+        return false;
+
     }
+  
     public void ResetObject(bool setOrgPos)
     {
         if (animator == null || audioSrc == null) Start();
         goreExplosion.SetActive(false);
         enemyBody.SetActive(true);
         animator.Rebind();
+        for (int mc = 0; mc < meshColliders.Length; mc++)
+            meshColliders[mc].enabled = true;
+        navAgent.enabled = true;
         damageResistanceTimer = damageResistanceTime;
         elapsed = 0.0f;
         health = maxHealth;
@@ -656,9 +670,7 @@ public class EnemyDSystem : MonoBehaviour
         if (currentState.Length > 0) currentState.Clear();
         enemyState = startState;
         ActiveState();
-        for (int mc = 0; mc < meshColliders.Length; mc++)
-            meshColliders[mc].enabled = true;
-        navAgent.enabled = true;
+      
         if (!setOrgPos) return;
         navAgent.Warp(originalPosition);
         transform.position = originalPosition;
