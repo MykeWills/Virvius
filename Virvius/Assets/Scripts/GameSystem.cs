@@ -7,8 +7,6 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine.SceneManagement;
 using System.Text;
-using System.Threading.Tasks;
-using System.Threading;
 
 public class GameSystem : MonoBehaviour
 {
@@ -143,8 +141,10 @@ public class GameSystem : MonoBehaviour
     [HideInInspector]
     public Quaternion resultCamRotation;
     [Space]
-    [Header("Enemy Access")]
+    [Header("Pool Access")]
+    private int[] bulletpoolAmt = new int[4] { 130, 70, 40, 10 };
     public Transform[] enemyBulletPools = new Transform[2];
+    public GameObject[] bulletHolePrefabs = new GameObject[4];
     public Transform[] bulletHolePool = new Transform[4];
     public Transform enemyAmmoPool;
     public Transform[] enemyWeaponPools = new Transform[2];
@@ -175,6 +175,7 @@ public class GameSystem : MonoBehaviour
     }
     private void Update()
     {
+        Debug.Log(bulletHolePool[0].childCount);
         LevelTime();
         LoadScene(sceneIndex);
         Pause();
@@ -356,6 +357,23 @@ public class GameSystem : MonoBehaviour
         {
             if (enemyAmmoPool.GetChild(c).gameObject.activeInHierarchy)
                 enemyAmmoPool.GetChild(c).gameObject.SetActive(false);
+        }
+
+        int[] poolAmt = new int[4]
+        {
+            bulletHolePool[0].childCount,
+            bulletHolePool[1].childCount,
+            bulletHolePool[2].childCount,
+            bulletHolePool[3].childCount
+        };
+        for (int c = 0; c < bulletHolePool.Length; c++)
+        {
+            if(poolAmt[c]  != bulletpoolAmt[c])
+            {
+                int totalholes = bulletpoolAmt[c] - poolAmt[c];
+                for(int h = 0; h < totalholes; h++)
+                    Instantiate(bulletHolePrefabs[c], bulletHolePool[c]);
+            }
         }
     }
     private void StartLevel()

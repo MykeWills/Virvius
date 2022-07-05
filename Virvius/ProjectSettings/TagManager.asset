@@ -70,6 +70,10 @@ TagManager:
   - ElitePack
   - GrenadeEBullet
   - SawBlade
+  - BulletHole
+  - PlasmaHole
+  - SigmaHole
+  - SpikeHole
   layers:
   - Default
   - TransparentFX

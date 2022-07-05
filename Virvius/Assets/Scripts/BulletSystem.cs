@@ -218,7 +218,8 @@ public class BulletSystem : MonoBehaviour
         hole.SetActive(true);
         if (holeSystem != hole.transform.GetComponent<HoleSystem>()) holeSystem = hole.GetComponent<HoleSystem>();
         int lifeTime = 0;
-        hole.transform.parent = hit.transform;
+        if(hit.transform != this)
+            hole.transform.parent = hit.transform;
         switch (transform.tag)
         {
             case "ShotgunBullet": lifeTime = 5; break;

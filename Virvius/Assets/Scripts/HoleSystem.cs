@@ -13,12 +13,12 @@ public class HoleSystem : MonoBehaviour
     private MeshRenderer meshRend;
     private Color hotHoleColor = new Color(1, 0.3f, 0, 1);
     private Color orgHoleColor = new Color(0.2f, 0.2f, 0.2f, 1);
-    private string[] meshNames = new string[4]
+    private string[] tags = new string[4]
     {
         "BulletHole",
         "PlasmaHole",
         "SigmaHole",
-        "Spike",
+        "SpikeHole",
     };
     void Update()
     {
@@ -66,16 +66,16 @@ public class HoleSystem : MonoBehaviour
         fadePercentage = Mathf.Clamp(fadePercentage, 0.0f, 1.0f);  // make sure you're in 0..100% 
         Color fadeColor = new Color(meshRend.material.color.r, meshRend.material.color.g, meshRend.material.color.b, fadePercentage) ;
         meshRend.material.SetColor("_Color", fadeColor);
-        if (fadePercentage == 0.0f) 
-        { 
-            isFading = false; 
+        if (fadePercentage == 0.0f)
+        {
+            isFading = false;
             isHot = false;
             if (gameSystem == null) gameSystem = GameSystem.gameSystem;
-            for(int h = 0; h < meshNames.Length; h++)
+            for (int h = 0; h < tags.Length; h++)
             {
-                if(meshRend.name == meshNames[h]) transform.parent = gameSystem.bulletHolePool[h];
+                if (transform.tag == tags[h]) { transform.parent = gameSystem.bulletHolePool[h]; gameObject.SetActive(false); }
             }
-            gameObject.SetActive(false); 
+            
         }
     }
 }
