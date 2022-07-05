@@ -137,7 +137,6 @@ public class EnemyESystem : MonoBehaviour
     private bool isDamaged = false;
     private bool updateNextPosition = false;
     private bool rebootEnemy = false;
-    private bool returnToDefault = false;
     private bool wasOnLink = false;
 
 
@@ -210,19 +209,6 @@ public class EnemyESystem : MonoBehaviour
         ActiveState();
         playerFound = false;
         rebootEnemy = false;
-    }
-    private bool DefaultEnemy()
-    {
-        bool playerActive = playerSystem.isDead ? false : true;
-        if (!returnToDefault)
-        {
-            if (currentState.Length > 0) currentState.Clear();
-            enemyState = startState;
-            ActiveState();
-            playerFound = false;
-            returnToDefault = true;
-        }
-        return !playerActive;
     }
     private bool ShutdownEnemy()
     {
@@ -765,7 +751,6 @@ public class EnemyESystem : MonoBehaviour
         isDamaged = false;
         playerFound = false;
         playerVisible = false;
-        returnToDefault = false;
         rebootEnemy = false;
         isDead = false;
         grenadeLight.enabled = false;

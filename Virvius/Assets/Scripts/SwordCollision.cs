@@ -10,7 +10,7 @@ public class SwordCollision : MonoBehaviour
     private GruntSystem enemyGrunt;
     private DinSystem enemyDin;
     private AudioSystem audioSystem;
-    private new ParticleSystem particleSystem;
+    private ParticleSystem ps;
     private RaycastHit hit;
     private Vector3 hitPosition;
     [HideInInspector]
@@ -115,12 +115,12 @@ public class SwordCollision : MonoBehaviour
     public void EnableSpark()
     {
         GameObject spark = AccessSpark();
-        if (particleSystem != spark.GetComponent<ParticleSystem>()) particleSystem = spark.GetComponent<ParticleSystem>();
+        if (ps != spark.GetComponent<ParticleSystem>()) ps = spark.GetComponent<ParticleSystem>();
         Vector3 fwd = transform.TransformDirection(Vector3.forward);
         if (Physics.Raycast(transform.position, fwd, out hit, Mathf.Infinity))
             spark.transform.position = hitPosition;
         spark.SetActive(true);
-        particleSystem.Play();
+        ps.Play();
 
     }
     private GameObject AccessSpark()

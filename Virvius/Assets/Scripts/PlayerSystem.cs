@@ -1342,6 +1342,7 @@ public class PlayerSystem : MonoBehaviour
         if (inputSystem.inputPlayer.GetButtonUp("Start") && isDead || inputSystem.inputPlayer.GetButtonUp("Select") && isDead)
         {
             gameSystem.ResetPools();
+            gameSystem.ResetLevelStats();
             messageSystem.EraseMessages();
             inputSystem.ResetInputSystem();
             weaponSystem.ResetWeaponSystem();

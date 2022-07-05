@@ -823,14 +823,13 @@ public class OptionsSystem : MonoBehaviour
         else if (fileSelectionOpen)
         {
             canQuit = false;
-            if (Input.GetKeyDown(KeyCode.Escape) && !selectingOption || inputPlayer.GetButtonDown("B") && !selectingOption)
+            if (Input.GetKeyUp(KeyCode.Escape) || inputPlayer.GetButtonUp("B"))
             {
                 OpenFileSelection(false);
                 gameSystem.SelectFileSelectable(0);
                 audioSystem.PlayAudioSource(selectFx, 1, 1, 128);
                 selectingOption = true;
             }
-            if (Input.GetKeyUp(KeyCode.Escape) || inputPlayer.GetButtonUp("B")) selectingOption = false;
         }
     }
     public void BackButton()

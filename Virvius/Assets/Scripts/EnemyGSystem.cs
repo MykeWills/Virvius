@@ -141,7 +141,6 @@ public class EnemyGSystem : MonoBehaviour
     private bool isDamaged = false;
     private bool updateNextPosition = false;
     private bool rebootEnemy = false;
-    private bool returnToDefault = false;
     private bool wasOnLink = false;
 
 
@@ -803,7 +802,6 @@ public class EnemyGSystem : MonoBehaviour
         isDamaged = false;
         playerFound = false;
         playerVisible = false;
-        returnToDefault = false;
         rebootEnemy = false;
         isDead = false;
         shotgunLight.enabled = false;

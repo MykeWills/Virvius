@@ -145,6 +145,7 @@ public class GameSystem : MonoBehaviour
     [Space]
     [Header("Enemy Access")]
     public Transform[] enemyBulletPools = new Transform[2];
+    public Transform[] bulletHolePool = new Transform[4];
     public Transform enemyAmmoPool;
     public Transform[] enemyWeaponPools = new Transform[2];
 
@@ -182,12 +183,16 @@ public class GameSystem : MonoBehaviour
     {
         if (!levelActive)
         {
-            if (levelTime != 0) levelTime = 0;
-            if (totalKills > 0) totalKills = 0;
-            if (secretsFound > 0) secretsFound = 0;
+            ResetLevelStats();
             return;
         }
         levelTime += Time.unscaledDeltaTime;
+    }
+    public void ResetLevelStats()
+    {
+        if (levelTime != 0) levelTime = 0;
+        if (totalKills > 0) totalKills = 0;
+        if (secretsFound > 0) secretsFound = 0;
     }
     public void ShowResults(bool active)
     {

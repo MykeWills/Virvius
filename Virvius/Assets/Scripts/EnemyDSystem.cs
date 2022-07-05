@@ -117,7 +117,6 @@ public class EnemyDSystem : MonoBehaviour
     private bool isDamaged = false;
     private bool updateNextPosition = false;
     private bool rebootEnemy = false;
-    private bool returnToDefault = false;
     private bool wasOnLink = false;
 
     private void Start()
@@ -165,19 +164,6 @@ public class EnemyDSystem : MonoBehaviour
         if (dist < walkPositionDistance) { ChangeDestination(); ActiveState(); }
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
         if (PlayerDistance() <= distanceRanges[2]) { if (playerVisible) { if (!playerFound) LineOfSight(); } }
-    }
-    private bool DefaultEnemy()
-    {
-        bool playerActive = playerSystem.isDead ? false : true;
-        if (!returnToDefault)
-        {
-            if (currentState.Length > 0) currentState.Clear();
-            enemyState = startState;
-            ActiveState();
-            playerFound = false;
-            returnToDefault = true;
-        }
-        return !playerActive;
     }
     private void IdleDistance()
     {
@@ -663,7 +649,6 @@ public class EnemyDSystem : MonoBehaviour
         isDamaged = false;
         playerFound = false;
         playerVisible = false;
-        returnToDefault = false;
         rebootEnemy = false;
         isDead = false;
         audioSrc.Stop();

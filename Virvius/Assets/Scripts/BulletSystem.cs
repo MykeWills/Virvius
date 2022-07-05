@@ -25,7 +25,7 @@ public class BulletSystem : MonoBehaviour
     private HoleSystem holeSystem;
     private Transform hPool;
     private Transform sPool;
-    private new ParticleSystem particleSystem;
+    private ParticleSystem ps;
     private RaycastHit hit;
     private Vector3 hitPosition;
     private Vector3 fwd;
@@ -144,12 +144,12 @@ public class BulletSystem : MonoBehaviour
     public void EnableSpark()
     {
         GameObject spark = AccessSpark();
-        if(particleSystem != spark.GetComponent<ParticleSystem>()) particleSystem = spark.GetComponent<ParticleSystem>();
+        if(ps != spark.GetComponent<ParticleSystem>()) ps = spark.GetComponent<ParticleSystem>();
         if(sparkType == SparkType.spark && projectileSfx != null && audioSrc != null & audioSrc.isActiveAndEnabled) audioSrc.PlayOneShot(projectileSfx);
         if (Physics.Raycast(transform.position, fwd, out hit, Mathf.Infinity))
             spark.transform.position = hit.point;
         spark.SetActive(true);
-        particleSystem.Play();
+        ps.Play();
  
     }
     private GameObject AccessSpark()
@@ -218,6 +218,7 @@ public class BulletSystem : MonoBehaviour
         hole.SetActive(true);
         if (holeSystem != hole.transform.GetComponent<HoleSystem>()) holeSystem = hole.GetComponent<HoleSystem>();
         int lifeTime = 0;
+        hole.transform.parent = hit.transform;
         switch (transform.tag)
         {
             case "ShotgunBullet": lifeTime = 5; break;
