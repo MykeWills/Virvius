@@ -61,7 +61,8 @@ public class KillTrigger : MonoBehaviour
             {
                 if (switchSystem == null) return;
                 //for when elevator hits player to reverse direction
-                switchSystem.DeactivateSwitch(switchSystem.switchSubType);
+                if(switchSystem.isActive) switchSystem.ActivateSwitch(switchSystem.switchSubType);
+                else switchSystem.DeactivateSwitch(switchSystem.switchSubType);
             }
         }
     }

@@ -123,15 +123,15 @@ public class WeaponSystem : MonoBehaviour
     private int weaponID = 0;
     private int handID = 0;
     //[public Access (Non Inspector)]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-    [HideInInspector]
+  
     public bool[] weaponEquipped;
     //[CHANGE VALUES TO OBTAIN EACH WEAPON]
-    [HideInInspector]
+    
     public bool[] weaponObtained;
     //[CHANGE VALUES TO MATCH TOTAL STARTING AMMO PER WEAPON]
-    [HideInInspector]
+   
     public int[] defaultWeaponAmmo; 
-    [HideInInspector]
+
     public int[] weaponAmmo;
     //[CHANGE VALUES TO MATCH TOTAL MAX AMMO CAPACITY PER WEAPON]
     [HideInInspector]
@@ -171,7 +171,7 @@ public class WeaponSystem : MonoBehaviour
     [HideInInspector]
     public float ammo = 0;
     [HideInInspector]
-    public int weaponIndex = 1;
+    public int weaponIndex = 0;
     //========================================================================================//
     //===================================[INSPECTOR FIELDS]====================================//
     //========================================================================================//
@@ -553,7 +553,10 @@ public class WeaponSystem : MonoBehaviour
             sigmaReady = false;
         }
         //else if (wType == WeaponType.Unarmed) anim.ResetTrigger("Swing");
-        weapons[weaponIndex].SetActive(false);
+        for (int w = 0; w < weapons.Length; w++)
+        {
+            weapons[w].SetActive(false);
+        }
         weaponEquipped[weaponIndex] = false;
         ShutOffMinigunSound();
         switch (type)
@@ -657,6 +660,7 @@ public class WeaponSystem : MonoBehaviour
             swordObject[0].SetActive(!bBlade);
             swordObject[1].SetActive(bBlade);
         }
+       
         // Grab the current weapon bobbing system
         if (bobSystem[weaponIndex] != weapons[weaponIndex].GetComponent<BobSystem>())
             bobSystem[weaponIndex] = weapons[weaponIndex].GetComponent<BobSystem>();
@@ -683,6 +687,7 @@ public class WeaponSystem : MonoBehaviour
     }
     public void ApplyAmmo()
     {
+        
         int val = 0;
         int versionID = playerSystem.versionID;
         int versionIndex = playerSystem.versionIndex;
@@ -693,7 +698,9 @@ public class WeaponSystem : MonoBehaviour
         weaponName[versionID].text = weaponNames[weaponIndex];
         ammo = weaponAmmo[val];
         ApplyWeaponThemeColor();
+       
         if (commandSystem == null) commandSystem = CommandSystem.commandSystem;
+        if (val == 0) return;
         if (!powerupSystem.powerEnabled[3] && !commandSystem.masterCodesActive[1])
         {
             if (ammo < 1)
@@ -738,7 +745,7 @@ public class WeaponSystem : MonoBehaviour
     {
         audioSystem.PlayAltAudioSource(0, minigunRevSfx[1], 1, 1f, false, false);
     }
-    public void ResetWeaponSystem()
+    public void ResetWeaponSystem(bool newGame)
     {
         anim.Rebind();
         isShooting = false;
@@ -766,28 +773,35 @@ public class WeaponSystem : MonoBehaviour
         weapons[weaponIndex].transform.localRotation = Quaternion.identity;
         aimObjects.Clear();
         //This is only temporary until save/load state is created
-        for (int w = 0; w < weaponObtained.Length; w++)
+        if (newGame)
         {
-            //
-            if (w < 10)
+            for (int w = 0; w < weaponObtained.Length; w++)
             {
-                if (w < 2)
+                //
+                if (w < 10)
                 {
-                    weaponSystem.weaponObtained[w] = true;
-                    weaponSystem.weaponAmmo[w] = defaultWeaponAmmo[w];
-                    weaponSystem.ApplyAmmo();
-                    weaponSystem.WeaponSetup(weaponSystem.weaponList[w]);
+                    if (w < 1)
+                    {
+                        weaponObtained[w] = true;
+                        weaponAmmo[w] = defaultWeaponAmmo[w];
+                        ApplyAmmo();
+                        WeaponSetup(weaponList[w]);
+                    }
+                    else
+                    {
+                        weaponObtained[w] = false;
+                        weaponAmmo[w] = 0;
+                        ApplyAmmo();
+                    }
                 }
-                else
-                {
-                    weaponSystem.weaponObtained[w] = false;
-                    weaponSystem.weaponAmmo[w] = 0;
-                    weaponSystem.ApplyAmmo();
-                }
+
             }
-
         }
-
+        else
+        {
+            ApplyAmmo();
+            WeaponSetup(weaponList[weaponIndex]);
+        }
     }
     public void GetAmmo(int index, int amt)
     {
@@ -840,14 +854,6 @@ public class WeaponSystem : MonoBehaviour
         }
         return 0;
     }
-    //private bool CheckWeaponAvailable()
-    //{
-    //    for (int w = weaponIndex; w < 10; w++)
-    //    {
-    //        if (weaponObtained[w] && weaponAmmo[w] > 0) return true;
-    //    }
-    //    return false;
-    //}
     private void ShiftWeapon()
     {
         //IF WEAPON RUNS OUT OF AMMO THE SHIFT TO THE NEXT WEAPON ============>>>
@@ -1570,6 +1576,7 @@ public class WeaponSystem : MonoBehaviour
     }
     private void CheckAmmo()
     {
+        if (weaponIndex == 0) return;
         int val = (weaponIndex == 3) ? 1 : weaponIndex;
         ammo = weaponAmmo[val];
         if (commandSystem == null) commandSystem = CommandSystem.commandSystem;
@@ -1614,20 +1621,23 @@ public class WeaponSystem : MonoBehaviour
             // check to see if current weapon ammo is empty first
             AudioClip weaponSfx = environmentSystem.headUnderWater ? noAmmoSound[1] : noAmmoSound[0];
             // if ammo is already empty and player is not [Berserk] or [Sword] equipped
-            if (ammoIsEmpty && !powerupSystem.powerEnabled[3] && !commandSystem.masterCodesActive[1] && wType != WeaponType.Unarmed)
+            if (weaponIndex != 0)
             {
-                // play [click] sound only when sound boolean is not active
-                if (!noAmmoActive)
+                if (ammoIsEmpty && !powerupSystem.powerEnabled[3] && !commandSystem.masterCodesActive[1])
                 {
-                    // play empty clip sound when player trys to shoot.
-                    audioSystem.PlayAudioSource(weaponSfx, 1, 0.5f, 128);
-                    // activate the sound boolean
-                    noAmmoActive = true;
-                    // if player is shooting deactivate the bool
-                    isShooting = false;
+                    // play [click] sound only when sound boolean is not active
+                    if (!noAmmoActive)
+                    {
+                        // play empty clip sound when player trys to shoot.
+                        audioSystem.PlayAudioSource(weaponSfx, 1, 0.5f, 128);
+                        // activate the sound boolean
+                        noAmmoActive = true;
+                        // if player is shooting deactivate the bool
+                        isShooting = false;
+                    }
+                    // don't continue the method
+                    return;
                 }
-                // don't continue the method
-                return;
             }
             // whem player has ammo fire the weapon
             // change the weapon gun shot sound based if the player is under water

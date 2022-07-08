@@ -2,6 +2,7 @@
 
 public class BobSystem : MonoBehaviour
 {
+    private GameSystem gameSystem;
     private WeaponSystem weaponSystem;
     private InputSystem inputSystem;
     private PlayerSystem playerSystem;
@@ -32,7 +33,7 @@ public class BobSystem : MonoBehaviour
     public AudioClip[] weaponAnimatedSounds = new AudioClip[2];
     public Transform[] weaponAnimatedObj = new Transform[1];
     private float heightAmount = .5f;
-    private float bobSpeed = 1.25f;
+    private float bobSpeed = 1.5f;
     [Space]
     [Header("ApplicateZ Amount")]
     public float backAmount = 0.5f;
@@ -54,6 +55,7 @@ public class BobSystem : MonoBehaviour
     public bool isRecoiling = false;
     public void Start()
     {
+        gameSystem = GameSystem.gameSystem;
         inputSystem = InputSystem.inputSystem;
         playerSystem = PlayerSystem.playerSystem;
         environmentSystem = EnvironmentSystem.environmentSystem;
@@ -90,6 +92,7 @@ public class BobSystem : MonoBehaviour
     }
     private void AnimatePlayer()
     {
+        if (gameSystem.BlockedAttributesActive()) return;
         if (weaponSystem.switchingWeapon) return;
         if (!inputSystem.isJumping)
         {
@@ -105,17 +108,19 @@ public class BobSystem : MonoBehaviour
             {
                 if (!inputSystem.IsOffGround() && weaponSystem.isWeaponMovementFinished)
                 {
-                    float inputModifyFactor = (inputSystem.inputX != 0.0f && inputSystem.inputY != 0.0f && inputSystem.limitDiagonalSpeed) ? 0.7071f : 1.0f;
+                    float inputModifyFactor = (inputSystem.inputX != 0.0f && inputSystem.inputY != 0.0f && inputSystem.limitDiagonalSpeed) ? 0.4f : 1.0f;
                     if (fall) fall = false; if (idle) idle = false;
-                    float curBobSpeed = inputSystem.isRunning ? bobSpeed * 1.35f : bobSpeed;
-                    float bobSpeedModule = inputSystem.isSwimming ? environmentSystem.headUnderWater ? curBobSpeed / 4f: curBobSpeed * 1.5f : curBobSpeed;
+                    float curBobSpeed = inputSystem.isRunning ? bobSpeed * 1.25f : bobSpeed;
+                    float bobSpeedModule = environmentSystem.headUnderWater ? curBobSpeed / 2f : curBobSpeed;
                     float X = HolsteredWeapon() ? weaponSystem.holsteredPos[weaponSystem.weaponIndex].x : bobVectors[bobIndex].x;
                     //float Y = HolsteredWeapon() ? weaponSystem.holsteredPos[weaponSystem.weaponIndex].y : bobVectors[bobIndex].y;
                     float Z = HolsteredWeapon() ? weaponSystem.holsteredPos[weaponSystem.weaponIndex].z : bobVectors[bobIndex].z;
                     Vector3 newBobValue = new Vector3(X, bobVectors[bobIndex].y, Z);
-                    transform.localPosition = MoveTowards(newBobValue, bobSpeedModule * (Mathf.Abs(inputSystem.inputX / 2) + Mathf.Abs(inputSystem.inputY)) * inputModifyFactor);
+                    transform.localPosition = MoveTowards(newBobValue, bobSpeedModule * (Mathf.Abs(inputSystem.inputX * 1.5f) + Mathf.Abs(inputSystem.inputY)) * inputModifyFactor);
                     if (transform.localPosition == newBobValue)
                     {
+                        if (bobIndex != 1)
+                            inputSystem.PlayFootStepSound();
                         bobIndex += switchDir ? -1 : +1;
                         if (bobIndex > 2 || bobIndex < 0) { bobIndex = 1; switchDir = !switchDir; }
                     }

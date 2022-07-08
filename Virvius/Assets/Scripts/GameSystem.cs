@@ -16,6 +16,7 @@ public class GameSystem : MonoBehaviour
     public static bool expandBulletPool = true;
     public bool isGameStarted = false;
     private OptionData optionData = new OptionData();
+    private PlayerData playerData = new PlayerData();
     private BinaryFormatter _BinaryFormatter = new BinaryFormatter();
     [SerializeField]
     private AudioSystem audioSystem;
@@ -67,13 +68,13 @@ public class GameSystem : MonoBehaviour
     private int curSceneIndex = 0;
     private string gamePath = "Data/";
     private string OPTION_FILE = "O_data";
+    private string PLAYER_FILE = "p_data";
     private string FILE_EXTENSION = ".vir";
     private string dataPath;
     [Header("Menu Assignment")]
     [SerializeField]
     private Selectable[] b_Select = new Selectable[6];
     private bool[] currentMenuButtonSelected = new bool[6] { true, false, false, false, false, false };
-
     [SerializeField]
     private AudioClip[] pauseOpenSfx = new AudioClip[2];
     [SerializeField]
@@ -141,6 +142,14 @@ public class GameSystem : MonoBehaviour
     [HideInInspector]
     public Quaternion resultCamRotation;
     [Space]
+    [Header("Save Settings")]
+    [SerializeField]
+    private Image saveIcon;
+    [SerializeField]
+    private float saveTime = 5;
+    private float saveTimer = 0;
+    private bool isSaving;
+    [Space]
     [Header("Pool Access")]
     private int[] bulletpoolAmt = new int[4] { 130, 70, 40, 10 };
     public Transform[] enemyBulletPools = new Transform[2];
@@ -175,10 +184,25 @@ public class GameSystem : MonoBehaviour
     }
     private void Update()
     {
-        Debug.Log(bulletHolePool[0].childCount);
+        if (Input.GetKeyDown(KeyCode.F2))
+            AutoSave();
+        if (Input.GetKeyDown(KeyCode.F3))
+            LoadPlayerData();
         LevelTime();
         LoadScene(sceneIndex);
         Pause();
+        Saving();
+    }
+    private void Saving()
+    {
+        if (!isSaving) return;
+        saveTimer -= Time.unscaledDeltaTime;
+        saveTimer = Mathf.Clamp(saveTimer, 0, saveTime);
+        if (saveTimer == 0)
+        {
+            saveIcon.enabled = false;
+            isSaving = false;
+        }
     }
     private void LevelTime()
     {
@@ -305,7 +329,7 @@ public class GameSystem : MonoBehaviour
         if (!isLoading) return;
         if (curSceneIndex != sceneIndex)
         {
-            Application.backgroundLoadingPriority = UnityEngine.ThreadPriority.High;
+            Application.backgroundLoadingPriority = ThreadPriority.High;
             async = SceneManager.LoadSceneAsync(sceneIndex, LoadSceneMode.Single);
             async.allowSceneActivation = false;
             curSceneIndex = sceneIndex;
@@ -381,8 +405,8 @@ public class GameSystem : MonoBehaviour
         // Shut off Loading Camera
         if (loadingCamera.activeInHierarchy) loadingCamera.SetActive(false);
         // turn on Player Object
-        player.transform.localPosition = scenePositions[sceneIndex];
-        player.SetActive(true);
+        
+       
         // Shut off Loading Screen
         if (loadingMenu.activeInHierarchy) loadingMenu.SetActive(false);
 
@@ -397,8 +421,8 @@ public class GameSystem : MonoBehaviour
             Time.timeScale = isPaused ? 0 : 1;
         }
 
-        if (sceneIndex > 1) playerSystem.SetupLevel();
-        else { SetMasterStart(); playerSystem.SetupNewLevel(); }
+        if (sceneIndex > 1) { player.SetActive(true); playerSystem.SetupLevel(); }
+        else { SetMasterStart(); player.transform.localPosition = scenePositions[sceneIndex]; player.SetActive(true); playerSystem.SetupNewLevel(); }
         isLoading = false;
         isGameStarted = true;
         levelActive = true;
@@ -496,7 +520,7 @@ public class GameSystem : MonoBehaviour
         Cursor.lockState = lockMode;
         Cursor.visible = active;
     }
-    public bool Load()
+    public bool LoadOptionData()
     {
         if (File.Exists(dataPath + gamePath + OPTION_FILE + FILE_EXTENSION))
         {
@@ -581,7 +605,7 @@ public class GameSystem : MonoBehaviour
         }
         else return false;
     }
-    public void Save()
+    public void SaveOptionData()
     {
         if (!Directory.Exists(dataPath + gamePath))
             Directory.CreateDirectory(dataPath + gamePath);
@@ -655,6 +679,170 @@ public class GameSystem : MonoBehaviour
 
         _BinaryFormatter.Serialize(stream, optionData);
         stream.Close();
+    }
+
+    public void LoadPlayerData()
+    {
+        if (!File.Exists(dataPath + gamePath + OPTION_FILE + FILE_EXTENSION)) return;
+        Stream stream = File.Open(dataPath + gamePath + OPTION_FILE + FILE_EXTENSION, FileMode.Open);
+        optionData = (OptionData)_BinaryFormatter.Deserialize(stream);
+        stream.Close();
+        //------------------------------------------------------------------------
+        //WEAPON SETTINGS---------------------------------------------------------
+        //------------------------------------------------------------------------
+        weaponSystem.weaponAmmo = new int[10] 
+        {
+            playerData.weaponAmmo[0],
+            playerData.weaponAmmo[1],
+            playerData.weaponAmmo[2],
+            playerData.weaponAmmo[3],
+            playerData.weaponAmmo[4],
+            playerData.weaponAmmo[5],
+            playerData.weaponAmmo[6],
+            playerData.weaponAmmo[7],
+            playerData.weaponAmmo[8],
+            playerData.weaponAmmo[9]
+        };
+        weaponSystem.weaponEquipped = new bool[10]
+        {
+            playerData.weaponEquipped[0],
+            playerData.weaponEquipped[1],
+            playerData.weaponEquipped[2],
+            playerData.weaponEquipped[3],
+            playerData.weaponEquipped[4],
+            playerData.weaponEquipped[5],
+            playerData.weaponEquipped[6],
+            playerData.weaponEquipped[7],
+            playerData.weaponEquipped[8],
+            playerData.weaponEquipped[9]
+        };
+        weaponSystem.weaponObtained = new bool[10]
+        {
+            playerData.weaponObtained[0],
+            playerData.weaponObtained[1],
+            playerData.weaponObtained[2],
+            playerData.weaponObtained[3],
+            playerData.weaponObtained[4],
+            playerData.weaponObtained[5],
+            playerData.weaponObtained[6],
+            playerData.weaponObtained[7],
+            playerData.weaponObtained[8],
+            playerData.weaponObtained[9]
+        };
+      
+        weaponSystem.weaponIndex = playerData.weaponIndex;
+        weaponSystem.ApplyAmmo();
+        weaponSystem.WeaponSetup(weaponSystem.weaponList[weaponSystem.weaponIndex]);
+        //------------------------------------------------------------------------
+        //PLAYER SETTINGS---------------------------------------------------------
+        //------------------------------------------------------------------------
+        playerSystem.health = playerData.health;
+        playerSystem.armor = playerData.armor;
+        playerSystem.maxArmor = playerData.maxArmor;
+        playerSystem.maxHealth = playerData.maxHealth;
+        playerSystem.ApplyPlayerHealthAndArmor();
+        playerSystem.keyCards = new bool[3]
+        {
+                playerData.keyCards[0],
+                playerData.keyCards[1],
+                playerData.keyCards[2]
+        };
+        for(int k = 0; k < playerSystem.keyCards.Length; k++)
+        {
+            if(playerSystem.keyCards[k])
+                playerSystem.GiveKey(k);
+        }
+     
+        //------------------------------------------------------------------------
+        //GAME SETTINGS-----------------------------------------------------------
+        //------------------------------------------------------------------------
+        curSceneIndex = playerData.sceneIndex;
+        SetNewLevel(curSceneIndex);
+        playerSystem.WarpPlayer(playerData.playerPosition, playerData.playerRotation);
+    }
+    public void SavePlayerData()
+    {
+        if (!Directory.Exists(dataPath + gamePath))
+            Directory.CreateDirectory(dataPath + gamePath);
+        Stream stream = File.Create(dataPath + gamePath + PLAYER_FILE + FILE_EXTENSION);
+        //------------------------------------------------------------------------
+        //WEAPON SETTINGS---------------------------------------------------------
+        //------------------------------------------------------------------------
+        playerData.weaponAmmo = new int[10]
+        {
+            weaponSystem.weaponAmmo[0],
+            weaponSystem.weaponAmmo[1],
+            weaponSystem.weaponAmmo[2],
+            weaponSystem.weaponAmmo[3],
+            weaponSystem.weaponAmmo[4],
+            weaponSystem.weaponAmmo[5],
+            weaponSystem.weaponAmmo[6],
+            weaponSystem.weaponAmmo[7],
+            weaponSystem.weaponAmmo[8],
+            weaponSystem.weaponAmmo[9]
+        };
+        playerData.weaponEquipped = new bool[10]
+        {
+            weaponSystem.weaponEquipped[0],
+            weaponSystem.weaponEquipped[1],
+            weaponSystem.weaponEquipped[2],
+            weaponSystem.weaponEquipped[3],
+            weaponSystem.weaponEquipped[4],
+            weaponSystem.weaponEquipped[5],
+            weaponSystem.weaponEquipped[6],
+            weaponSystem.weaponEquipped[7],
+            weaponSystem.weaponEquipped[8],
+            weaponSystem.weaponEquipped[9]
+        };
+        playerData.weaponObtained = new bool[10]
+        {
+            weaponSystem.weaponObtained[0],
+            weaponSystem.weaponObtained[1],
+            weaponSystem.weaponObtained[2],
+            weaponSystem.weaponObtained[3],
+            weaponSystem.weaponObtained[4],
+            weaponSystem.weaponObtained[5],
+            weaponSystem.weaponObtained[6],
+            weaponSystem.weaponObtained[7],
+            weaponSystem.weaponObtained[8],
+            weaponSystem.weaponObtained[9]
+        };
+        playerData.weaponIndex = weaponSystem.weaponIndex;
+        //------------------------------------------------------------------------
+        //PLAYER SETTINGS---------------------------------------------------------
+        //------------------------------------------------------------------------
+        playerData.health = playerSystem.health;
+        playerData.armor = playerSystem.armor;
+        playerData.maxArmor = playerSystem.maxArmor;
+        playerData.maxHealth = playerSystem.maxHealth;
+        playerData.keyCards = new bool[3]
+        {
+                playerSystem.keyCards[0],
+                playerSystem.keyCards[1],
+                playerSystem.keyCards[2]
+        };
+        playerData.playerPosition = playerSystem.transform.position;
+        playerData.playerRotation = playerSystem.transform.rotation;
+        //------------------------------------------------------------------------
+        //GAME SETTINGS-----------------------------------------------------------
+        //------------------------------------------------------------------------
+        playerData.sceneIndex = curSceneIndex;
+
+        _BinaryFormatter.Serialize(stream, playerData);
+        stream.Close();
+    }
+    public void AutoSave()
+    {
+        if (!optionsSystem.autoSave) return;
+        SavePlayerData();
+        SaveOptionData();
+        saveIcon.enabled = true;
+        saveTimer = saveTime;
+        isSaving = true;
+    }
+    public void AutoLoad()
+    {
+
     }
     public void SetPlayerScenePosition(int index)
     {
@@ -738,4 +926,82 @@ public struct OptionData
     public int sampleRateIndex;
     public int dpsBufferIndex;
     public int soundtrackIndex;
+}
+[Serializable]
+public struct PlayerData
+{
+    //----------------------
+    //WEAPON SETTINGS
+    //----------------------
+    public int[] weaponAmmo;
+    public int weaponIndex;
+    public bool[] weaponObtained;
+    public bool[] weaponEquipped;
+    //----------------------
+    //PLAYER SETTINGS
+    //----------------------
+    public float health;
+    public float armor;
+    public int maxArmor;
+    public int maxHealth;
+    public bool[] keyCards;
+    public SerializableQuaternion playerRotation;
+    public SerializableVector3 playerPosition;
+    //----------------------
+    //GAME SETTINGS
+    //----------------------
+    public int sceneIndex;
+}
+[Serializable]
+public struct SerializableVector3
+{
+    public float x;
+    public float y;
+    public float z;
+    public SerializableVector3(float rX, float rY, float rZ)
+    {
+        x = rX;
+        y = rY;
+        z = rZ;
+    }
+    public override string ToString()
+    {
+        return string.Format("[{0}, {1}, {2}]", x, y, z);
+    }
+    public static implicit operator Vector3(SerializableVector3 rValue)
+    {
+        return new Vector3(rValue.x, rValue.y, rValue.z);
+    }
+    public static implicit operator SerializableVector3(Vector3 rValue)
+    {
+        return new SerializableVector3(rValue.x, rValue.y, rValue.z);
+    }
+}
+[Serializable]
+public struct SerializableQuaternion
+{
+    public float x;
+    public float y;
+    public float z;
+    public float w;
+
+    public SerializableQuaternion(float rX, float rY, float rZ, float rW)
+    {
+        x = rX;
+        y = rY;
+        z = rZ;
+        w = rW;
+    }
+    public override string ToString()
+    {
+        return string.Format("[{0}, {1}, {2}, {3}]", x, y, z, w);
+    }
+    public static implicit operator Quaternion(SerializableQuaternion rValue)
+    {
+        return new Quaternion(rValue.x, rValue.y, rValue.z, rValue.w);
+    }
+    public static implicit operator SerializableQuaternion(Quaternion rValue)
+    {
+        return new SerializableQuaternion(rValue.x, rValue.y, rValue.z, rValue.w);
+    }
 }

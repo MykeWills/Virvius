@@ -134,8 +134,10 @@ public class PlayerSystem : MonoBehaviour
     private float flashTime = 0.3f;
     private float flashTimer;
     private float flashSigmaTimer;
-    private float health = 100;
-    private float armor = 0;
+    [HideInInspector]
+    public float health = 100;
+    [HideInInspector]
+    public float armor = 0;
     private float reviverTime = 1;
     private float reviverTimer;
     private float time = 0;
@@ -144,7 +146,8 @@ public class PlayerSystem : MonoBehaviour
     private float hitCapTimer = 1;
     [HideInInspector]
     public int maxArmor = 50;
-    private int maxHealth = 200;
+    [HideInInspector]
+    public int maxHealth = 200;
     private int uISelectIndex = 3;
 
     //[public Access (Non Inspector)]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -528,7 +531,7 @@ public class PlayerSystem : MonoBehaviour
                     if (weaponSystem.ReEquipWeapon())
                         weaponSystem.AutoSelectWeapon(t);
                 }
-                weaponSystem.GetAmmo(t, weaponSystem.defaultWeaponAmmo[t] * 2);
+                weaponSystem.GetAmmo(t, weaponSystem.defaultWeaponAmmo[t]);
                 messageSystem.SetMessage(BuildFixedMessages(weaponPickupMessage[t]), MessageSystem.MessageType.Top);
                 other.gameObject.SetActive(false);
                 break;
@@ -1211,9 +1214,10 @@ public class PlayerSystem : MonoBehaviour
     }
     public void SetupNewLevel()
     {
+        //gameSystem.LoadPlayerData();
         messageSystem.EraseMessages();
         inputSystem.ResetInputSystem();
-        weaponSystem.ResetWeaponSystem();
+        weaponSystem.ResetWeaponSystem(true);
         powerupSystem.ResetPowerupSystem();
         UIVersion(versionIndex);
         HUD.SetActive(true);
@@ -1289,9 +1293,11 @@ public class PlayerSystem : MonoBehaviour
     }
     public void SetupLevel()
     {
+
         messageSystem.EraseMessages();
         inputSystem.ResetInputSystem();
         powerupSystem.ResetPowerupSystem();
+        weaponSystem.ResetWeaponSystem(false);
         UIVersion(versionIndex);
         HUD.SetActive(true);
         overKill = false;
@@ -1328,6 +1334,7 @@ public class PlayerSystem : MonoBehaviour
         if (levelSystem != null) levelSystem.ResetLevel();
         characterController.enabled = true;
         messageSystem.SetMessage(levelTitle[gameSystem.sceneIndex], MessageSystem.MessageType.Display);
+        gameSystem.AutoSave();
     }
     public void ActivateLevelEnviromentSounds()
     {
@@ -1341,11 +1348,12 @@ public class PlayerSystem : MonoBehaviour
         if (!isDead) return;
         if (inputSystem.inputPlayer.GetButtonUp("Start") && isDead || inputSystem.inputPlayer.GetButtonUp("Select") && isDead)
         {
+            gameSystem.LoadPlayerData();
             gameSystem.ResetPools();
             gameSystem.ResetLevelStats();
             messageSystem.EraseMessages();
             inputSystem.ResetInputSystem();
-            weaponSystem.ResetWeaponSystem();
+            weaponSystem.ResetWeaponSystem(false);
             powerupSystem.ResetPowerupSystem();
             for(int kc = 0; kc < 3; kc++) SetActiveKey(kc, false);
             UIVersion(versionIndex);
@@ -1360,7 +1368,7 @@ public class PlayerSystem : MonoBehaviour
             SetSigmaFlash(false);
             if (flashSigmaUI.enabled) flashSigmaUI.enabled = false;
             transform.SetParent(originParent);
-            gameSystem.SetPlayerScenePosition(gameSystem.sceneIndex);
+            //gameSystem.SetPlayerScenePosition(gameSystem.sceneIndex);
             isDamaged = false;
             suicideDamage = false;
             SetFlash(false);
@@ -1396,12 +1404,9 @@ public class PlayerSystem : MonoBehaviour
             else if (versionIndex > 2)
                 SetUIColor(hAmtText[versionIndex], hBar[versionID], hIcon[versionIndex], visorColor2);
             else SetUIColor(hAmtText[versionIndex], hBar[versionID], hIcon[versionIndex], Color.white);
-            health = 100;
             SetUIColor(aAmtText[versionIndex], aBar[versionID], null, Color.clear);
             for(int a = 0; a < 4; a++)
                 armorBannerObject[a].SetActive(false);
-            armor = 0;
-            maxArmor = 50;
             SetArmorSprites();
             for (int et = 0; et < 4; et++)
             {
@@ -1419,9 +1424,8 @@ public class PlayerSystem : MonoBehaviour
             crosshair.enabled = true;
             ApplyPlayerHealthAndArmor();
             messageSystem.SetMessage(levelTitle[gameSystem.sceneIndex], MessageSystem.MessageType.Display);
-        }
-        else if (transform.localPosition == gameSystem.scenePositions[gameSystem.sceneIndex] && isDead)
             isDead = false;
+        } 
     }
     private void KillPlayer()
     {

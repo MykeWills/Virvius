@@ -35,7 +35,6 @@ public class ElevatorTrigger : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
-        
             other.gameObject.transform.parent = holderReturn;
         }
     }

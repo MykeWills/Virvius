@@ -32,18 +32,13 @@ public class InputSystem : MonoBehaviour
     private enum RotationAxes { XY, X, Y };
     private RotationAxes axis = RotationAxes.XY;
     private FootElement footElement = FootElement.Normal;
-    private FootElement currentFootElement = FootElement.Normal;
-    private Vector3 contactPoint = new Vector3();
     private Vector3 fallStartLevel = new Vector3();
-    private Vector3 lastStepPosition = new Vector3();
     private Vector3 headStartPos = new Vector3();
     private Vector3 swimDir = Vector3.zero;
     private Vector3[] bobVectors = new Vector3[3];
     private RaycastHit playerHit = new RaycastHit();
     private RaycastHit wallHit = new RaycastHit();
-    private RaycastHit controllerHit = new RaycastHit();
     //[Variables]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
-    private bool fallDamage = false;
     [HideInInspector]
     public bool isGrounded = false;
     private bool isSliding = false;
@@ -58,39 +53,48 @@ public class InputSystem : MonoBehaviour
     private bool breathOut = false;
     private bool breathOutActive = false;
     private bool diveUnder = false;
+    [Space]
+    [Header("Moving Controls")]
+    [SerializeField]
+    private float moveAcceleration = 400;    
     [SerializeField]
     private float moveSpeed = 40;
     [SerializeField]
+    private float moveSlowDownSpeed = 5;
+    [SerializeField]
     private float runSpeed = 60;
+    [Space]
+    [Header("Strafe Controls")]
+    [SerializeField]
+    private float strafeAcceleration = 400;
     [SerializeField]
     private float strafeSpeed = 20;
     [SerializeField]
+    private float inputThreshold = 0.75f;
+    [SerializeField]
     private float runStrafeSpeed = 40;
+    [SerializeField]
+    private float strafeSlowDownSpeed = 5;
+   
+    public float forceX = 0;
+    public float forceZ = 0;
 
+    public float lookSpeed = 5;
+    public float lookPower = 0;
+    public float lookPowerThreshold = 1.5f;
+    public float lookAcceleration = 5;
     private float clampLookAngle = 75;
     private float lookAxis = 0;
     [SerializeField]
     private float jumpSpeed = 40f;
     private float antiBumpFactor = 0.75f;
     private float tiltAngle = 0;
+    [SerializeField]
     private float tiltSpeed = 0.5f;
     private float tiltReturnRate = 120;
     private float fallingDamageThreshold = 10.0f;
     private float swimTime = 1;
     private float swimTimer = 0;
-    private float lastFootstepPlayedTime = 0;
-    private float velocityPollPeriod = 0.2f;
-    private float currentFootstepsWaitingPeriod = 0;
-    [SerializeField]
-    private float stepSoundRatioA = 1.0f;
-    [SerializeField]
-    private float stepSoundRatioN = 2.0f;
-    [SerializeField]
-    private float stepSoundRatioB = 1.0f;
-    [SerializeField]
-    private float stepSoundRatioC = 80.0f;
-    private float timePerStep = 0;
-    private float stepsPerSecond = 0;
     private float headbobSpeedY = 3f;
     private float AboveOrBelowZeroY = 0;
     private float UpAndDownAmount = 10;
@@ -146,16 +150,16 @@ public class InputSystem : MonoBehaviour
     [SerializeField]
     private float gravityPull = 100;
     // Player Sliding
-    [Range(0, 70)]
-    [SerializeField]
-    private float slideAngle = 50;
-    [Range(0, 100)]
-    [SerializeField]
-    private float slideSpeed = 40;
-    [SerializeField]
-    private bool slideOnAngle = true;
-    [SerializeField]
-    private bool slideOnTag = false;
+    //[Range(0, 70)]
+    //[SerializeField]
+    //private float slideAngle = 50;
+    //[Range(0, 100)]
+    //[SerializeField]
+    //private float slideSpeed = 40;
+    //[SerializeField]
+    //private bool slideOnAngle = true;
+    //[SerializeField]
+    //private bool slideOnTag = false;
     [SerializeField]
     private AudioClip playerJSound;
     [SerializeField]
@@ -206,12 +210,11 @@ public class InputSystem : MonoBehaviour
         // set the gravity
         gravity = gravityPull;
         swimTimer = swimTime;
-        InvokeRepeating("EstimatePlayerVelocity_InvokeRepeating", 1.0f, velocityPollPeriod);
     }
     private void Update()
     {
         if (gameSystem.BlockedAttributesActive()) return;
-
+  
         time = Time.deltaTime * (commandSystem.masterCodesActive[3] ? 1.5f : (powerupSystem.powerEnabled[3] ? 1.25f : 1));
         bobVectors[0] = WeaponAnimation(weaponAnimType.up);
         if (overTilt)
@@ -251,19 +254,18 @@ public class InputSystem : MonoBehaviour
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         isJumping = false;
-        if (!fallDamage)
-        {
-            //if ( !isGrounded || isJumping)
-            // play landing sound
-        }
-        if (hit.gameObject.CompareTag("Wood")) SetFootElement(FootElement.Wood);
-        else if (hit.gameObject.CompareTag("Metal")) SetFootElement(FootElement.Metal);
+        //if (!fallDamage)
+        //{
+        //    //if ( !isGrounded || isJumping)
+        //    // play landing sound
+        //}
+        if (hit.gameObject.CompareTag("Wood")) footElement = FootElement.Wood;
+        else if (hit.gameObject.CompareTag("Metal")) footElement = FootElement.Metal;
         else
         {
             if (!swimGrounded)
-                SetFootElement(FootElement.Normal);
+                footElement = FootElement.Normal;
         }
-        contactPoint = hit.point;
     }
     private void OnTriggerExit(Collider other)
     {
@@ -310,13 +312,9 @@ public class InputSystem : MonoBehaviour
     //========================================================================================//
     private void Move()
     {
-      
-        // player input of left stick or Arrow Keys
         inputX = inputPlayer.GetAxis("LSH");
         inputY = inputPlayer.GetAxis("LSV");
 
-        // if no player input and angle limit true, slow down input factor [For player control when moving diagonal]
-        float inputModifyFactor = (inputX > 0.5f && inputY > 0.5f && limitDiagonalSpeed) ? 0.8f : 1.0f;
         float curMoveSpeed = optionsSystem.alwaysRun ? runSpeed : moveSpeed;
         float curStrafeSpeed = optionsSystem.alwaysRun ? runStrafeSpeed : strafeSpeed;
         
@@ -412,9 +410,9 @@ public class InputSystem : MonoBehaviour
                 // Move speed in the water
                 float waterSpeed = moveSpeed / 1.05f;
                 // Move Horizontal
-                moveDirection.x = inputX * waterSpeed * inputModifyFactor;
+                moveDirection.x = inputX * waterSpeed;
                 // Move Applicate
-                moveDirection.z = inputY * waterSpeed * inputModifyFactor;
+                moveDirection.z = inputY * waterSpeed;
                 // When player is above water and [IS] grounded
                 if(!breathOut)
                 {
@@ -561,39 +559,113 @@ public class InputSystem : MonoBehaviour
             // when the player is grounded
             if (isGrounded)
             {
-                
+               
                 // [PLAYER SLIDING] -----------------------------------------------------------------------------
                 swimGrounded = false;
-                isSliding = false;
-                // when player transform collides with slide angle, sliding = true
-                if (Physics.Raycast(transform.position, -Vector3.up, out controllerHit))
+                //isSliding = false;
+                //// when player transform collides with slide angle, sliding = true
+                //if (Physics.Raycast(transform.position, -Vector3.up, out controllerHit))
+                //{
+                //    if (Vector3.Angle(controllerHit.normal, Vector3.up) > slideAngle)
+                //        isSliding = true;
+                //}
+                //// when player collision contact point collides with slide angle, sliding = true
+                //else
+                //{
+                //    Physics.Raycast(contactPoint + Vector3.up, -Vector3.up, out controllerHit);
+                //    if (Vector3.Angle(controllerHit.normal, Vector3.up) > slideAngle)
+                //        isSliding = true;
+                //}
+                //// start sliding the player based on angle or tag in direction of the angle
+                //if ((isSliding && slideOnAngle) || (isSliding && slideOnTag))
+                //{
+                //    Vector3 hitNormal = controllerHit.normal;
+                //    moveDirection = new Vector3(hitNormal.x, -hitNormal.y, hitNormal.z);
+                //    Vector3.OrthoNormalize(ref hitNormal, ref moveDirection);
+                //    moveDirection *= slideSpeed;
+                //}
+                //// Start moving the player based on player input
+                //else
+                //{
+
+
+                //}
+                if (OverInputThreshold(inputX, optionsSystem.usingKeyboard ? 0 : inputThreshold))
                 {
-                    if (Vector3.Angle(controllerHit.normal, Vector3.up) > slideAngle)
-                        isSliding = true;
+                    //-----------------------------------------------------------------------------
+                    //Version 1 of the movement/glide, [Start speed at 0 + gradually increase]
+                    //-----------------------------------------------------------------------------
+                    //forceX += (time / 8 * inputX * strafeAcceleration) * 100;
+
+
+                    //-----------------------------------------------------------------------------
+                    //Version 2 of the movement/glide, [Start speed at max]
+                    //-----------------------------------------------------------------------------
+                    //forceX = inputX * strafeAcceleration * 100;
+
+
+                    //-----------------------------------------------------------------------------
+                    //Version 3 of the movement/glide, [Start speed at 1/4 + gradually increase]
+                    //-----------------------------------------------------------------------------
+                    if (inputX < 0 && forceX > -curStrafeSpeed / 4) forceX = -curStrafeSpeed / 4;
+                    else if (inputX > 0 && forceX < curStrafeSpeed / 4) forceX = curStrafeSpeed / 4;
+                    forceX += (time / 8 * inputX * strafeAcceleration) * 100;
+
+
+                    //CLAMP MAX SPEED==============================================================
+                    if (forceX > curStrafeSpeed) forceX = curStrafeSpeed;
+                    if (forceX < -curStrafeSpeed) forceX = -curStrafeSpeed;
+
+
                 }
-                // when player collision contact point collides with slide angle, sliding = true
                 else
                 {
-                    Physics.Raycast(contactPoint + Vector3.up, -Vector3.up, out controllerHit);
-                    if (Vector3.Angle(controllerHit.normal, Vector3.up) > slideAngle)
-                        isSliding = true;
+                    float decreaseX = AxisModule(forceX);
+                    if (forceX != 0) forceX += ((time / 8 * strafeSlowDownSpeed) * 100) * -decreaseX;
+
+                    if (forceX < 1f && forceX > 0) forceX = 0;
+                    else if (forceX > -1f && forceX < 0f) forceX = 0;
                 }
-                // start sliding the player based on angle or tag in direction of the angle
-                if ((isSliding && slideOnAngle) || (isSliding && slideOnTag))
+                if (OverInputThreshold(inputY, optionsSystem.usingKeyboard ? 0 : inputThreshold))
                 {
-                    Vector3 hitNormal = controllerHit.normal;
-                    moveDirection = new Vector3(hitNormal.x, -hitNormal.y, hitNormal.z);
-                    Vector3.OrthoNormalize(ref hitNormal, ref moveDirection);
-                    moveDirection *= slideSpeed;
+                    //-----------------------------------------------------------------------------
+                    //Version 1 of the movement/glide, [Start speed at 0 + gradually increase]
+                    //-----------------------------------------------------------------------------
+                    //forceZ += (time / 8 * inputY * moveAcceleration) * 100;
+
+
+                    //-----------------------------------------------------------------------------
+                    //Version 2 of the movement/glide, [Start speed at max]
+                    //-----------------------------------------------------------------------------
+                    //forceZ = inputY * moveAcceleration * 100;
+
+
+                    //-----------------------------------------------------------------------------
+                    //Version 3 of the movement/glide, [Start speed at 1/4 + gradually increase]
+                    //-----------------------------------------------------------------------------
+                    if (inputY < 0 && forceZ > -curMoveSpeed / 4) forceZ = -curMoveSpeed / 4;
+                    else if (inputY > 0 && forceZ < curMoveSpeed / 4) forceZ = curMoveSpeed / 4;
+                    forceZ += (time / 8 * inputY * moveAcceleration) * 100;
+
+                    //forceZ += (time / 8 * inputY * moveAcceleration) * 100;
+                    //forceZ = inputY * moveAcceleration * 100;
+
+                    if (forceZ > curMoveSpeed) forceZ = curMoveSpeed;
+                    if (forceZ < -curMoveSpeed) forceZ = -curMoveSpeed;
                 }
-                // Start moving the player based on player input
                 else
                 {
-                    moveDirection = new Vector3(inputX * curStrafeSpeed, -antiBumpFactor, inputY * curMoveSpeed);
-                    moveDirection = transform.TransformDirection(moveDirection) * inputModifyFactor;
+                    float decreaseZ = AxisModule(forceZ);
+                    if (forceZ != 0) forceZ += ((time / 8 * moveSlowDownSpeed) * 100) * -decreaseZ;
+
+                    if (forceZ < 1f && forceZ > 0) forceZ = 0;
+                    else if (forceZ > -1f && forceZ < 0f) forceZ = 0;
                 }
+                moveDirection.y = -antiBumpFactor;
+                moveDirection.x = forceX;
+                moveDirection.z = forceZ;
+                moveDirection = transform.TransformDirection(moveDirection);
                 // [PLAYER FALLING] -------------------------------------------------------------------------------------
-                fallDamage = false;
                 if (isFalling)
                 {
                     isFalling = false;
@@ -640,11 +712,79 @@ public class InputSystem : MonoBehaviour
                 // Move the player in the air based on control
                 if (optionsSystem.airControl)
                 {
-                    // Move horizontal
-                    moveDirection.x = inputX * curStrafeSpeed * inputModifyFactor ;
-                    // Move Forward/back
-                    moveDirection.z = inputY * curMoveSpeed * inputModifyFactor;
-                    // set current movement
+                    if (OverInputThreshold(inputX, optionsSystem.usingKeyboard ? 0 : inputThreshold))
+                    {
+                        //-----------------------------------------------------------------------------
+                        //Version 1 of the movement/glide, [Start speed at 0 + gradually increase]
+                        //-----------------------------------------------------------------------------
+                        //forceX += (time / 8 * inputX * strafeAcceleration) * 100;
+
+
+                        //-----------------------------------------------------------------------------
+                        //Version 2 of the movement/glide, [Start speed at max]
+                        //-----------------------------------------------------------------------------
+                        //forceX = inputX * strafeAcceleration * 100;
+
+
+                        //-----------------------------------------------------------------------------
+                        //Version 3 of the movement/glide, [Start speed at 1/4 + gradually increase]
+                        //-----------------------------------------------------------------------------
+                        if (inputX < 0 && forceX > -curStrafeSpeed / 4) forceX = -curStrafeSpeed / 4;
+                        else if (inputX > 0 && forceX < curStrafeSpeed / 4) forceX = curStrafeSpeed / 4;
+                        forceX += (time / 8 * inputX * strafeAcceleration) * 100;
+
+
+                        //CLAMP MAX SPEED==============================================================
+                        if (forceX > curStrafeSpeed) forceX = curStrafeSpeed;
+                        if (forceX < -curStrafeSpeed) forceX = -curStrafeSpeed;
+
+
+                    }
+                    else
+                    {
+                        float decreaseX = AxisModule(forceX);
+                        if (forceX != 0) forceX += ((time / 8 * strafeSlowDownSpeed) * 100) * -decreaseX;
+
+                        if (forceX < 1f && forceX > 0) forceX = 0;
+                        else if (forceX > -1f && forceX < 0f) forceX = 0;
+                    }
+                    if (OverInputThreshold(inputY, optionsSystem.usingKeyboard ? 0: inputThreshold))
+                    {
+                        //-----------------------------------------------------------------------------
+                        //Version 1 of the movement/glide, [Start speed at 0 + gradually increase]
+                        //-----------------------------------------------------------------------------
+                        //forceZ += (time / 8 * inputY * moveAcceleration) * 100;
+
+
+                        //-----------------------------------------------------------------------------
+                        //Version 2 of the movement/glide, [Start speed at max]
+                        //-----------------------------------------------------------------------------
+                        //forceZ = inputY * moveAcceleration * 100;
+
+
+                        //-----------------------------------------------------------------------------
+                        //Version 3 of the movement/glide, [Start speed at 1/4 + gradually increase]
+                        //-----------------------------------------------------------------------------
+                        if (inputY < 0 && forceZ > -curMoveSpeed / 4) forceZ = -curMoveSpeed / 4;
+                        else if (inputY > 0 && forceZ < curMoveSpeed / 4) forceZ = curMoveSpeed / 4;
+                        forceZ += (time / 8 * inputY * moveAcceleration) * 100;
+
+                        //forceZ += (time / 8 * inputY * moveAcceleration) * 100;
+                        //forceZ = inputY * moveAcceleration * 100;
+
+                        if (forceZ > curMoveSpeed) forceZ = curMoveSpeed;
+                        if (forceZ < -curMoveSpeed) forceZ = -curMoveSpeed;
+                    }
+                    else
+                    {
+                        float decreaseZ = AxisModule(forceZ);
+                        if (forceZ != 0) forceZ += ((time / 8 * moveSlowDownSpeed) * 100) * -decreaseZ;
+
+                        if (forceZ < 1f && forceZ > 0) forceZ = 0;
+                        else if (forceZ > -1f && forceZ < 0f) forceZ = 0;
+                    }
+                    moveDirection.x = forceX;
+                    moveDirection.z = forceZ;
                     moveDirection = transform.TransformDirection(moveDirection);
                 }
             }
@@ -652,24 +792,19 @@ public class InputSystem : MonoBehaviour
             
             if (playerSystem.isDead || gameSystem.isLoading)
                 return;
+         
             moveDirection.y -= gravity * time * 2;
+           
 
             // Set the isGrounded collision flags if player has landed 
             isGrounded = (controller.Move(moveDirection * time) & CollisionFlags.Below) != 0;
         }
-        if (isGrounded && !idle() || swimGrounded && !idle())
-        {
-            if (Time.time - lastFootstepPlayedTime > currentFootstepsWaitingPeriod && !isJumping && !environmentSystem.headUnderWater)
-            {
-                if (swimGrounded && footElement != FootElement.Water)
-                    footElement = FootElement.Water;
-                else if (isGrounded && footElement != currentFootElement)
-                    footElement = currentFootElement;
-                FootStep(footElement);
-                lastFootstepPlayedTime = Time.time;
-            }
-        }
-        else currentFootstepsWaitingPeriod = Mathf.Infinity;
+    }
+    private bool OverInputThreshold(float axis, float threshold)
+    {
+        if (axis > threshold) return true;
+        else if (axis < -threshold) return true;
+        else return false;
     }
     private bool CheckRaycast(Vector3 origin, Vector3 direction, RaycastHit hit, float maxDistance)
     {
@@ -695,10 +830,28 @@ public class InputSystem : MonoBehaviour
         if (inputSystem.inputX == 0 && inputSystem.inputY == 0) return true;
         else return false;
     }
+
+    private bool LookActive()
+    {
+        float x = inputPlayer.GetAxisRaw("RSH");
+        float y = inputPlayer.GetAxisRaw("RSV");
+        if (x == 0 && y == 0) return false;
+        else return true;
+    }
     private void Look()
     {
         // activate rotation smoothing value
-        float smoothing = optionsSystem.smoothRotation ? time * 50 : 1;
+
+        float x = inputPlayer.GetAxisRaw("RSH");
+        float y = inputPlayer.GetAxisRaw("RSV");
+        if (OverInputThreshold(x, inputThreshold) || OverInputThreshold(y, inputThreshold))
+        {
+            lookPower += time * (x + y) / 2 * lookAcceleration;
+        }
+        else lookPower = 0;
+        float absoluteLook = (lookPower > lookPowerThreshold || lookPower < -lookPowerThreshold) ? lookSpeed : lookSpeed / 2;
+        float smoothing = optionsSystem.smoothRotation ? time * absoluteLook : absoluteLook / 8 * 0.05f;
+
         // switch the look rotation
         switch (axis)
         {
@@ -711,8 +864,7 @@ public class InputSystem : MonoBehaviour
         }
     }
     private void XLook(float smoothing)
-    { 
-        
+    {
         // rotation input times smoothing & sensitivity
         lookRotation[0] = inputPlayer.GetAxisRaw("RSH") * smoothing * optionsSystem.sensitivity[0];
         // rotate only player transform
@@ -747,7 +899,6 @@ public class InputSystem : MonoBehaviour
     }
     private void FallingDamageAlert(float fallDistance)
     {
-        fallDamage = true;
         if(fallDistance > 24 && fallDistance < 76)
         {
             audioSystem.PlayAudioSource(playerSWSound[3], Random.Range(0.6f, 1), 1, 128);
@@ -774,24 +925,9 @@ public class InputSystem : MonoBehaviour
         SetVibration(1, 2, 0.2f);
         RecoilEffect(0, 0, Random.Range(-5.5f, 5.5f), 120);
     }
-    private void EstimatePlayerVelocity_InvokeRepeating()
-    {
-
-        float distanceMagnitude = (transform.position - lastStepPosition).magnitude;
-        lastStepPosition = transform.position;
-        float estimatedPlayerVelocity = distanceMagnitude / velocityPollPeriod;
-        if (estimatedPlayerVelocity < 15.0f) { currentFootstepsWaitingPeriod = Mathf.Infinity; return; }
-        float mappedPlayerSpeed = estimatedPlayerVelocity / 5.0f;
-        //Convert the speed so that walking speed is about 6
-        bool strafing = (inputX > 0f) ? true : false;
-
-        float rcRate = isRunning ? (strafing ? 70 : 90) : (strafing ? 60 : stepSoundRatioC);
-        stepsPerSecond = ((stepSoundRatioA * Mathf.Pow(mappedPlayerSpeed, stepSoundRatioN)) + (stepSoundRatioB * mappedPlayerSpeed) + rcRate) / 60.0f;
-        timePerStep = (1.0f / stepsPerSecond);
-        currentFootstepsWaitingPeriod = timePerStep;
-    }
     private void BobHeadMaster()
     {
+        if (gameSystem.BlockedAttributesActive()) return;
         if (!optionsSystem.cameraBobbing) return;
         if (environmentSystem.headUnderWater) return;
         if (!inputSystem.isJumping)
@@ -806,10 +942,9 @@ public class InputSystem : MonoBehaviour
             {
                 if (!isFalling)
                 {
-                    float inputModifyFactor = (inputX != 0.0f && inputY != 0.0f && limitDiagonalSpeed) ? 0.7071f : 1.0f;
-                    float bobSpeedModule = environmentSystem.headUnderWater ? bobSpeed / 4 : bobSpeed;
+                    float bobSpeedModule = environmentSystem.headUnderWater ? bobSpeed / 8 : bobSpeed;
                     Vector3 newBobValue = new Vector3(bobVectors[bobIndex].x, bobVectors[bobIndex].y, bobVectors[bobIndex].z);
-                    headBob.localPosition = MoveTowards(newBobValue, bobSpeedModule * (Mathf.Abs(inputX / 2) + Mathf.Abs(inputY)) * inputModifyFactor);
+                    headBob.localPosition = MoveTowards(newBobValue, bobSpeedModule * (Mathf.Abs(inputX / 2) + Mathf.Abs(inputY)));
                     if (headBob.localPosition == newBobValue)
                     {
                         bobIndex += switchDir ? -1 : +1;
@@ -824,6 +959,13 @@ public class InputSystem : MonoBehaviour
             weaponAnimType type = isFalling ? weaponAnimType.origin : weaponAnimType.jump;
             headBob.localPosition = MoveTowards(WeaponAnimation(type), speed);
         }
+    }
+    public void PlayFootStepSound()
+    {
+        if (!isGrounded && !swimGrounded) return;
+        if (swimGrounded && footElement != FootElement.Water)
+            footElement = FootElement.Water;
+        FootStep(footElement);
     }
     private Vector3 WeaponAnimation(weaponAnimType type)
     {
@@ -934,8 +1076,6 @@ public class InputSystem : MonoBehaviour
     }
     public void SetFootElement(FootElement element)
     {
-        if (element != FootElement.Water)
-            currentFootElement = element;
         footElement = element;
     }
 }

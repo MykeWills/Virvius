@@ -138,6 +138,7 @@ public class DoorSystem : MonoBehaviour
                         }
                     case DoorType.Blue:
                         {
+                            if (playerSystem == null) return;
                             if (playerSystem.keyCards[0])
                             {
                                 if (tags[0] == tag)
@@ -161,6 +162,7 @@ public class DoorSystem : MonoBehaviour
                         }
                     case DoorType.Yellow:
                         {
+                            if (playerSystem == null) return;
                             if (playerSystem.keyCards[1])
                             {
                                 if (tags[0] == tag)
@@ -187,6 +189,7 @@ public class DoorSystem : MonoBehaviour
                         }
                     case DoorType.Red:
                         {
+                            if (playerSystem == null) return;
                             if (playerSystem.keyCards[2])
                             {
                                 if (tags[0] == tag)

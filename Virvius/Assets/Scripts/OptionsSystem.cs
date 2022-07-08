@@ -30,6 +30,8 @@ public class OptionsSystem : MonoBehaviour
     private ButtonHighlight buttonHighlight;
     private bool testVibrate = false;
     private bool startFade = false;
+    [HideInInspector]
+    public bool usingKeyboard = true;
     private float fadePercentage = 0;
     private Image[] imageElements;
     private Text[] textElements;
@@ -747,6 +749,7 @@ public class OptionsSystem : MonoBehaviour
             mainMenuSystem.SetNavigationUI(MainMenuSystem.Navigation.Keyboard);
             gameSystem.GameMouseActive(false, CursorLockMode.Locked);
             currentMousePosition = Input.mousePosition;
+            usingKeyboard = true;
         }
         if (inputPlayer.controllers.Joysticks.Count > 0)
         {
@@ -755,6 +758,7 @@ public class OptionsSystem : MonoBehaviour
                 mainMenuSystem.SetNavigationUI(MainMenuSystem.Navigation.Controller);
                 gameSystem.GameMouseActive(false, CursorLockMode.Locked);
                 currentMousePosition = Input.mousePosition;
+                usingKeyboard = false;
             }
         }
         if (!gameSystem.isPaused) return;
@@ -763,6 +767,7 @@ public class OptionsSystem : MonoBehaviour
             mainMenuSystem.SetNavigationUI(MainMenuSystem.Navigation.Keyboard);
             gameSystem.GameMouseActive(true, CursorLockMode.Confined);
             currentMousePosition = Input.mousePosition;
+            usingKeyboard = true;
         }
     }
     public void ApplyActiveInputUI()
@@ -1354,7 +1359,7 @@ public class OptionsSystem : MonoBehaviour
         }
         if(audioSystem == null) audioSystem = AudioSystem.audioSystem;
         gameSystem.SetMasterStart();
-        if (gameSystem.Load())
+        if (gameSystem.LoadOptionData())
         {
             //------------------------------------------------------------------------
             //GAME SETTINGS-----------------------------------------------------------
@@ -1670,7 +1675,7 @@ public class OptionsSystem : MonoBehaviour
         }
         else
         {
-            gameSystem.Save();
+            gameSystem.SaveOptionData();
             for (int sp = 0; sp < optionPanels.Length; sp++)
                 optionPanels[sp].SetActive(false);
 

@@ -638,19 +638,19 @@ public class EnemyGSystem : MonoBehaviour
         bullet.transform.rotation = emitter.rotation;
         bullet.SetActive(true);
         bulletSystem.SetupLifeTime(5);
-        float bulletforce = 0;
-        //VERYHARD
-        if (optionsSystem.difficultyActive[3])
-            bulletforce = 20000f;
-        //HARD
-        else if (optionsSystem.difficultyActive[2])
-            bulletforce = 15000f;
-        //NORMAL
-        else if (optionsSystem.difficultyActive[1])
-            bulletforce = 10000f;
-        //EASY
-        else if (optionsSystem.difficultyActive[0])
-            bulletforce = 7500;
+        float bulletforce = 30000f;
+        ////VERYHARD
+        //if (optionsSystem.difficultyActive[3])
+        //    bulletforce = 50000f;
+        ////HARD
+        //else if (optionsSystem.difficultyActive[2])
+        //    bulletforce = 15000f;
+        ////NORMAL
+        //else if (optionsSystem.difficultyActive[1])
+        //    bulletforce = 10000f;
+        ////EASY
+        //else if (optionsSystem.difficultyActive[0])
+        //    bulletforce = 7500;
         rb.AddForce(emitter.transform.forward * bulletforce);
     }
     private void LookAtPlayerShooting()
