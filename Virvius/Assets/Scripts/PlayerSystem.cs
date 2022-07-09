@@ -788,7 +788,7 @@ public class PlayerSystem : MonoBehaviour
         ApplyPlayerHealthAndArmor();
         weaponSystem.ApplyAmmo();
     }
-    private void SetActiveKey(int kID, bool active)
+    public void SetActiveKey(int kID, bool active)
     {
         if(kCIconsArray == null)
         {
@@ -1212,13 +1212,12 @@ public class PlayerSystem : MonoBehaviour
         if (goreExplode.TryGetComponent(out PlayerGoreSystem goreSystem))
             goreSystem.ActivateGore(true);
     }
-    public void SetupNewLevel()
+    public void SetupPlayer(bool newGame)
     {
-        //gameSystem.LoadPlayerData();
         messageSystem.EraseMessages();
         inputSystem.ResetInputSystem();
-        weaponSystem.ResetWeaponSystem(true);
         powerupSystem.ResetPowerupSystem();
+        weaponSystem.ResetWeaponSystem(newGame);
         UIVersion(versionIndex);
         HUD.SetActive(true);
         overKill = false;
@@ -1226,16 +1225,31 @@ public class PlayerSystem : MonoBehaviour
         if (goreExplode.TryGetComponent(out PlayerGoreSystem goreSystem))
             goreSystem.ActivateGore(false);
         if (flashSigmaUI.enabled) flashSigmaUI.enabled = false;
-        //=======================================================
+
         characterController.enabled = false;
         fallDamage = false;
         transform.SetParent(originParent);
-        gameSystem.SetPlayerScenePosition(gameSystem.sceneIndex);
         isDamaged = false;
         suicideDamage = false;
         SetFlash(false);
         optionsSystem.SetSceneMusic(gameSystem.sceneIndex);
-        for (int kc = 0; kc < 3; kc++) SetActiveKey(kc, false);
+        if (newGame)
+        {
+            health = 100;
+            armor = 0;
+            maxArmor = 50;
+            maxHealth = 100;
+            for (int mb = 0; mb < 2; mb++)
+            {
+                hMaxBar[mb].fillAmount = 0;
+            }
+            SetUIColor(aAmtText[versionIndex], aBar[versionID], null, Color.clear);
+            SetArmorSprites();
+            for (int a = 0; a < 4; a++)
+                armorBannerObject[a].SetActive(false);
+
+            for (int kc = 0; kc < 3; kc++) SetActiveKey(kc, false);
+        }
         Vector3 headLoc = Vector3.zero;
         Vector3 headRot = Vector3.zero;
         Quaternion rot = Quaternion.Euler(headRot);
@@ -1267,13 +1281,6 @@ public class PlayerSystem : MonoBehaviour
         else if (versionIndex > 2)
             SetUIColor(hAmtText[versionIndex], hBar[versionID], hIcon[versionIndex], visorColor2);
         else SetUIColor(hAmtText[versionIndex], hBar[versionID], hIcon[versionIndex], Color.white);
-        health = 100;
-        SetUIColor(aAmtText[versionIndex], aBar[versionID], null, Color.clear);
-        for (int a = 0; a < 4; a++)
-            armorBannerObject[a].SetActive(false);
-        armor = 0;
-        maxArmor = 50;
-        SetArmorSprites();
         for (int et = 0; et < 4; et++)
         {
             enviromentUIActiveImage[et].enabled = false;
@@ -1286,55 +1293,15 @@ public class PlayerSystem : MonoBehaviour
         environmentSystem.ActiveEnvironmentUI(false);
         levelSystem = AccessLevel();
         if (levelSystem != null) levelSystem.ResetLevel();
-        characterController.enabled = true;
         crosshair.enabled = true;
         ApplyPlayerHealthAndArmor();
-        messageSystem.SetMessage(levelTitle[gameSystem.sceneIndex], MessageSystem.MessageType.Display);
-    }
-    public void SetupLevel()
-    {
-
-        messageSystem.EraseMessages();
-        inputSystem.ResetInputSystem();
-        powerupSystem.ResetPowerupSystem();
-        weaponSystem.ResetWeaponSystem(false);
-        UIVersion(versionIndex);
-        HUD.SetActive(true);
-        overKill = false;
-        SetSigmaFlash(false);
-        if (goreSystem == null) goreSystem = goreExplode.GetComponent<PlayerGoreSystem>();
-        goreSystem.ActivateGore(false);
-        if (flashSigmaUI.enabled) flashSigmaUI.enabled = false;
-        characterController.enabled = false;
-        fallDamage = false;
-        transform.SetParent(originParent);
-        gameSystem.SetPlayerScenePosition(gameSystem.sceneIndex);
-        isDamaged = false;
-        suicideDamage = false;
-        SetFlash(false);
-        optionsSystem.SetSceneMusic(gameSystem.sceneIndex);
-        for (int kc = 0; kc < 3; kc++) SetActiveKey(kc, false);
-        Vector3 headLoc = Vector3.zero;
-        Vector3 headRot = Vector3.zero;
-        Quaternion rot = Quaternion.Euler(headRot);
-        head.localRotation = rot;
-        head.localPosition = headLoc;
-        SetKeyBannerColor(visorColor);
-        for (int et = 0; et < 4; et++)
-        {
-            enviromentUIActiveImage[et].enabled = false;
-            enviromentUIActiveImage[et].color = Color.white;
-            fadeEnviroTime[et] = 1;
-            enviroUIActive[et] = false;
-        }
-        environmentSystem.SetEnvironment(0, 0);
-        environmentSystem.ActivateEnvironment(0);
-        environmentSystem.ActiveEnvironmentUI(false);
-        levelSystem = AccessLevel();
-        if (levelSystem != null) levelSystem.ResetLevel();
         characterController.enabled = true;
         messageSystem.SetMessage(levelTitle[gameSystem.sceneIndex], MessageSystem.MessageType.Display);
-        gameSystem.AutoSave();
+        if (gameSystem.loadPosiitonFromFile) gameSystem.loadPosiitonFromFile = false;
+        else
+        {
+            if(gameSystem.sceneIndex > 1) gameSystem.AutoSave();
+        }
     }
     public void ActivateLevelEnviromentSounds()
     {

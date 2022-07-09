@@ -49,6 +49,8 @@ public class GameSystem : MonoBehaviour
         new Vector3(0, 18,-245),
         new Vector3(0, -2, 0)
     };
+    public Vector3 loadedPosition = Vector3.zero;
+    public Quaternion loadedRotation = Quaternion.identity;
     //[HideInInspector]
     public Vector3[] sceneRotations = new Vector3[4]
     {
@@ -57,6 +59,8 @@ public class GameSystem : MonoBehaviour
         new Vector3(0, 0, 0),
         new Vector3(0, 0, 0)
     };
+    [HideInInspector]
+    public bool loadPosiitonFromFile = false;
     private AsyncOperation async = new AsyncOperation();
     private bool firstTimeBoot = false;
     [HideInInspector]
@@ -67,7 +71,7 @@ public class GameSystem : MonoBehaviour
     public int sceneIndex = 0;
     private int curSceneIndex = 0;
     private string gamePath = "Data/";
-    private string OPTION_FILE = "O_data";
+    private string OPTION_FILE = "o_data";
     private string PLAYER_FILE = "p_data";
     private string FILE_EXTENSION = ".vir";
     private string dataPath;
@@ -421,8 +425,20 @@ public class GameSystem : MonoBehaviour
             Time.timeScale = isPaused ? 0 : 1;
         }
 
-        if (sceneIndex > 1) { player.SetActive(true); playerSystem.SetupLevel(); }
-        else { SetMasterStart(); player.transform.localPosition = scenePositions[sceneIndex]; player.SetActive(true); playerSystem.SetupNewLevel(); }
+        if (sceneIndex > 1) 
+        { 
+            player.transform.localPosition = loadPosiitonFromFile ? loadedPosition : scenePositions[sceneIndex]; 
+            player.transform.localRotation = loadPosiitonFromFile ? loadedRotation : Quaternion.Euler(sceneRotations[sceneIndex]);
+            player.SetActive(true); 
+            playerSystem.SetupPlayer(false); 
+        }
+        else 
+        { 
+            SetMasterStart(); 
+            player.transform.localPosition = scenePositions[sceneIndex]; 
+            player.SetActive(true);
+            playerSystem.SetupPlayer(true);
+        }
         isLoading = false;
         isGameStarted = true;
         levelActive = true;
@@ -683,9 +699,9 @@ public class GameSystem : MonoBehaviour
 
     public void LoadPlayerData()
     {
-        if (!File.Exists(dataPath + gamePath + OPTION_FILE + FILE_EXTENSION)) return;
-        Stream stream = File.Open(dataPath + gamePath + OPTION_FILE + FILE_EXTENSION, FileMode.Open);
-        optionData = (OptionData)_BinaryFormatter.Deserialize(stream);
+        if (!File.Exists(dataPath + gamePath + PLAYER_FILE + FILE_EXTENSION)) return;
+        Stream stream = File.Open(dataPath + gamePath + PLAYER_FILE + FILE_EXTENSION, FileMode.Open);
+        playerData = (PlayerData)_BinaryFormatter.Deserialize(stream);
         stream.Close();
         //------------------------------------------------------------------------
         //WEAPON SETTINGS---------------------------------------------------------
@@ -750,15 +766,16 @@ public class GameSystem : MonoBehaviour
         for(int k = 0; k < playerSystem.keyCards.Length; k++)
         {
             if(playerSystem.keyCards[k])
-                playerSystem.GiveKey(k);
+                playerSystem.SetActiveKey(k, playerSystem.keyCards[k]);
         }
-     
+        loadedPosition = playerData.playerPosition;
+        loadedRotation = playerData.playerRotation;
+        loadPosiitonFromFile = true;
         //------------------------------------------------------------------------
         //GAME SETTINGS-----------------------------------------------------------
         //------------------------------------------------------------------------
         curSceneIndex = playerData.sceneIndex;
         SetNewLevel(curSceneIndex);
-        playerSystem.WarpPlayer(playerData.playerPosition, playerData.playerRotation);
     }
     public void SavePlayerData()
     {
@@ -821,8 +838,8 @@ public class GameSystem : MonoBehaviour
                 playerSystem.keyCards[1],
                 playerSystem.keyCards[2]
         };
-        playerData.playerPosition = playerSystem.transform.position;
-        playerData.playerRotation = playerSystem.transform.rotation;
+        playerData.playerPosition = playerSystem.transform.localPosition;
+        playerData.playerRotation = playerSystem.transform.localRotation;
         //------------------------------------------------------------------------
         //GAME SETTINGS-----------------------------------------------------------
         //------------------------------------------------------------------------
