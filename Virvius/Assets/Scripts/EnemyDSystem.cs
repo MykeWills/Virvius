@@ -660,4 +660,16 @@ public class EnemyDSystem : MonoBehaviour
         navAgent.Warp(originalPosition);
         transform.position = originalPosition;
     }
+    public void ActivateObjectState()
+    {
+        gameSystem.totalKills++;
+        health = 0;
+        isDead = true;
+        enemyBody.SetActive(false);
+        enemyState = EnemyState.death;
+        ActiveState();
+        for (int mc = 0; mc < meshColliders.Length; mc++)
+            meshColliders[mc].enabled = false;
+        navAgent.enabled = false;
+    }
 }

@@ -13,7 +13,8 @@ public class SwitchSystem : MonoBehaviour
     [SerializeField]
     private bool setCustomFinalMessage = false;
     private string normalMessage = "Sequence Completed.";
-
+    [HideInInspector]
+    public bool switchOpen = false;
     [SerializeField]
     private AudioSource moveObjectSrc;
     [SerializeField]
@@ -393,6 +394,7 @@ public class SwitchSystem : MonoBehaviour
                     PlayMoveObjectSound();
                     hasMoved = !hasMoved;
                     ActivateEvent(0, isActive);
+                    switchOpen = true;
                     break;
                 }
             case SwitchActivationType.Activation:
@@ -497,7 +499,7 @@ public class SwitchSystem : MonoBehaviour
         isTimer = false;
         switchTimer = switchTime;
         hasMoved = false;
-
+        switchOpen = false;
         for (int e = 0; e < eventObject.Length; e++)
         {
             if (eventObject[0] == null) break;
@@ -573,5 +575,19 @@ public class SwitchSystem : MonoBehaviour
         if (switchType == SwitchType.Press || switchType == SwitchType.Step)
             boxCollider.isTrigger = true;
         else boxCollider.isTrigger = false;
+    }
+    public void ActivateObjectState()
+    {
+        if (switchType == SwitchType.Press || switchType == SwitchType.Step)
+        {
+            if (eventObject.Length > 0)
+            {
+                if (eventObject[0].TryGetComponent(out CraneDropSystem craneDropSystem))
+                {
+                    if (craneDropSystem.craneActive) return;
+                }
+            }
+            ActivateSwitch(switchSubType);
+        }
     }
 }

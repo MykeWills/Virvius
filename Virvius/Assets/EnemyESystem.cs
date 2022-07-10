@@ -763,4 +763,20 @@ public class EnemyESystem : MonoBehaviour
         navAgent.Warp(originalPosition);
         transform.position = originalPosition;
     }
+    public void ActivateObjectState()
+    {
+        gameSystem.totalKills++;
+        health = 0;
+        isDead = true;
+        enemyBody.SetActive(false);
+        enemyState = EnemyState.death;
+        ActiveState();
+        boxCollider.enabled = false;
+        navAgent.enabled = false;
+        gunFlash = false;
+        grenadeMuzzle.transform.Rotate(0, 30, 0);
+        grenadeMuzzle.enabled = false;
+        grenadeLight.enabled = false;
+        gunflashTimer = gunflashTime;
+    }
 }

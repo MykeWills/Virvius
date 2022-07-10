@@ -24,6 +24,13 @@ public class LevelSystem : MonoBehaviour
     public GameObject[] difficulty1Enemies;
     public GameObject[] difficulty2Enemies;
     public GameObject[] difficulty3Enemies;
+    [HideInInspector]
+    public bool[] enemiesDeadGrunt;
+    [HideInInspector]
+    public bool[] enemiesDeadDin;
+    [HideInInspector]
+    public bool[] enemiesDeadElite;
+
     [SerializeField]
     private Transform resultCameraPlaceholder;
     private Vector3 resultCameraPosition;
@@ -80,6 +87,17 @@ public class LevelSystem : MonoBehaviour
             doorTriggers[a].ResetObject();
 
         ActivateEnvironment();
+    }
+    public void LoadLevel()
+    {
+
+    }
+    public void SaveLevel()
+    {
+        enemiesDeadGrunt = new bool[gruntSystems.Length];
+        enemiesDeadDin = new bool[dinSystems.Length];
+        enemiesDeadElite = new bool[eliteSystems.Length];
+
     }
     public void ActivateEnvironment()
     {
