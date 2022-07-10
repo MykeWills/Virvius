@@ -22,7 +22,7 @@ public class ExplodingCrateSystem : MonoBehaviour
     [SerializeField]
     private GameObject viewableCrate;
     private ContactPoint contactPoint;
-
+    public bool crateExploded = false;
     private string[] collisionTags = new string[7]
     {
         "Player",
@@ -56,7 +56,7 @@ public class ExplodingCrateSystem : MonoBehaviour
                 sphereCollider.enabled = true;
             else sphereCollider.enabled = false;
         }
-        if (viewableCrate.activeInHierarchy) 
+        if (viewableCrate.activeInHierarchy)
             viewableCrate.SetActive(false);
         int exVal = expandRadius ? 1 : -1;
         curRadius += (time * explosionSpeed) * exVal;
@@ -69,6 +69,7 @@ public class ExplodingCrateSystem : MonoBehaviour
             isDetonated = false;
             sphereCollider.enabled = false;
             explosionPrefab.SetActive(false);
+            crateExploded = true;
         }
     }
     public void Explode()
@@ -84,9 +85,9 @@ public class ExplodingCrateSystem : MonoBehaviour
         if (!isDetonated) return;
         string tag = collision.gameObject.tag;
 
-        for(int t = 0; t < collisionTags.Length; t++)
+        for (int t = 0; t < collisionTags.Length; t++)
         {
-            if(tag == collisionTags[t])
+            if (tag == collisionTags[t])
             {
                 contactPoint = collision.GetContact(0);
                 float dist = Vector3.Distance(sphereCollider.bounds.center, contactPoint.point);
@@ -110,5 +111,14 @@ public class ExplodingCrateSystem : MonoBehaviour
         expandRadius = true;
         viewableCrate.SetActive(true);
         explosionPrefab.SetActive(false);
+        crateExploded = false;
+    }
+    public void ActivateObjectState()
+    {
+        viewableCrate.SetActive(false);
+        isDetonated = false;
+        sphereCollider.enabled = false;
+        explosionPrefab.SetActive(false);
+        crateExploded = true;
     }
 }

@@ -16,7 +16,8 @@ public class GameSystem : MonoBehaviour
     public static bool expandBulletPool = true;
     public bool isGameStarted = false;
     private OptionData optionData = new OptionData();
-    private PlayerData playerData = new PlayerData();
+    [HideInInspector]
+    public PlayerData playerData = new PlayerData();
     private BinaryFormatter _BinaryFormatter = new BinaryFormatter();
     [SerializeField]
     private AudioSystem audioSystem;
@@ -73,6 +74,7 @@ public class GameSystem : MonoBehaviour
     private string gamePath = "Data/";
     private string OPTION_FILE = "o_data";
     private string PLAYER_FILE = "p_data";
+    private string LEVEL_FILE = "l_data";
     private string FILE_EXTENSION = ".vir";
     private string dataPath;
     [Header("Menu Assignment")]
@@ -153,6 +155,28 @@ public class GameSystem : MonoBehaviour
     private float saveTime = 5;
     private float saveTimer = 0;
     private bool isSaving;
+    [HideInInspector]
+    public bool[] ambushesActivated;
+    [HideInInspector]
+    public bool[] enemiesDeadGrunt;
+    [HideInInspector]
+    public bool[] enemiesDeadDin;
+    [HideInInspector]
+    public bool[] enemiesDeadElite;
+    [HideInInspector]
+    public bool[] switchesActivated;
+    [HideInInspector]
+    public bool[] pickupsObtained;
+    [HideInInspector]
+    public bool[] spawnersActivated;
+    [HideInInspector]
+    public bool[] messagesActivated;
+    [HideInInspector]
+    public bool[] cratesExploded;
+    [HideInInspector]
+    public bool[] explodingTriggersActivated;
+    [HideInInspector]
+    public bool[] doorTriggersActivated;
     [Space]
     [Header("Pool Access")]
     private int[] bulletpoolAmt = new int[4] { 130, 70, 40, 10 };
@@ -774,7 +798,63 @@ public class GameSystem : MonoBehaviour
         //------------------------------------------------------------------------
         //GAME SETTINGS-----------------------------------------------------------
         //------------------------------------------------------------------------
+
         curSceneIndex = playerData.sceneIndex;
+
+        ambushesActivated = new bool[playerData.ambushesActivated.Length];
+        for (int a = 0; a < ambushesActivated.Length; a++)
+            ambushesActivated[a] = playerData.ambushesActivated[a];
+
+        enemiesDeadGrunt = new bool[playerData.enemiesDeadGrunt.Length];
+        for (int a = 0; a < enemiesDeadGrunt.Length; a++)
+            enemiesDeadGrunt[a] = playerData.enemiesDeadGrunt[a];
+
+        enemiesDeadDin = new bool[playerData.enemiesDeadDin.Length];
+        for (int a = 0; a < enemiesDeadDin.Length; a++)
+            enemiesDeadDin[a] = playerData.enemiesDeadDin[a];
+
+        enemiesDeadElite = new bool[playerData.enemiesDeadElite.Length];
+        for (int a = 0; a < enemiesDeadElite.Length; a++)
+            enemiesDeadElite[a] = playerData.enemiesDeadElite[a];
+
+        switchesActivated = new bool[playerData.switchesActivated.Length];
+        for (int a = 0; a < switchesActivated.Length; a++)
+            switchesActivated[a] = playerData.switchesActivated[a];
+
+        pickupsObtained = new bool[playerData.pickupsObtained.Length];
+        for (int a = 0; a < pickupsObtained.Length; a++)
+            pickupsObtained[a] = playerData.pickupsObtained[a];
+
+        spawnersActivated = new bool[playerData.spawnersActivated.Length];
+        for (int a = 0; a < spawnersActivated.Length; a++)
+            spawnersActivated[a] = playerData.spawnersActivated[a];
+
+        messagesActivated = new bool[playerData.messagesActivated.Length];
+        for (int a = 0; a < messagesActivated.Length; a++)
+            messagesActivated[a] = playerData.messagesActivated[a];
+
+        cratesExploded = new bool[playerData.cratesExploded.Length];
+        for (int a = 0; a < cratesExploded.Length; a++)
+            cratesExploded[a] = playerData.cratesExploded[a];
+
+        explodingTriggersActivated = new bool[playerData.explodingTriggersActivated.Length];
+        for (int a = 0; a < explodingTriggersActivated.Length; a++)
+            explodingTriggersActivated[a] = playerData.explodingTriggersActivated[a];
+
+        doorTriggersActivated = new bool[playerData.doorTriggersActivated.Length];
+        for (int a = 0; a < doorTriggersActivated.Length; a++)
+            doorTriggersActivated[a] = playerData.doorTriggersActivated[a];
+
+        ambushesActivated = playerData.ambushesActivated;
+        enemiesDeadGrunt = playerData.enemiesDeadGrunt;
+        enemiesDeadDin = playerData.enemiesDeadDin;
+        enemiesDeadElite = playerData.enemiesDeadElite;
+        pickupsObtained = playerData.pickupsObtained;
+        spawnersActivated = playerData.spawnersActivated;
+        messagesActivated = playerData.messagesActivated;
+        cratesExploded = playerData.cratesExploded;
+        explodingTriggersActivated = playerData.explodingTriggersActivated;
+        doorTriggersActivated = playerData.doorTriggersActivated;
         SetNewLevel(curSceneIndex);
     }
     public void SavePlayerData()
@@ -845,9 +925,25 @@ public class GameSystem : MonoBehaviour
         //------------------------------------------------------------------------
         playerData.sceneIndex = curSceneIndex;
 
+        LevelSystem levelSystem = playerSystem.AccessLevel();
+        if (levelSystem == null) { Debug.LogError("Level System Not Accessed."); return; }
+        levelSystem.SaveLevel();
+        playerData.ambushesActivated = levelSystem.ambushesActivated;
+        playerData.enemiesDeadGrunt = levelSystem.enemiesDeadGrunt;
+        playerData.enemiesDeadDin = levelSystem.enemiesDeadDin;
+        playerData.enemiesDeadElite = levelSystem.enemiesDeadElite;
+        playerData.pickupsObtained = levelSystem.pickupsObtained;
+        playerData.spawnersActivated = levelSystem.spawnersActivated;
+        playerData.messagesActivated = levelSystem.messagesActivated;
+        playerData.cratesExploded = levelSystem.cratesExploded;
+        playerData.explodingTriggersActivated = levelSystem.explodingTriggersActivated;
+        playerData.doorTriggersActivated = levelSystem.doorTriggersActivated;
+       
         _BinaryFormatter.Serialize(stream, playerData);
         stream.Close();
     }
+   
+
     public void AutoSave()
     {
         if (!optionsSystem.autoSave) return;
@@ -856,10 +952,6 @@ public class GameSystem : MonoBehaviour
         saveIcon.enabled = true;
         saveTimer = saveTime;
         isSaving = true;
-    }
-    public void AutoLoad()
-    {
-
     }
     public void SetPlayerScenePosition(int index)
     {
@@ -968,6 +1060,17 @@ public struct PlayerData
     //GAME SETTINGS
     //----------------------
     public int sceneIndex;
+    public bool[] ambushesActivated;
+    public bool[] enemiesDeadGrunt;
+    public bool[] enemiesDeadDin;
+    public bool[] enemiesDeadElite;
+    public bool[] switchesActivated;
+    public bool[] pickupsObtained;
+    public bool[] spawnersActivated;
+    public bool[] messagesActivated;
+    public bool[] cratesExploded;
+    public bool[] explodingTriggersActivated;
+    public bool[] doorTriggersActivated;
 }
 [Serializable]
 public struct SerializableVector3

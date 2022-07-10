@@ -4,6 +4,7 @@ public class LevelSystem : MonoBehaviour
 {
     private OptionsSystem optionsSystem;
     private GameSystem gameSystem;
+    [Header("Level Systems")]
     public AmbushSystem[] ambushSystems;
     public EnemyGSystem[] gruntSystems;
     public EnemyDSystem[] dinSystems;
@@ -20,25 +21,58 @@ public class LevelSystem : MonoBehaviour
     public ExplodingCrateSystem[] explodingCrateSystems;
     public ExplodeTrigger[] explodingTriggerSystems;
     public DoorTrigger[] doorTriggers;
+    [Space]
+    [Header("Enemy Difficulty Sorters")]
     public GameObject[] difficulty0Enemies;
     public GameObject[] difficulty1Enemies;
     public GameObject[] difficulty2Enemies;
     public GameObject[] difficulty3Enemies;
+    [Space]
+    [Header("Level Result Camera")]
+    [SerializeField]
+    private Transform resultCameraPlaceholder;
+    private Vector3 resultCameraPosition;
+    private Quaternion resultCameraRotation;
+    //===================================================================
+    //====================Save/Loading===================================
+    //===================================================================
+    [HideInInspector]
+    public bool[] ambushesActivated;
     [HideInInspector]
     public bool[] enemiesDeadGrunt;
     [HideInInspector]
     public bool[] enemiesDeadDin;
     [HideInInspector]
     public bool[] enemiesDeadElite;
+    [HideInInspector]
+    public bool[] switchesActivated;
+    [HideInInspector]
+    public bool[] pickupsObtained;
+    [HideInInspector]
+    public bool[] spawnersActivated;
+    [HideInInspector]
+    public bool[] messagesActivated;
+    [HideInInspector]
+    public bool[] cratesExploded;
+    [HideInInspector]
+    public bool[] explodingTriggersActivated;   
+    [HideInInspector]
+    public bool[] doorTriggersActivated;
 
-    [SerializeField]
-    private Transform resultCameraPlaceholder;
-    private Vector3 resultCameraPosition;
-    private Quaternion resultCameraRotation;
-    //private void Start()
-    //{
-    //    SetDifficultyEnemies(4);
-    //}
+    private void Start()
+    {
+        ambushesActivated = new bool[ambushSystems.Length];
+        enemiesDeadGrunt = new bool[gruntSystems.Length];
+        enemiesDeadDin = new bool[dinSystems.Length];
+        enemiesDeadElite = new bool[eliteSystems.Length];
+        switchesActivated = new bool[switches.Length];
+        pickupsObtained = new bool[pickupItems.Length];
+        spawnersActivated = new bool[spawnSystems.Length];
+        messagesActivated = new bool[messageTriggerSystems.Length];
+        cratesExploded = new bool[explodingCrateSystems.Length];
+        explodingTriggersActivated = new bool[explodingTriggerSystems.Length];
+        doorTriggersActivated = new bool[doorTriggers.Length];
+    }
     public void ResetLevel()
     {
 
@@ -90,21 +124,128 @@ public class LevelSystem : MonoBehaviour
     }
     public void LoadLevel()
     {
+        if (gameSystem == null) gameSystem = GameSystem.gameSystem;
+        gameSystem.totalLevelSecrets = 0;
+        gameSystem.totalLevelEnemies = 0;
+        if (resultCameraPlaceholder != null)
+        {
+            resultCameraPosition = resultCameraPlaceholder.position;
+            resultCameraRotation = resultCameraPlaceholder.rotation;
+            gameSystem.resultCamPosition = resultCameraPosition;
+            gameSystem.resultCamRotation = resultCameraRotation;
+        }
+        SetDifficultyEnemies(ActiveDifficulty());
+        for (int a = 0; a < ambushSystems.Length; a++)
+            if (ambushSystems[a] != null || ambushSystems[a].gameObject.activeInHierarchy) ambushSystems[a].ResetObject();
+        for (int a = 0; a < gruntSystems.Length; a++)
+            if (gruntSystems[a] != null || gruntSystems[a].gameObject.activeInHierarchy) gruntSystems[a].ResetObject(true);
+        for (int a = 0; a < dinSystems.Length; a++)
+            if (dinSystems[a] != null || dinSystems[a].gameObject.activeInHierarchy) dinSystems[a].ResetObject(true);
+        for (int a = 0; a < eliteSystems.Length; a++)
+            if (eliteSystems[a] != null || eliteSystems[a].gameObject.activeInHierarchy) eliteSystems[a].ResetObject(true);
+        for (int a = 0; a < secretDoorSystems.Length; a++)
+            if (secretDoorSystems[a] != null || secretDoorSystems[a].gameObject.activeInHierarchy) secretDoorSystems[a].ResetObject();
+        for (int a = 0; a < messageTriggerSystems.Length; a++)
+            if (messageTriggerSystems[a] != null || messageTriggerSystems[a].gameObject.activeInHierarchy)
+            {
+                if (messageTriggerSystems[a].isSecret) gameSystem.totalLevelSecrets++;
+                messageTriggerSystems[a].ResetObject();
+            }
+        for (int a = 0; a < switches.Length; a++)
+            if (switches[a] != null || switches[a].gameObject.activeInHierarchy) switches[a].ResetObject();
+        for (int a = 0; a < doorSystems.Length; a++)
+            if (doorSystems[a] != null || doorSystems[a].gameObject.activeInHierarchy) doorSystems[a].ResetObject();
+        for (int a = 0; a < spawnSystems.Length; a++)
+            if (spawnSystems[a] != null || spawnSystems[a].gameObject.activeInHierarchy) spawnSystems[a].ResetObject();
+        for (int a = 0; a < pickupItems.Length; a++)
+            pickupItems[a].SetActive(true);
+        for (int a = 0; a < craneDropSystem.Length; a++)
+            craneDropSystem[a].ResetObject();
+        for (int a = 0; a < explodingCrateSystems.Length; a++)
+            explodingCrateSystems[a].ResetObject();
+        for (int a = 0; a < explodingTriggerSystems.Length; a++)
+            explodingTriggerSystems[a].ResetObject();
+        for (int a = 0; a < doorTriggers.Length; a++)
+            doorTriggers[a].ResetObject();
 
-    }
-    public void SaveLevel()
-    {
+        ActivateEnvironment();
+
+        ambushesActivated = new bool[ambushSystems.Length];
         enemiesDeadGrunt = new bool[gruntSystems.Length];
         enemiesDeadDin = new bool[dinSystems.Length];
         enemiesDeadElite = new bool[eliteSystems.Length];
+        switchesActivated = new bool[switches.Length];
+        pickupsObtained = new bool[pickupItems.Length];
+        spawnersActivated = new bool[spawnSystems.Length];
+        messagesActivated = new bool[messageTriggerSystems.Length];
+        cratesExploded = new bool[explodingCrateSystems.Length];
+        explodingTriggersActivated = new bool[explodingTriggerSystems.Length];
+        doorTriggersActivated = new bool[doorTriggers.Length];
 
+        ambushesActivated = gameSystem.ambushesActivated;
+        enemiesDeadGrunt = gameSystem.enemiesDeadGrunt;
+        enemiesDeadDin = gameSystem.enemiesDeadDin;
+        enemiesDeadElite = gameSystem.enemiesDeadElite;
+        pickupsObtained = gameSystem.pickupsObtained;
+        spawnersActivated = gameSystem.spawnersActivated;
+        messagesActivated = gameSystem.messagesActivated;
+        cratesExploded = gameSystem.cratesExploded;
+        explodingTriggersActivated = gameSystem.explodingTriggersActivated;
+        doorTriggersActivated = gameSystem.doorTriggersActivated;
+
+        for (int a = 0; a < ambushesActivated.Length; a++)
+            if (ambushesActivated[a]) ambushSystems[a].ActivateObjectState();
+        for (int a = 0; a < enemiesDeadGrunt.Length; a++)
+            if (enemiesDeadGrunt[a]) gruntSystems[a].ActivateObjectState();
+        for (int a = 0; a < enemiesDeadDin.Length; a++)
+            if (enemiesDeadDin[a]) dinSystems[a].ActivateObjectState();
+        for (int a = 0; a < enemiesDeadElite.Length; a++)
+            if (enemiesDeadElite[a]) eliteSystems[a].ActivateObjectState();
+        for (int a = 0; a < switchesActivated.Length; a++)
+            if (switchesActivated[a]) switches[a].ActivateObjectState();
+        for (int a = 0; a < pickupsObtained.Length; a++)
+            if (pickupsObtained[a]) pickupItems[a].SetActive(false);
+        for (int a = 0; a < spawnersActivated.Length; a++)
+            if (spawnersActivated[a]) spawnSystems[a].ActivateObjectState();
+        for (int a = 0; a < messagesActivated.Length; a++)
+            if (messagesActivated[a]) messageTriggerSystems[a].ActivateObjectState();
+        for (int a = 0; a < cratesExploded.Length; a++)
+            if (cratesExploded[a]) explodingCrateSystems[a].ActivateObjectState();
+        for (int a = 0; a < explodingTriggersActivated.Length; a++)
+            if (explodingTriggersActivated[a]) explodingTriggerSystems[a].ActivateObjectState();
+        for (int a = 0; a < doorTriggersActivated.Length; a++)
+            if (doorTriggersActivated[a]) doorTriggers[a].ActivateObjectState();
     }
+    public void SaveLevel()
+    {
+        for(int a = 0; a < ambushesActivated.Length; a++)
+            if (ambushSystems[a].ambushActivated) ambushesActivated[a] = ambushSystems[a].ambushActivated;
+        for (int a = 0; a < enemiesDeadGrunt.Length; a++)
+            if(gruntSystems[a].isDead) enemiesDeadGrunt[a] = gruntSystems[a].isDead;
+        for (int a = 0; a < enemiesDeadDin.Length; a++)
+            if (dinSystems[a].isDead) enemiesDeadDin[a] = dinSystems[a].isDead;
+        for (int a = 0; a < enemiesDeadElite.Length; a++)
+            if (eliteSystems[a].isDead) enemiesDeadElite[a] = eliteSystems[a].isDead;
+        for (int a = 0; a < switchesActivated.Length; a++)
+            if (switches[a].switchActivated) switchesActivated[a] = switches[a].switchActivated;
+        for (int a = 0; a < pickupsObtained.Length; a++)
+            if (!pickupItems[a].activeInHierarchy) pickupsObtained[a] = true;
+        for (int a = 0; a < spawnersActivated.Length; a++)
+            if (spawnSystems[a].spawnActivated) spawnersActivated[a] = spawnSystems[a].spawnActivated;
+        for (int a = 0; a < messagesActivated.Length; a++)
+            if (messageTriggerSystems[a].messageActivated) messagesActivated[a] = messageTriggerSystems[a].messageActivated;
+        for (int a = 0; a < cratesExploded.Length; a++)
+            if (explodingCrateSystems[a].crateExploded) cratesExploded[a] = explodingCrateSystems[a].crateExploded;
+        for (int a = 0; a < explodingTriggersActivated.Length; a++)
+            if (explodingTriggerSystems[a].explodingTriggerActivated) explodingTriggersActivated[a] = explodingTriggerSystems[a].explodingTriggerActivated;
+        for (int a = 0; a < doorTriggersActivated.Length; a++)
+            if (doorTriggers[a].doorTriggerActivated) doorTriggersActivated[a] = doorTriggers[a].doorTriggerActivated;
+    }
+
     public void ActivateEnvironment()
     {
         for (int a = 0; a < levelEnvironment.Length; a++)
-        {
             if (!levelEnvironment[a].isPlaying) levelEnvironment[a].Play();
-        }
     }
     private void SetDifficultyEnemies(int index)
     {
@@ -168,9 +309,7 @@ public class LevelSystem : MonoBehaviour
     {
         if (optionsSystem == null) optionsSystem = OptionsSystem.optionsSystem;
         for(int d = 0; d < optionsSystem.difficultyActive.Length; d++)
-        {
             if (optionsSystem.difficultyActive[d]) return d;
-        }
         return 3;
     }
 }

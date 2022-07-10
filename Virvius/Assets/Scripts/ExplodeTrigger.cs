@@ -12,7 +12,7 @@ public class ExplodeTrigger : MonoBehaviour
     private ExplodingCrateSystem[] crateSystems;
     [SerializeField]
     private GameObject activateObject;
-
+    public bool explodingTriggerActivated = false;
     void Update()
     {
         TriggerMultiple();
@@ -25,12 +25,13 @@ public class ExplodeTrigger : MonoBehaviour
         if (triggerTimer == 0)
         {
             crateSystems[triggerInterval].Explode();
-            if (triggerInterval == 0) 
-            { 
-                if(activateObject != null) 
-                    activateObject.SetActive(true); 
-                active = false; 
-                return; 
+            if (triggerInterval == 0)
+            {
+                if (activateObject != null)
+                    activateObject.SetActive(true);
+                active = false;
+                explodingTriggerActivated = true;
+                return;
             }
             triggerInterval--;
             triggerTimer = triggerTime;
@@ -39,7 +40,7 @@ public class ExplodeTrigger : MonoBehaviour
     private void TriggerExplosions()
     {
         isTriggered = true;
-        triggerInterval = crateSystems.Length -1;
+        triggerInterval = crateSystems.Length - 1;
         triggerTimer = triggerTime;
         active = true;
 
@@ -52,7 +53,7 @@ public class ExplodeTrigger : MonoBehaviour
     public void ResetObject()
     {
         triggerInterval = 0;
-        if(activateObject != null)
+        if (activateObject != null)
         {
             if (activateObject.activeInHierarchy)
                 activateObject.SetActive(false);
@@ -61,5 +62,11 @@ public class ExplodeTrigger : MonoBehaviour
         isTriggered = false;
         triggerTimer = triggerTime;
         for (int t = 0; t < crateSystems.Length; t++) crateSystems[t].ResetObject();
+        explodingTriggerActivated = false;
+    }
+    public void ActivateObjectState()
+    {
+        isTriggered = true;
+        explodingTriggerActivated = true;
     }
 }

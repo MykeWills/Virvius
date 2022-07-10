@@ -1292,7 +1292,13 @@ public class PlayerSystem : MonoBehaviour
         environmentSystem.ActivateEnvironment(0);
         environmentSystem.ActiveEnvironmentUI(false);
         levelSystem = AccessLevel();
-        if (levelSystem != null) levelSystem.ResetLevel();
+        if (levelSystem != null) 
+        {
+            if (!gameSystem.loadPosiitonFromFile)
+                levelSystem.ResetLevel(); 
+            else
+                levelSystem.LoadLevel();
+        }
         crosshair.enabled = true;
         ApplyPlayerHealthAndArmor();
         characterController.enabled = true;

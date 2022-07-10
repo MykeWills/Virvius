@@ -13,14 +13,11 @@ public class AmbushSystem : MonoBehaviour
     private AudioSource[] audioSrc;
     private bool open = false;
     private int doorCount = 0;
+    public bool ambushActivated = false;
     private bool[] soundActive1;
     private bool[] soundActive2;
     [SerializeField]
     private Transform[] doors;
-    [Space]
-    [Header("Surface Linking")]
-    [SerializeField]
-    private NavMeshLink[] navMeshLinks;
     void Start()
     {
         curPosition = new Vector3[transform.childCount];
@@ -28,7 +25,6 @@ public class AmbushSystem : MonoBehaviour
         audioSrc = new AudioSource[transform.childCount];
         soundActive1 = new bool[transform.childCount];
         soundActive2 = new bool[transform.childCount];
-        //SetNavLinks(false);
         for (int t = 0; t < doors.Length; t++)
         {
             audioSrc[t] = doors[t].GetComponent<AudioSource>();
@@ -45,15 +41,6 @@ public class AmbushSystem : MonoBehaviour
             }
         }
     }
-    //private void SetNavLinks(bool active)
-    //{
-    //    if (navMeshLinks.Length > 0)
-    //    {
-    //        for (int l = 0; l < navMeshLinks.Length; l++)
-    //            navMeshLinks[l].enabled = active;
-    //    }
-    //}
-    // Update is called once per frame
     void Update()
     {
         Opendoors();
@@ -61,20 +48,15 @@ public class AmbushSystem : MonoBehaviour
     private void Opendoors()
     {
         if (!open) return;
-        {
-            for (int t = 0; t < doors.Length; t++)
-            {
-                if (!soundActive1[t])
-                {
-                    audioSrc[t].clip = doorSoundFx[1];
-                    audioSrc[t].loop = true;
-                    audioSrc[t].Play();
-                    soundActive1[t] = true;
-                }
-            }
-        }
         for (int t = 0; t < doors.Length; t++)
         {
+            if (!soundActive1[t])
+            {
+                audioSrc[t].clip = doorSoundFx[1];
+                audioSrc[t].loop = true;
+                audioSrc[t].Play();
+                soundActive1[t] = true;
+            }
             doors[t].transform.localPosition = Vector3.MoveTowards(doors[t].transform.localPosition, slideDirection[t], Time.deltaTime * (moveSpeed * 2));
             if (doors[t].transform.localPosition == slideDirection[t])
             {
@@ -91,11 +73,14 @@ public class AmbushSystem : MonoBehaviour
             }
         }
         if (doorCount == doors.Length)
+        {
             open = false;
+            ambushActivated = true;
+        }
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Player") && !open) open = true;
+        if (other.gameObject.CompareTag("Player") && !open && !ambushActivated) open = true;
     }
     public void ResetObject()
     {
@@ -108,8 +93,28 @@ public class AmbushSystem : MonoBehaviour
             soundActive1[t] = false;
             soundActive2[t] = false;
         }
-        //SetNavLinks(true);
+        ambushActivated = false;
         doorCount = 0;
         open = false;
+    }
+    public void ActivateObjectState()
+    {
+        for (int t = 0; t < doors.Length; t++)
+        {
+            doors[t].transform.localPosition = slideDirection[t];
+            if (doors[t].transform.localPosition == slideDirection[t])
+            {
+                if (!soundActive2[t])
+                {
+                    audioSrc[t].clip = null;
+                    audioSrc[t].Stop();
+                    audioSrc[t].loop = false;
+                    audioSrc[t].PlayOneShot(doorSoundFx[0]);
+                    soundActive2[t] = true;
+                }
+                doorCount++;
+            }
+        }
+        ambushActivated = true;
     }
 }

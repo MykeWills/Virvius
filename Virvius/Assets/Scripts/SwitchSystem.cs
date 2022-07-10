@@ -13,8 +13,6 @@ public class SwitchSystem : MonoBehaviour
     [SerializeField]
     private bool setCustomFinalMessage = false;
     private string normalMessage = "Sequence Completed.";
-    [HideInInspector]
-    public bool switchOpen = false;
     [SerializeField]
     private AudioSource moveObjectSrc;
     [SerializeField]
@@ -37,6 +35,7 @@ public class SwitchSystem : MonoBehaviour
     private int switchCounter = 2;
     private float movePressedSpeed = 2;
     private Vector3 updatedPosition = Vector3.zero;
+    public bool switchActivated = false;
     public enum SwitchType { Press, Shoot, Step };
     public enum SwitchSubType { Move, Spawn, Timed, Counter, EventOnly };
     public enum SwitchActivationType { MoveDirection, Activation, Instantiation, EventOnly };
@@ -210,10 +209,6 @@ public class SwitchSystem : MonoBehaviour
                 moveObjectSrc.loop = false;
                 moveObjectSrc.Play();
             }
-            if (allowLinkValueChangeUpper)
-                SetNavLinks(navMeshLinkUpper, isActive);
-            if (allowLinkValueChangeLower)
-                SetNavLinks(navMeshLinkLower, !isActive);
         }
     }
     private void PlayMoveObjectSound()
@@ -223,15 +218,6 @@ public class SwitchSystem : MonoBehaviour
             moveObjectSrc.clip = moveObjectSound[0];
             moveObjectSrc.loop = false;
             if (!moveObjectSrc.isPlaying) moveObjectSrc.Play();
-        }
-    }
-
-    private void SetNavLinks(NavMeshLink[] links, bool active)
-    {
-        if (links.Length > 0)
-        {
-            for (int l = 0; l < links.Length; l++)
-                links[l].enabled = active;
         }
     }
     //========================================================================================//
@@ -304,20 +290,12 @@ public class SwitchSystem : MonoBehaviour
         if (!isActive) return;
         isActive = false;
         ActivateSwitchSubType(subType);
-        if (allowLinkValueChangeUpper)
-            SetNavLinks(navMeshLinkUpper, false);
-        if (allowLinkValueChangeLower)
-            SetNavLinks(navMeshLinkLower, false);
     }
     public void ActivateSwitch(SwitchSubType subType)
     {
         if (isActive) return;
         isActive = true;
         ActivateSwitchSubType(subType);
-        if (allowLinkValueChangeUpper)
-            SetNavLinks(navMeshLinkUpper, false);
-        if (allowLinkValueChangeLower)
-            SetNavLinks(navMeshLinkLower, false);
     }
     private void ActivateSwitchSubType(SwitchSubType subType)
     {
@@ -394,7 +372,6 @@ public class SwitchSystem : MonoBehaviour
                     PlayMoveObjectSound();
                     hasMoved = !hasMoved;
                     ActivateEvent(0, isActive);
-                    switchOpen = true;
                     break;
                 }
             case SwitchActivationType.Activation:
@@ -416,6 +393,7 @@ public class SwitchSystem : MonoBehaviour
                 }
             case SwitchActivationType.EventOnly: ActivateEvent(0, isActive); break;
         }
+        switchActivated = true;
     }
     private void ActivateEvent(int index, bool active)
     {
@@ -499,7 +477,6 @@ public class SwitchSystem : MonoBehaviour
         isTimer = false;
         switchTimer = switchTime;
         hasMoved = false;
-        switchOpen = false;
         for (int e = 0; e < eventObject.Length; e++)
         {
             if (eventObject[0] == null) break;
@@ -575,19 +552,14 @@ public class SwitchSystem : MonoBehaviour
         if (switchType == SwitchType.Press || switchType == SwitchType.Step)
             boxCollider.isTrigger = true;
         else boxCollider.isTrigger = false;
+        switchActivated = false;
     }
     public void ActivateObjectState()
     {
-        if (switchType == SwitchType.Press || switchType == SwitchType.Step)
-        {
-            if (eventObject.Length > 0)
-            {
-                if (eventObject[0].TryGetComponent(out CraneDropSystem craneDropSystem))
-                {
-                    if (craneDropSystem.craneActive) return;
-                }
-            }
-            ActivateSwitch(switchSubType);
-        }
+        isPressed = true;
+        if (switchSubType != SwitchSubType.Counter) ChangeSwitchAttributes();
+        isActive = true;
+        SetActivationType(activationType);
+        switchActivated = true;
     }
 }

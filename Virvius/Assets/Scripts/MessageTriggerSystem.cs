@@ -22,6 +22,7 @@ public class MessageTriggerSystem : MonoBehaviour
     private float repeatTimer;
     private bool repeat = false;
     private bool shutOffMessage = false;
+    public bool messageActivated = false;
     [SerializeField]
     private GameObject activeObject;
     private void Start()
@@ -71,17 +72,18 @@ public class MessageTriggerSystem : MonoBehaviour
                     messageSystem.SetMessage(triggerMessage, MessageSystem.MessageType.Center);
                     audioSystem.PlayAudioSource(triggerSounds[0], 1, 1, 128);
                     boxCollider.enabled = false;
-                    if (isSecret) 
-                    { 
-                        if (gameSystem == null) 
-                            gameSystem = GameSystem.gameSystem; 
+                    if (isSecret)
+                    {
+                        if (gameSystem == null)
+                            gameSystem = GameSystem.gameSystem;
                         gameSystem.secretsFound++;
                     }
+                    messageActivated = true;
                     break;
                 }
             case TriggerType.Continuous:
                 {
-                    if(activeObject != null)
+                    if (activeObject != null)
                     {
                         if (!activeObject.activeInHierarchy) ShutMessageOff(true);
                     }
@@ -100,5 +102,25 @@ public class MessageTriggerSystem : MonoBehaviour
         repeatTimer = repeatTime;
         boxCollider.enabled = true;
         shutOffMessage = false;
+        messageActivated = false;
+    }
+    public void ActivateObjectState()
+    {
+        if(triggerType == TriggerType.Instance)
+        {
+            if (activeObject != null)
+            {
+                if (!activeObject.activeInHierarchy) ShutMessageOff(true);
+            }
+            if (shutOffMessage) return;
+            boxCollider.enabled = false;
+            if (isSecret)
+            {
+                if (gameSystem == null)
+                    gameSystem = GameSystem.gameSystem;
+                gameSystem.secretsFound++;
+            }
+            messageActivated = true;
+        }
     }
 }

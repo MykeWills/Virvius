@@ -2,12 +2,14 @@
 
 public class SpawnSystem : MonoBehaviour
 {
-    public enum ObjectType { Grunt, Din, 
-                             Health0, Health1, Health2, health3, 
-                             Armor0, Armor1, Armor2, Armor3, 
-                             Power0, Power1, Power2, Power3, Power4, Power5, 
-                             Weapon1, Weapon2, Weapon3, Weapon4, Weapon5, Weapon6, Weapon7, Weapon8, Weapon9,
-                             Ammo1, Ammo2, Ammo4, Ammo5, Ammo6, Ammo7, Ammo8, Ammo9, None, Elite,
+    public enum ObjectType
+    {
+        Grunt, Din,
+        Health0, Health1, Health2, health3,
+        Armor0, Armor1, Armor2, Armor3,
+        Power0, Power1, Power2, Power3, Power4, Power5,
+        Weapon1, Weapon2, Weapon3, Weapon4, Weapon5, Weapon6, Weapon7, Weapon8, Weapon9,
+        Ammo1, Ammo2, Ammo4, Ammo5, Ammo6, Ammo7, Ammo8, Ammo9, None, Elite,
     }
     private PlayerSystem playerSystem;
     [SerializeField]
@@ -57,7 +59,7 @@ public class SpawnSystem : MonoBehaviour
     [SerializeField]
     private int spawnAmount = 0;
     [SerializeField]
-    private bool spawnAllAtOnce = false;    
+    private bool spawnAllAtOnce = false;
     [SerializeField]
     private bool randomizePositions = false;
     private int objectID = 0;
@@ -65,7 +67,7 @@ public class SpawnSystem : MonoBehaviour
     private bool spawnFinished = false;
     private bool startSpawning = false;
     private int objectIndex = 0;
-
+    public bool spawnActivated = false;
     private void Start()
     {
         warpEffect.gameObject.SetActive(false);
@@ -77,11 +79,11 @@ public class SpawnSystem : MonoBehaviour
         time = Time.deltaTime;
         Spawn();
     }
-    private void SpawnObjectType(ObjectType type) 
+    private void SpawnObjectType(ObjectType type)
     {
         switch (type)
         {
-            case ObjectType.Grunt: objectID = 0;  break;
+            case ObjectType.Grunt: objectID = 0; break;
             case ObjectType.Din: objectID = 1; break;
             case ObjectType.Health0: objectID = 2; break;
             case ObjectType.Health1: objectID = 3; break;
@@ -115,7 +117,7 @@ public class SpawnSystem : MonoBehaviour
             case ObjectType.Ammo8: objectID = 31; break;
             case ObjectType.Ammo9: objectID = 32; break;
             case ObjectType.Elite: objectID = 33; break;
-            
+
         }
         AccessSpawn(objectID);
     }
@@ -124,7 +126,7 @@ public class SpawnSystem : MonoBehaviour
         //access the spawnobject from pool or instantiate one into pool
         warpEffect.gameObject.SetActive(false);
         spawnedObject = AccessPool(spawnPool[index], spawnObjects[index]);
-        if(!spawnedObject.activeInHierarchy) spawnedObject.SetActive(true);
+        if (!spawnedObject.activeInHierarchy) spawnedObject.SetActive(true);
         //Randomize the spawn position
         if (randomizePositions) posIndex = Random.Range(0, spawnPoints.Length);
         //Spawn in symetrical order
@@ -159,10 +161,10 @@ public class SpawnSystem : MonoBehaviour
                 eliteSystem.EngagePlayer();
             }
         }
-        else 
+        else
         {
             Vector3 ItemPosition = new Vector3(spawnPoints[posIndex].transform.position.x, spawnPoints[posIndex].transform.position.y + 10, spawnPoints[posIndex].transform.position.z);
-            spawnedObject.transform.position = ItemPosition; 
+            spawnedObject.transform.position = ItemPosition;
         }
         warpEffect.gameObject.SetActive(true);
         warpEffect.transform.localPosition = spawnedObject.transform.localPosition;
@@ -181,7 +183,7 @@ public class SpawnSystem : MonoBehaviour
                 spawnTimer = Mathf.Clamp(spawnTimer, 0, spawnTime);
                 if (spawnTimer == 0)
                 {
-                    if (objectIndex < spawnAmount) 
+                    if (objectIndex < spawnAmount)
                     {
                         spawnTimer = spawnTime;
                         if (objectType[objectIndex] != ObjectType.None)
@@ -191,15 +193,17 @@ public class SpawnSystem : MonoBehaviour
                         return;
                     }
                     startSpawning = false;
-                }
+                    spawnActivated = true;
+}
             }
-            else if(spawnAllAtOnce)
+            else if (spawnAllAtOnce)
             {
                 if (spawnAltAudioSrc == null) Debug.LogWarning("Alt source is not Assigned!");
                 else spawnAltAudioSrc.PlayOneShot(warpSoundSfx);
                 for (int s = 0; s < spawnAmount; s++)
                     SpawnObjectType(objectType[s]);
                 startSpawning = false;
+                spawnActivated = true;
             }
         }
     }
@@ -218,18 +222,19 @@ public class SpawnSystem : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Player") && !spawnFinished) 
+        if (other.gameObject.CompareTag("Player") && !spawnFinished)
         {
             if (playerSystem == null) playerSystem = other.GetComponent<PlayerSystem>();
-            spawnTimer = spawnTime; 
-            startSpawning = true; 
-            spawnFinished = true; 
+            spawnTimer = spawnTime;
+            startSpawning = true;
+            spawnFinished = true;
         }
     }
     public void ResetObject()
     {
         startSpawning = false;
         spawnFinished = false;
+        spawnActivated = false;
         spawnTimer = spawnTime;
         posIndex = -1;
         objectID = 0;
@@ -251,5 +256,10 @@ public class SpawnSystem : MonoBehaviour
             }
         }
 
+    }
+    public void ActivateObjectState()
+    {
+        spawnFinished = true;
+        spawnActivated = true;
     }
 }

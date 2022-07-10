@@ -13,13 +13,13 @@ public class DoorTrigger : MonoBehaviour
         "Unlocked",
         "Locked"
     };
-
+    public bool doorTriggerActivated = false;
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            if(sb.Length  > 0) sb.Clear();
-            for(int d = 0; d < doorSystems.Length; d++)
+            if (sb.Length > 0) sb.Clear();
+            for (int d = 0; d < doorSystems.Length; d++)
             {
                 doorSystems[d].lockDoor = !doorSystems[d].lockDoor;
             }
@@ -29,11 +29,23 @@ public class DoorTrigger : MonoBehaviour
             messageSystem.SetMessage(sb.ToString(), MessageSystem.MessageType.Top);
             if (boxCollider == null) boxCollider = GetComponent<BoxCollider>();
             boxCollider.enabled = false;
+            doorTriggerActivated = true;
         }
     }
     public void ResetObject()
     {
         if (boxCollider == null) boxCollider = GetComponent<BoxCollider>();
         boxCollider.enabled = true;
+    doorTriggerActivated = false;
+}
+    public void ActivateObjectState()
+    {
+        for (int d = 0; d < doorSystems.Length; d++)
+            doorSystems[d].lockDoor = !doorSystems[d].lockDoor;
+        if (messageSystem == null) messageSystem = MessageSystem.messageSystem;
+        int sIndex = doorSystems[0].lockDoor ? 1 : 0;
+        if (boxCollider == null) boxCollider = GetComponent<BoxCollider>();
+        boxCollider.enabled = false;
+        doorTriggerActivated = true;
     }
 }
