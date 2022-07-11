@@ -20,6 +20,8 @@ public class ButtonAnimate : MonoBehaviour
     [SerializeField]
     private Sprite[] logoSpriteArray;
 
+    public bool animateLogo = true;
+    public bool animateButton = true;
     private bool logoActive = false;
     private bool buttonActive = false;
 
@@ -33,18 +35,25 @@ public class ButtonAnimate : MonoBehaviour
     }
     public void StartAnimation(bool active)
     {
-        buttonLogo.enabled = active;
-        buttonActive = active;
-        logoActive = active;
         for (int f = 0; f < 2; f++)
         {
             curFrame[f] = 0;
         }
-        buttonLogo.sprite = logoSpriteArray[curFrame[0]];
-        buttonImage.sprite = buttonSpriteArray[curFrame[1]];
+        if (animateLogo)
+        {
+            buttonLogo.enabled = active;
+            logoActive = active;
+            buttonLogo.sprite = logoSpriteArray[curFrame[0]];
+        }
+        if (animateButton)
+        {
+            buttonActive = active;
+            buttonImage.sprite = buttonSpriteArray[curFrame[1]];
+        }
     }
     private void LogoAnimation()
     {
+        if (!animateLogo) return;
         if (!logoActive) return;
         frameTimer[0] -= time;
         if (frameTimer[0] <= 0)
@@ -62,6 +71,7 @@ public class ButtonAnimate : MonoBehaviour
     }
     private void ButtonAnimation()
     {
+        if (!animateButton) return;
         if (!buttonActive) return;
         frameTimer[1] -= time;
         if (frameTimer[1] <= 0)

@@ -19,6 +19,7 @@ public class OptionsSystem : MonoBehaviour
     private GameSystem gameSystem;
     [SerializeField]
     private IntroSystem introSystem;
+    private FileSystem fileSystem;
     private WeaponSystem weaponSystem;
     private PlayerSystem playerSystem;
     private Player inputPlayer;
@@ -689,7 +690,7 @@ public class OptionsSystem : MonoBehaviour
     void Start()
     {
         gameSystem = GameSystem.gameSystem;
-       
+        fileSystem = FileSystem.fileSystem;
         // Grab player input from Rewired
         inputPlayer = ReInput.players.GetPlayer(0);
       
@@ -783,9 +784,10 @@ public class OptionsSystem : MonoBehaviour
     }
     private void KeyControl()
     {
+        if (gameSystem.fileMenuOpen) return;
         if (gameSystem.isLoading) return;
         if (CommandSystem.commandOpen) return;
-        if (!optionsOpen && !quitOpen && !fileSelectionOpen) return;
+        if (!optionsOpen && !quitOpen && !fileSelectionOpen ) return;
         if (optionsOpen)
         {
             canQuit = false;

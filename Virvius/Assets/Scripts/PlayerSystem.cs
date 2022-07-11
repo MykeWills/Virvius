@@ -1321,7 +1321,7 @@ public class PlayerSystem : MonoBehaviour
         if (!isDead) return;
         if (inputSystem.inputPlayer.GetButtonUp("Start") && isDead || inputSystem.inputPlayer.GetButtonUp("Select") && isDead)
         {
-            gameSystem.LoadPlayerData();
+            gameSystem.LoadData(0);
             gameSystem.ResetPools();
             gameSystem.ResetLevelStats();
             messageSystem.EraseMessages();

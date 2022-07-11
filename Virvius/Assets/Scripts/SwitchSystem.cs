@@ -92,16 +92,6 @@ public class SwitchSystem : MonoBehaviour
     [SerializeField]
     private int dropCranePosIndex = 0;
     [Space]
-    [Header("Surface Linking")]
-    [SerializeField]
-    private NavMeshLink[] navMeshLinkUpper;
-    [SerializeField]
-    private bool allowLinkValueChangeUpper = false;
-    [SerializeField]
-    private NavMeshLink[] navMeshLinkLower;
-    [SerializeField]
-    private bool allowLinkValueChangeLower = false;
-    [Space]
     [Header("Door Preferences")]
     [SerializeField]
     private bool lockedDoorEvent = false;

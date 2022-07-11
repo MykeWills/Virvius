@@ -42,6 +42,7 @@ public class GameSystem : MonoBehaviour
     [SerializeField]
     private OptionsSystem optionsSystem;
     private Player inputPlayer;
+
     //[HideInInspector]
     public Vector3[] scenePositions = new Vector3[4]
     {
@@ -73,14 +74,24 @@ public class GameSystem : MonoBehaviour
     private int curSceneIndex = 0;
     private string gamePath = "Data/";
     private string OPTION_FILE = "o_data";
-    private string PLAYER_FILE = "p_data";
-    private string LEVEL_FILE = "l_data";
+    private string[] SAVE_FILE = new string[9]
+    {
+        "s0_data",
+        "s1_data",
+        "s2_data",
+        "s3_data",
+        "s4_data",
+        "s5_data",
+        "s6_data",
+        "s7_data",
+        "s8_data"
+    };
     private string FILE_EXTENSION = ".vir";
     private string dataPath;
     [Header("Menu Assignment")]
     [SerializeField]
     private Selectable[] b_Select = new Selectable[6];
-    private bool[] currentMenuButtonSelected = new bool[6] { true, false, false, false, false, false };
+    private bool[] currentMenuButtonSelected = new bool[7] { true, false, false, false, false, false, false };
     [SerializeField]
     private AudioClip[] pauseOpenSfx = new AudioClip[2];
     [SerializeField]
@@ -185,6 +196,11 @@ public class GameSystem : MonoBehaviour
     public Transform[] bulletHolePool = new Transform[4];
     public Transform enemyAmmoPool;
     public Transform[] enemyWeaponPools = new Transform[2];
+    [HideInInspector]
+    public bool fileMenuOpen = false;
+    [SerializeField]
+    private Button saveButtonActivation;
+    [SerializeField]
 
     private void Awake()
     {
@@ -212,10 +228,6 @@ public class GameSystem : MonoBehaviour
     }
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F2))
-            AutoSave();
-        if (Input.GetKeyDown(KeyCode.F3))
-            LoadPlayerData();
         LevelTime();
         LoadScene(sceneIndex);
         Pause();
@@ -265,14 +277,21 @@ public class GameSystem : MonoBehaviour
         audioSystem.MusicPlayStop(false);
     }
    
-
+    private bool GameAttributesOpen()
+    {
+        if (isLoading) return true;
+        if (CommandSystem.commandOpen) return true;
+        if (!isGameStarted) return true;
+        if (optionsSystem.quitOpen) return true;
+        if (!optionsSystem.canQuit) return true;
+        if (optionsSystem.optionsOpen) return true;
+        if (optionsSystem.fileSelectionOpen) return true;
+        return false;
+    }
     private void Pause()
     {
-        if (isLoading) return;
-        if (CommandSystem.commandOpen) return;
-        if (!isGameStarted) return;
-        if (optionsSystem.quitOpen) return;
-        if (inputPlayer.GetButtonDown("Start") && optionsSystem.canQuit && !optionsSystem.optionsOpen && !optionsSystem.fileSelectionOpen)
+        if (GameAttributesOpen()) return;
+        if (inputPlayer.GetButtonDown("Start") && !isPaused || inputPlayer.GetButtonDown("B") && isPaused || inputPlayer.GetButtonDown("Start") && isPaused)
         {
             isPaused = !isPaused;
             int open = isPaused ? 1 : 0;
@@ -289,7 +308,9 @@ public class GameSystem : MonoBehaviour
         mainSelection.SetActive(active);
         mainNavigation.SetActive(active);
         if (active) 
-        { 
+        {
+            if (sceneIndex > 1) saveButtonActivation.interactable = true;
+            else saveButtonActivation.interactable = false;
             SelectFileSelectable(0);
             SetButtonAnimates(0);
         }
@@ -721,10 +742,10 @@ public class GameSystem : MonoBehaviour
         stream.Close();
     }
 
-    public void LoadPlayerData()
+    public void LoadData(int slotID)
     {
-        if (!File.Exists(dataPath + gamePath + PLAYER_FILE + FILE_EXTENSION)) return;
-        Stream stream = File.Open(dataPath + gamePath + PLAYER_FILE + FILE_EXTENSION, FileMode.Open);
+        if (!File.Exists(dataPath + gamePath + SAVE_FILE[slotID] + FILE_EXTENSION)) return;
+        Stream stream = File.Open(dataPath + gamePath + SAVE_FILE[slotID] + FILE_EXTENSION, FileMode.Open);
         playerData = (PlayerData)_BinaryFormatter.Deserialize(stream);
         stream.Close();
         //------------------------------------------------------------------------
@@ -799,7 +820,7 @@ public class GameSystem : MonoBehaviour
         //GAME SETTINGS-----------------------------------------------------------
         //------------------------------------------------------------------------
 
-        curSceneIndex = playerData.sceneIndex;
+        sceneIndex = playerData.sceneIndex;
 
         ambushesActivated = new bool[playerData.ambushesActivated.Length];
         for (int a = 0; a < ambushesActivated.Length; a++)
@@ -855,13 +876,13 @@ public class GameSystem : MonoBehaviour
         cratesExploded = playerData.cratesExploded;
         explodingTriggersActivated = playerData.explodingTriggersActivated;
         doorTriggersActivated = playerData.doorTriggersActivated;
-        SetNewLevel(curSceneIndex);
+        SetNewLevel(sceneIndex);
     }
-    public void SavePlayerData()
+    public void SaveData(int slotID)
     {
         if (!Directory.Exists(dataPath + gamePath))
             Directory.CreateDirectory(dataPath + gamePath);
-        Stream stream = File.Create(dataPath + gamePath + PLAYER_FILE + FILE_EXTENSION);
+        Stream stream = File.Create(dataPath + gamePath + SAVE_FILE[slotID] + FILE_EXTENSION);
         //------------------------------------------------------------------------
         //WEAPON SETTINGS---------------------------------------------------------
         //------------------------------------------------------------------------
@@ -923,8 +944,24 @@ public class GameSystem : MonoBehaviour
         //------------------------------------------------------------------------
         //GAME SETTINGS-----------------------------------------------------------
         //------------------------------------------------------------------------
-        playerData.sceneIndex = curSceneIndex;
+        playerData.sceneIndex = sceneIndex;
+        switch (optionsSystem.difficultyIndex)
+        {
+            case 0: playerData.difficultyName = " [Easy]"; break;
+            case 1: playerData.difficultyName = " [Normal]"; break;
+            case 2: playerData.difficultyName = " [Hard]"; break;
+            case 3: playerData.difficultyName = " [Demonic]"; break;
+        }
+        if (sceneIndex > 1 && sceneIndex < 11) playerData.episodeName = " Episode 1: Melted Foundry ";
+        else if (sceneIndex > 10 && sceneIndex < 21) playerData.episodeName = " Episode 2: Torcher Sanctum ";
+        else if (sceneIndex > 20 && sceneIndex < 31) playerData.episodeName = " Episode 3: Command Headquarters ";
+        else if (sceneIndex > 30 && sceneIndex < 41) playerData.episodeName = " Episode 4: Dark Abyss ";
+        else playerData.episodeName = " Episode 0: Development Tech Demo ";
 
+        switch (sceneIndex)
+        {
+            case 2: playerData.levelName = "- Level 1: Virulent Vault"; break;
+        }
         LevelSystem levelSystem = playerSystem.AccessLevel();
         if (levelSystem == null) { Debug.LogError("Level System Not Accessed."); return; }
         levelSystem.SaveLevel();
@@ -941,13 +978,47 @@ public class GameSystem : MonoBehaviour
        
         _BinaryFormatter.Serialize(stream, playerData);
         stream.Close();
-    }
-   
 
+    }
+
+    public void LoadFileInformation(Text[] slotSText, Text[] slotLText)
+    {
+        string[] fileNames = new string[9]
+        {
+            "s0_data",
+            "s1_data",
+            "s2_data",
+            "s3_data",
+            "s4_data",
+            "s5_data",
+            "s6_data",
+            "s7_data",
+            "s8_data"
+        };
+        for (int s = 0; s < 9; s++)
+        {
+            if (File.Exists(dataPath + gamePath + fileNames[s] + FILE_EXTENSION))
+            {
+                Stream stream = File.Open(dataPath + gamePath + fileNames[s] + FILE_EXTENSION, FileMode.Open);
+                playerData = (PlayerData)_BinaryFormatter.Deserialize(stream);
+                stream.Close();
+                if(s == 0)
+                    slotLText[s].text = "Auto_Save " + playerData.episodeName + playerData.levelName + playerData.difficultyName;
+                else 
+                    slotLText[s].text = playerData.episodeName + playerData.levelName + playerData.difficultyName;
+            }
+            else if (!File.Exists(dataPath + gamePath + fileNames[s] + FILE_EXTENSION))
+            {
+                slotLText[s].text = "Empty Slot";
+            }
+            if(s > 0) 
+                slotSText[s - 1].text = slotLText[s].text;
+        }
+    }
     public void AutoSave()
     {
         if (!optionsSystem.autoSave) return;
-        SavePlayerData();
+        SaveData(0);
         SaveOptionData();
         saveIcon.enabled = true;
         saveTimer = saveTime;
@@ -1057,9 +1128,8 @@ public struct PlayerData
     public SerializableQuaternion playerRotation;
     public SerializableVector3 playerPosition;
     //----------------------
-    //GAME SETTINGS
+    //LEVEL SETTINGS
     //----------------------
-    public int sceneIndex;
     public bool[] ambushesActivated;
     public bool[] enemiesDeadGrunt;
     public bool[] enemiesDeadDin;
@@ -1071,7 +1141,15 @@ public struct PlayerData
     public bool[] cratesExploded;
     public bool[] explodingTriggersActivated;
     public bool[] doorTriggersActivated;
+    //----------------------
+    //GAME SETTINGS
+    //----------------------
+    public int sceneIndex;
+    public string episodeName;
+    public string levelName;
+    public string difficultyName;
 }
+
 [Serializable]
 public struct SerializableVector3
 {

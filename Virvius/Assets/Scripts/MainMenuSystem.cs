@@ -7,6 +7,7 @@ public class MainMenuSystem : MonoBehaviour
 {
     // Start is called before the first frame update
     private GameSystem gameSystem;
+    private FileSystem fileSystem;
     private OptionsSystem optionsSystem;
     private IntroSystem introSystem;
     private Player inputPlayer;
@@ -34,9 +35,12 @@ public class MainMenuSystem : MonoBehaviour
     private VideoClip previewClip;
     [SerializeField]
     private RenderTexture renderTexture;
+    [SerializeField]
+    private GameObject fileMenu;
     void Start()
     {
         introSystem = IntroSystem.introSystem;
+        fileSystem = FileSystem.fileSystem;
         inputPlayer = ReInput.players.GetPlayer(0);
         gameSystem = GameSystem.gameSystem;
         optionsSystem = OptionsSystem.optionsSystem;
@@ -50,10 +54,13 @@ public class MainMenuSystem : MonoBehaviour
     void Update()
     {
         FadeOutBlackScreen();
+       
+        if (gameSystem.fileMenuOpen) return;
         if (gameSystem.isLoading) return;
         if (gameSystem.isGameStarted) return;
         if (optionsSystem.optionsOpen) return;
         if (optionsSystem.quitOpen) return;
+        
         PulseAlpha();
         if (!startGame)
         {
@@ -74,6 +81,7 @@ public class MainMenuSystem : MonoBehaviour
         }
         else
         {
+             
             if (!gameSystem.mainmenuOpen) return;
             if (Input.GetKeyDown(KeyCode.Escape) || inputPlayer.GetButtonDown("B"))
             {
