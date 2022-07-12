@@ -766,7 +766,8 @@ public class GameSystem : MonoBehaviour
 
         sceneIndex = playerData.sceneIndex;
         levelTime = playerData.levelTime;
-
+        optionsSystem.difficultyIndex = playerData.difficultyIndex;
+        optionsSystem.SetDifficulty();
         ambushesActivated = new bool[playerData.ambushesActivated.Length];
         for (int a = 0; a < ambushesActivated.Length; a++)
             ambushesActivated[a] = playerData.ambushesActivated[a];
@@ -986,6 +987,8 @@ public class GameSystem : MonoBehaviour
         //-------------------------------------------------------------------------------------------------------------------------------------------
         playerData.gameTime = optionsSystem.SetTime(levelTime);
         playerData.levelTime = levelTime;
+
+        playerData.difficultyIndex = optionsSystem.difficultyIndex;
         LevelSystem levelSystem = playerSystem.AccessLevel();
         if (levelSystem == null) { Debug.LogError("Level System Not Accessed."); return; }
         //-------------------------------------------------------------------------------------------------------------------------------------------
@@ -1253,6 +1256,7 @@ public struct PlayerData
     //----------------------
     //GAME SETTINGS
     //----------------------
+    public int difficultyIndex;
     public int sceneIndex;
     public string episodeName;
     public string levelName;

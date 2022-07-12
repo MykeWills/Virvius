@@ -198,6 +198,7 @@ public class BobSystem : MonoBehaviour
             !lerpAhead[0] ? weaponBlastBackRate : weaponReturnRate,
             !lerpAhead[1] ? animatedBlastBackRate : animatedReturnRate
         };
+        if (animatedXPosition == null || animatedXPosition == null) Start();
         switch (WeaponSystem.wType)
         {
             case WeaponSystem.WeaponType.Shotgun:
@@ -229,6 +230,7 @@ public class BobSystem : MonoBehaviour
                         }
                         else if (!holdAnimLoad)
                         {
+
                             Vector3 start = new Vector3(animatedXPosition[0], animatedYPosition[0], animatedZStartPosition);
                             Vector3 end = new Vector3(animatedXPosition[0], animatedYPosition[0], animatedZEndPosition);
                             Vector3 lerpReload = !lerpAhead[1] ? end : start;
@@ -528,6 +530,7 @@ public class BobSystem : MonoBehaviour
     {
         isRecoiling = false;
         weaponReloadTime = weaponReloadRate;
+        if (animatedXPosition == null || animatedXPosition == null) Start();
         switch (WeaponSystem.wType)
         {
             case WeaponSystem.WeaponType.Shotgun:

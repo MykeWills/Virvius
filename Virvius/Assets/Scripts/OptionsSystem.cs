@@ -19,7 +19,6 @@ public class OptionsSystem : MonoBehaviour
     private GameSystem gameSystem;
     [SerializeField]
     private IntroSystem introSystem;
-    private FileSystem fileSystem;
     private WeaponSystem weaponSystem;
     private PlayerSystem playerSystem;
     private Player inputPlayer;
@@ -690,7 +689,6 @@ public class OptionsSystem : MonoBehaviour
     void Start()
     {
         gameSystem = GameSystem.gameSystem;
-        fileSystem = FileSystem.fileSystem;
         // Grab player input from Rewired
         inputPlayer = ReInput.players.GetPlayer(0);
       
