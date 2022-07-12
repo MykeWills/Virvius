@@ -814,12 +814,16 @@ public class EnemyGSystem : MonoBehaviour
         navAgent.Warp(originalPosition);
         transform.position = originalPosition;
     }
-    public void ActivateObjectState()
+
+    public void ActivateObjectState(Vector3 lastPosition, Quaternion lastRotation)
     {
+        navAgent.Warp(lastPosition);
+        transform.position = lastPosition;
+        transform.rotation = lastRotation;
         gameSystem.totalKills++;
         health = 0;
         isDead = true;
-        enemyBody.SetActive(false);
+        //enemyBody.SetActive(false);
         enemyState = EnemyState.death;
         ActiveState();
         boxCollider.enabled = false;
@@ -829,5 +833,6 @@ public class EnemyGSystem : MonoBehaviour
         shotgunMuzzle.enabled = false;
         shotgunLight.enabled = false;
         gunflashTimer = gunflashTime;
+
     }
 }

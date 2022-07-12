@@ -1064,7 +1064,6 @@ public class PlayerSystem : MonoBehaviour
     {
         if (!optionsSystem.environmentEffects) 
         {
-
             for (int e = 0; e < enviromentUIActiveImage.Length; e++)
             {
                 if (enviromentUIActiveImage[e].enabled)
@@ -1214,6 +1213,7 @@ public class PlayerSystem : MonoBehaviour
     }
     public void SetupPlayer(bool newGame)
     {
+        isDead = false;
         messageSystem.EraseMessages();
         inputSystem.ResetInputSystem();
         powerupSystem.ResetPowerupSystem();
@@ -1247,7 +1247,7 @@ public class PlayerSystem : MonoBehaviour
             SetArmorSprites();
             for (int a = 0; a < 4; a++)
                 armorBannerObject[a].SetActive(false);
-
+            gameSystem.ResetLevelStats();
             for (int kc = 0; kc < 3; kc++) SetActiveKey(kc, false);
         }
         Vector3 headLoc = Vector3.zero;
@@ -1294,20 +1294,31 @@ public class PlayerSystem : MonoBehaviour
         levelSystem = AccessLevel();
         if (levelSystem != null) 
         {
-            if (!gameSystem.loadPosiitonFromFile)
+            if (!gameSystem.loadFromFile)
                 levelSystem.ResetLevel(); 
             else
                 levelSystem.LoadLevel();
         }
         crosshair.enabled = true;
         ApplyPlayerHealthAndArmor();
-        characterController.enabled = true;
         messageSystem.SetMessage(levelTitle[gameSystem.sceneIndex], MessageSystem.MessageType.Display);
-        if (gameSystem.loadPosiitonFromFile) gameSystem.loadPosiitonFromFile = false;
+        for(int e = 0; e < 3; e++) StartFadeEnvironmentUI(false, e, Color.white);
+        Vector3 position = gameSystem.loadFromFile ? gameSystem.loadedPosition : gameSystem.scenePositions[gameSystem.sceneIndex];
+        Quaternion rotation = gameSystem.loadFromFile ? gameSystem.loadedRotation : Quaternion.Euler(gameSystem.sceneRotations[gameSystem.sceneIndex]);
+        WarpPlayer(position, rotation);
+
+        if (gameSystem.loadFromFile) 
+        {
+            gameSystem.SetPreviouslyDroppedItems();
+            gameSystem.SetPreviousWeaponStats();
+            gameSystem.SetPreviousPlayerStats();
+            gameSystem.loadFromFile = false; 
+        }
         else
         {
-            if(gameSystem.sceneIndex > 1) gameSystem.AutoSave();
+            if (gameSystem.sceneIndex > 1) gameSystem.AutoSave();
         }
+       
     }
     public void ActivateLevelEnviromentSounds()
     {
@@ -1437,11 +1448,9 @@ public class PlayerSystem : MonoBehaviour
         environmentSystem.ActivateSwimming(false);
         environmentSystem.SetEnvironment(0, 0);
         environmentSystem.ActiveEnvironmentUI(false);
-        Vector3 headLoc = Vector3.zero;
         Vector3 headRot = Vector3.zero;
         Quaternion rot = Quaternion.Euler(headRot);
         head.localRotation = rot;
-        //head.localPosition = headLoc;
         characterController.enabled = true;
 
 

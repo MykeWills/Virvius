@@ -58,7 +58,18 @@ public class LevelSystem : MonoBehaviour
     public bool[] explodingTriggersActivated;   
     [HideInInspector]
     public bool[] doorTriggersActivated;
-
+    [HideInInspector]
+    public Vector3[] enemiesPositionGrunt;
+    [HideInInspector]
+    public Vector3[] enemiesPositionDin;
+    [HideInInspector]
+    public Vector3[] enemiesPositionElite;
+    [HideInInspector]
+    public Quaternion[] enemiesRotationGrunt;
+    [HideInInspector]
+    public Quaternion[] enemiesRotationDin;
+    [HideInInspector]
+    public Quaternion[] enemiesRotationElite;
     private void Start()
     {
         ambushesActivated = new bool[ambushSystems.Length];
@@ -72,6 +83,12 @@ public class LevelSystem : MonoBehaviour
         cratesExploded = new bool[explodingCrateSystems.Length];
         explodingTriggersActivated = new bool[explodingTriggerSystems.Length];
         doorTriggersActivated = new bool[doorTriggers.Length];
+        enemiesPositionGrunt = new Vector3[gruntSystems.Length];
+        enemiesRotationGrunt = new Quaternion[gruntSystems.Length];
+        enemiesPositionDin = new Vector3[dinSystems.Length];
+        enemiesRotationDin = new Quaternion[dinSystems.Length];
+        enemiesPositionElite = new Vector3[eliteSystems.Length];
+        enemiesRotationElite = new Quaternion[eliteSystems.Length];
     }
     public void ResetLevel()
     {
@@ -186,6 +203,7 @@ public class LevelSystem : MonoBehaviour
         enemiesDeadGrunt = gameSystem.enemiesDeadGrunt;
         enemiesDeadDin = gameSystem.enemiesDeadDin;
         enemiesDeadElite = gameSystem.enemiesDeadElite;
+        switchesActivated = gameSystem.switchesActivated;
         pickupsObtained = gameSystem.pickupsObtained;
         spawnersActivated = gameSystem.spawnersActivated;
         messagesActivated = gameSystem.messagesActivated;
@@ -196,11 +214,11 @@ public class LevelSystem : MonoBehaviour
         for (int a = 0; a < ambushesActivated.Length; a++)
             if (ambushesActivated[a]) ambushSystems[a].ActivateObjectState();
         for (int a = 0; a < enemiesDeadGrunt.Length; a++)
-            if (enemiesDeadGrunt[a]) gruntSystems[a].ActivateObjectState();
+            if (enemiesDeadGrunt[a]) gruntSystems[a].ActivateObjectState(gameSystem.playerData.enemyGPosition[a], gameSystem.playerData.enemyGRotation[a]);
         for (int a = 0; a < enemiesDeadDin.Length; a++)
-            if (enemiesDeadDin[a]) dinSystems[a].ActivateObjectState();
+            if (enemiesDeadDin[a]) dinSystems[a].ActivateObjectState(gameSystem.playerData.enemyDPosition[a], gameSystem.playerData.enemyDRotation[a]);
         for (int a = 0; a < enemiesDeadElite.Length; a++)
-            if (enemiesDeadElite[a]) eliteSystems[a].ActivateObjectState();
+            if (enemiesDeadElite[a]) eliteSystems[a].ActivateObjectState(gameSystem.playerData.enemyEPosition[a], gameSystem.playerData.enemyERotation[a]);
         for (int a = 0; a < switchesActivated.Length; a++)
             if (switchesActivated[a]) switches[a].ActivateObjectState();
         for (int a = 0; a < pickupsObtained.Length; a++)
@@ -215,6 +233,8 @@ public class LevelSystem : MonoBehaviour
             if (explodingTriggersActivated[a]) explodingTriggerSystems[a].ActivateObjectState();
         for (int a = 0; a < doorTriggersActivated.Length; a++)
             if (doorTriggersActivated[a]) doorTriggers[a].ActivateObjectState();
+
+        gameSystem.SetPreviouslyDroppedItems();
     }
     public void SaveLevel()
     {
@@ -240,6 +260,18 @@ public class LevelSystem : MonoBehaviour
             if (explodingTriggerSystems[a].explodingTriggerActivated) explodingTriggersActivated[a] = explodingTriggerSystems[a].explodingTriggerActivated;
         for (int a = 0; a < doorTriggersActivated.Length; a++)
             if (doorTriggers[a].doorTriggerActivated) doorTriggersActivated[a] = doorTriggers[a].doorTriggerActivated;
+        for (int a = 0; a < enemiesPositionGrunt.Length; a++)
+            enemiesPositionGrunt[a] = gruntSystems[a].transform.position;
+        for (int a = 0; a < enemiesRotationGrunt.Length; a++)
+            enemiesRotationGrunt[a] = gruntSystems[a].transform.rotation;
+        for (int a = 0; a < enemiesPositionDin.Length; a++)
+            enemiesPositionDin[a] = dinSystems[a].transform.position;
+        for (int a = 0; a < enemiesRotationDin.Length; a++)
+            enemiesRotationDin[a] = dinSystems[a].transform.rotation;
+        for (int a = 0; a < enemiesPositionElite.Length; a++)
+            enemiesPositionElite[a] = eliteSystems[a].transform.position;
+        for (int a = 0; a < enemiesRotationElite.Length; a++)
+            enemiesRotationElite[a] = eliteSystems[a].transform.rotation;
     }
 
     public void ActivateEnvironment()

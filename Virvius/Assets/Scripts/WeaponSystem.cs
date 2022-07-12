@@ -773,6 +773,7 @@ public class WeaponSystem : MonoBehaviour
         weapons[weaponIndex].transform.localRotation = Quaternion.identity;
         aimObjects.Clear();
         //This is only temporary until save/load state is created
+        if (gameSystem.loadFromFile) return;
         if (newGame)
         {
             for (int w = 0; w < weaponObtained.Length; w++)

@@ -62,7 +62,7 @@ public class GameSystem : MonoBehaviour
         new Vector3(0, 0, 0)
     };
     [HideInInspector]
-    public bool loadPosiitonFromFile = false;
+    public bool loadFromFile = false;
     private AsyncOperation async = new AsyncOperation();
     private bool firstTimeBoot = false;
     [HideInInspector]
@@ -188,7 +188,18 @@ public class GameSystem : MonoBehaviour
     public bool[] explodingTriggersActivated;
     [HideInInspector]
     public bool[] doorTriggersActivated;
-    [Space]
+
+    public bool[] dropItem0Activated;
+
+    public bool[] dropItem1Activated;
+
+    public bool[] dropItem2Activated;
+    [SerializeField]
+    private Transform[] enemyDropPool = new Transform[3];
+    [SerializeField]
+    private GameObject[] dropPoolPrefabs = new GameObject[3];
+
+ [Space]
     [Header("Pool Access")]
     private int[] bulletpoolAmt = new int[4] { 130, 70, 40, 10 };
     public Transform[] enemyBulletPools = new Transform[2];
@@ -196,6 +207,7 @@ public class GameSystem : MonoBehaviour
     public Transform[] bulletHolePool = new Transform[4];
     public Transform enemyAmmoPool;
     public Transform[] enemyWeaponPools = new Transform[2];
+ 
     [HideInInspector]
     public bool fileMenuOpen = false;
     [SerializeField]
@@ -246,11 +258,7 @@ public class GameSystem : MonoBehaviour
     }
     private void LevelTime()
     {
-        if (!levelActive)
-        {
-            ResetLevelStats();
-            return;
-        }
+        if (!levelActive) return;
         levelTime += Time.unscaledDeltaTime;
     }
     public void ResetLevelStats()
@@ -453,12 +461,8 @@ public class GameSystem : MonoBehaviour
     {
         // Shut off Loading Camera
         if (loadingCamera.activeInHierarchy) loadingCamera.SetActive(false);
-        // turn on Player Object
-        
-       
         // Shut off Loading Screen
         if (loadingMenu.activeInHierarchy) loadingMenu.SetActive(false);
-
         // Turn on Game UI
         gameUI.SetActive(true);
  
@@ -472,15 +476,12 @@ public class GameSystem : MonoBehaviour
 
         if (sceneIndex > 1) 
         { 
-            player.transform.localPosition = loadPosiitonFromFile ? loadedPosition : scenePositions[sceneIndex]; 
-            player.transform.localRotation = loadPosiitonFromFile ? loadedRotation : Quaternion.Euler(sceneRotations[sceneIndex]);
             player.SetActive(true); 
             playerSystem.SetupPlayer(false); 
         }
         else 
         { 
-            SetMasterStart(); 
-            player.transform.localPosition = scenePositions[sceneIndex]; 
+            SetMasterStart();
             player.SetActive(true);
             playerSystem.SetupPlayer(true);
         }
@@ -748,79 +749,23 @@ public class GameSystem : MonoBehaviour
         Stream stream = File.Open(dataPath + gamePath + SAVE_FILE[slotID] + FILE_EXTENSION, FileMode.Open);
         playerData = (PlayerData)_BinaryFormatter.Deserialize(stream);
         stream.Close();
-        //------------------------------------------------------------------------
-        //WEAPON SETTINGS---------------------------------------------------------
-        //------------------------------------------------------------------------
-        weaponSystem.weaponAmmo = new int[10] 
-        {
-            playerData.weaponAmmo[0],
-            playerData.weaponAmmo[1],
-            playerData.weaponAmmo[2],
-            playerData.weaponAmmo[3],
-            playerData.weaponAmmo[4],
-            playerData.weaponAmmo[5],
-            playerData.weaponAmmo[6],
-            playerData.weaponAmmo[7],
-            playerData.weaponAmmo[8],
-            playerData.weaponAmmo[9]
-        };
-        weaponSystem.weaponEquipped = new bool[10]
-        {
-            playerData.weaponEquipped[0],
-            playerData.weaponEquipped[1],
-            playerData.weaponEquipped[2],
-            playerData.weaponEquipped[3],
-            playerData.weaponEquipped[4],
-            playerData.weaponEquipped[5],
-            playerData.weaponEquipped[6],
-            playerData.weaponEquipped[7],
-            playerData.weaponEquipped[8],
-            playerData.weaponEquipped[9]
-        };
-        weaponSystem.weaponObtained = new bool[10]
-        {
-            playerData.weaponObtained[0],
-            playerData.weaponObtained[1],
-            playerData.weaponObtained[2],
-            playerData.weaponObtained[3],
-            playerData.weaponObtained[4],
-            playerData.weaponObtained[5],
-            playerData.weaponObtained[6],
-            playerData.weaponObtained[7],
-            playerData.weaponObtained[8],
-            playerData.weaponObtained[9]
-        };
-      
-        weaponSystem.weaponIndex = playerData.weaponIndex;
-        weaponSystem.ApplyAmmo();
-        weaponSystem.WeaponSetup(weaponSystem.weaponList[weaponSystem.weaponIndex]);
+
+        loadFromFile = true;
+        ResetLevelStats();
+     
         //------------------------------------------------------------------------
         //PLAYER SETTINGS---------------------------------------------------------
         //------------------------------------------------------------------------
-        playerSystem.health = playerData.health;
-        playerSystem.armor = playerData.armor;
-        playerSystem.maxArmor = playerData.maxArmor;
-        playerSystem.maxHealth = playerData.maxHealth;
-        playerSystem.ApplyPlayerHealthAndArmor();
-        playerSystem.keyCards = new bool[3]
-        {
-                playerData.keyCards[0],
-                playerData.keyCards[1],
-                playerData.keyCards[2]
-        };
-        for(int k = 0; k < playerSystem.keyCards.Length; k++)
-        {
-            if(playerSystem.keyCards[k])
-                playerSystem.SetActiveKey(k, playerSystem.keyCards[k]);
-        }
+       
         loadedPosition = playerData.playerPosition;
         loadedRotation = playerData.playerRotation;
-        loadPosiitonFromFile = true;
+    
         //------------------------------------------------------------------------
         //GAME SETTINGS-----------------------------------------------------------
         //------------------------------------------------------------------------
 
         sceneIndex = playerData.sceneIndex;
+        levelTime = playerData.levelTime;
 
         ambushesActivated = new bool[playerData.ambushesActivated.Length];
         for (int a = 0; a < ambushesActivated.Length; a++)
@@ -871,64 +816,124 @@ public class GameSystem : MonoBehaviour
         enemiesDeadDin = playerData.enemiesDeadDin;
         enemiesDeadElite = playerData.enemiesDeadElite;
         pickupsObtained = playerData.pickupsObtained;
+        switchesActivated = playerData.switchesActivated;
         spawnersActivated = playerData.spawnersActivated;
         messagesActivated = playerData.messagesActivated;
         cratesExploded = playerData.cratesExploded;
         explodingTriggersActivated = playerData.explodingTriggersActivated;
         doorTriggersActivated = playerData.doorTriggersActivated;
+
+        //---------------------------------------------------------------------------------------------
+        //SET THE TOTAL AMOUNT OF OBJECTS IN POOL TO MATCH PREVIOUS POOL AMOUNT & ACTIVATE THEM + SET POSITIONS
+        //---------------------------------------------------------------------------------------------
+
+        dropItem0Activated = new bool[playerData.dropItem0Activated.Length];
+        dropItem1Activated = new bool[playerData.dropItem1Activated.Length];
+        dropItem2Activated = new bool[playerData.dropItem2Activated.Length];
+
+        dropItem0Activated = playerData.dropItem0Activated;
+        dropItem1Activated = playerData.dropItem1Activated;
+        dropItem2Activated = playerData.dropItem2Activated;
+
         SetNewLevel(sceneIndex);
+    }
+    public void SetPreviouslyDroppedItems()
+    {
+        if (enemyDropPool[0].childCount != playerData.dropPoolChildCount[0])
+        {
+            int totalChildCount = playerData.dropPoolChildCount[0] - enemyDropPool[0].childCount;
+            for (int e = 0; e < totalChildCount; e++)
+                Instantiate(dropPoolPrefabs[0], enemyDropPool[0]);
+        }
+        if (enemyDropPool[1].childCount != playerData.dropPoolChildCount[1])
+        {
+            int totalChildCount = playerData.dropPoolChildCount[1] - enemyDropPool[1].childCount;
+            for (int e = 0; e < totalChildCount; e++)
+                Instantiate(dropPoolPrefabs[1], enemyDropPool[1]);
+        }
+        if (enemyDropPool[2].childCount != playerData.dropPoolChildCount[2])
+        {
+            int totalChildCount = playerData.dropPoolChildCount[2] - enemyDropPool[2].childCount;
+            for (int e = 0; e < totalChildCount; e++)
+                Instantiate(dropPoolPrefabs[2], enemyDropPool[2]);
+        }
+
+        for(int a = 0; a < dropItem0Activated.Length; a++)
+        {
+            enemyDropPool[0].GetChild(a).transform.position = playerData.enemyDrop0Positions[a];
+            enemyDropPool[0].GetChild(a).gameObject.SetActive(dropItem0Activated[a]);
+        }
+        for (int a = 0; a < dropItem1Activated.Length; a++)
+        {
+            enemyDropPool[1].GetChild(a).transform.position = playerData.enemyDrop1Positions[a];
+            enemyDropPool[1].GetChild(a).gameObject.SetActive(dropItem1Activated[a]);
+        }
+        for (int a = 0; a < dropItem2Activated.Length; a++)
+        {
+            enemyDropPool[2].GetChild(a).transform.position = playerData.enemyDrop2Positions[a];
+            enemyDropPool[2].GetChild(a).gameObject.SetActive(dropItem2Activated[a]);
+        }
+    }
+    public void SetPreviousWeaponStats()
+    {
+        weaponSystem.weaponAmmo = playerData.weaponAmmo;
+        weaponSystem.weaponEquipped = playerData.weaponEquipped;
+        weaponSystem.weaponObtained = playerData.weaponObtained;
+        weaponSystem.weaponIndex = playerData.weaponIndex;
+        weaponSystem.ApplyAmmo();
+        weaponSystem.WeaponSetup(weaponSystem.weaponList[weaponSystem.weaponIndex]);
+    }
+    public void SetPreviousPlayerStats()
+    {
+        playerSystem.health = playerData.health;
+        playerSystem.armor = playerData.armor;
+        playerSystem.maxArmor = playerData.maxArmor;
+        playerSystem.maxHealth = playerData.maxHealth;
+        playerSystem.ApplyPlayerHealthAndArmor();
+        playerSystem.keyCards = new bool[3]
+        {
+                playerData.keyCards[0],
+                playerData.keyCards[1],
+                playerData.keyCards[2]
+        };
+        for (int k = 0; k < playerSystem.keyCards.Length; k++)
+        {
+            if (playerSystem.keyCards[k])
+                playerSystem.SetActiveKey(k, playerSystem.keyCards[k]);
+        }
     }
     public void SaveData(int slotID)
     {
         if (!Directory.Exists(dataPath + gamePath))
             Directory.CreateDirectory(dataPath + gamePath);
         Stream stream = File.Create(dataPath + gamePath + SAVE_FILE[slotID] + FILE_EXTENSION);
-        //------------------------------------------------------------------------
-        //WEAPON SETTINGS---------------------------------------------------------
-        //------------------------------------------------------------------------
-        playerData.weaponAmmo = new int[10]
-        {
-            weaponSystem.weaponAmmo[0],
-            weaponSystem.weaponAmmo[1],
-            weaponSystem.weaponAmmo[2],
-            weaponSystem.weaponAmmo[3],
-            weaponSystem.weaponAmmo[4],
-            weaponSystem.weaponAmmo[5],
-            weaponSystem.weaponAmmo[6],
-            weaponSystem.weaponAmmo[7],
-            weaponSystem.weaponAmmo[8],
-            weaponSystem.weaponAmmo[9]
-        };
-        playerData.weaponEquipped = new bool[10]
-        {
-            weaponSystem.weaponEquipped[0],
-            weaponSystem.weaponEquipped[1],
-            weaponSystem.weaponEquipped[2],
-            weaponSystem.weaponEquipped[3],
-            weaponSystem.weaponEquipped[4],
-            weaponSystem.weaponEquipped[5],
-            weaponSystem.weaponEquipped[6],
-            weaponSystem.weaponEquipped[7],
-            weaponSystem.weaponEquipped[8],
-            weaponSystem.weaponEquipped[9]
-        };
-        playerData.weaponObtained = new bool[10]
-        {
-            weaponSystem.weaponObtained[0],
-            weaponSystem.weaponObtained[1],
-            weaponSystem.weaponObtained[2],
-            weaponSystem.weaponObtained[3],
-            weaponSystem.weaponObtained[4],
-            weaponSystem.weaponObtained[5],
-            weaponSystem.weaponObtained[6],
-            weaponSystem.weaponObtained[7],
-            weaponSystem.weaponObtained[8],
-            weaponSystem.weaponObtained[9]
-        };
+        //===========================================================================================================================================
+        //WEAPON SETTINGS============================================================================================================================
+        //===========================================================================================================================================
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //STORE ALL CURRENT WEAPON AMMO
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        playerData.weaponAmmo = new int[weaponSystem.weaponAmmo.Length];
+        playerData.weaponAmmo = weaponSystem.weaponAmmo;
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //STORE THE WHICH WEAPON IS EQUIPPED
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        playerData.weaponEquipped = new bool[weaponSystem.weaponEquipped.Length];
+        playerData.weaponEquipped = weaponSystem.weaponEquipped;
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //STORE ALL CURRENT OBTAINED WEAPONS
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        playerData.weaponObtained = new bool[weaponSystem.weaponObtained.Length];
+        playerData.weaponObtained = weaponSystem.weaponObtained;
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //STORE ALL CURRENT WEAPON INDEX NUMBER
+        //-------------------------------------------------------------------------------------------------------------------------------------------
         playerData.weaponIndex = weaponSystem.weaponIndex;
-        //------------------------------------------------------------------------
-        //PLAYER SETTINGS---------------------------------------------------------
-        //------------------------------------------------------------------------
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //STORE ALL CURRENT PLAYER ATTRIBUTES & POSITION
+        //-------------------------------------------------------------------------------------------------------------------------------------------
         playerData.health = playerSystem.health;
         playerData.armor = playerSystem.armor;
         playerData.maxArmor = playerSystem.maxArmor;
@@ -939,43 +944,134 @@ public class GameSystem : MonoBehaviour
                 playerSystem.keyCards[1],
                 playerSystem.keyCards[2]
         };
-        playerData.playerPosition = playerSystem.transform.localPosition;
-        playerData.playerRotation = playerSystem.transform.localRotation;
-        //------------------------------------------------------------------------
-        //GAME SETTINGS-----------------------------------------------------------
-        //------------------------------------------------------------------------
+        playerData.playerPosition = playerSystem.transform.position;
+        playerData.playerRotation = playerSystem.transform.rotation;
+
+        //===========================================================================================================================================
+        //GAME SETTINGS==============================================================================================================================
+        //===========================================================================================================================================
+
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //STORE CURRENT SCENE
+        //-------------------------------------------------------------------------------------------------------------------------------------------
         playerData.sceneIndex = sceneIndex;
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //SET THE DIFFICULTY NAME FOR SAVEFILE
+        //-------------------------------------------------------------------------------------------------------------------------------------------
         switch (optionsSystem.difficultyIndex)
         {
-            case 0: playerData.difficultyName = " [Easy]"; break;
-            case 1: playerData.difficultyName = " [Normal]"; break;
-            case 2: playerData.difficultyName = " [Hard]"; break;
-            case 3: playerData.difficultyName = " [Demonic]"; break;
+            case 0: playerData.difficultyName = " [Easy] "; break;
+            case 1: playerData.difficultyName = " [Normal] "; break;
+            case 2: playerData.difficultyName = " [Hard] "; break;
+            case 3: playerData.difficultyName = " [Demonic] "; break;
         }
-        if (sceneIndex > 1 && sceneIndex < 11) playerData.episodeName = " Episode 1: Melted Foundry ";
-        else if (sceneIndex > 10 && sceneIndex < 21) playerData.episodeName = " Episode 2: Torcher Sanctum ";
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //SET THE EPISODE NAME FOR SAVEFILE
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        if (sceneIndex > 2 && sceneIndex < 11) playerData.episodeName = " Episode 1: Fallen Foundry ";
+        else if (sceneIndex > 10 && sceneIndex < 21) playerData.episodeName = " Episode 2: Torture Sanctum ";
         else if (sceneIndex > 20 && sceneIndex < 31) playerData.episodeName = " Episode 3: Command Headquarters ";
         else if (sceneIndex > 30 && sceneIndex < 41) playerData.episodeName = " Episode 4: Dark Abyss ";
         else playerData.episodeName = " Episode 0: Development Tech Demo ";
-
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //SET THE SCENE NAME FOR SAVEFILE
+        //-------------------------------------------------------------------------------------------------------------------------------------------
         switch (sceneIndex)
         {
-            case 2: playerData.levelName = "- Level 1: Virulent Vault"; break;
+            case 2: playerData.levelName = "- Level ?: Fallen Scourge"; break;
+            case 3: playerData.levelName = "- Level 1: Virulent Vault"; break;
         }
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //STORE THE CURRENT LEVEL TIME FOR SAVEFILE
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        playerData.gameTime = optionsSystem.SetTime(levelTime);
+        playerData.levelTime = levelTime;
         LevelSystem levelSystem = playerSystem.AccessLevel();
         if (levelSystem == null) { Debug.LogError("Level System Not Accessed."); return; }
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //GRAB TOTAL LEVEL ASSETS STATUSES FOR SAVEFILE
+        //-------------------------------------------------------------------------------------------------------------------------------------------
         levelSystem.SaveLevel();
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //STORE POSITIONS & ROTATIONS OF THE ENEMIES-------------------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //Grunt>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        playerData.enemyGPosition = new SerializableVector3[levelSystem.enemiesPositionGrunt.Length];
+        playerData.enemyGRotation = new SerializableQuaternion[levelSystem.enemiesPositionGrunt.Length];
+        for (int e = 0; e < levelSystem.enemiesPositionGrunt.Length; e++)
+        {
+            playerData.enemyGPosition[e] = levelSystem.enemiesPositionGrunt[e];
+            playerData.enemyGRotation[e] = levelSystem.enemiesRotationGrunt[e];
+        }
+        //Din>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        playerData.enemyDPosition = new SerializableVector3[levelSystem.enemiesPositionDin.Length];
+        playerData.enemyDRotation = new SerializableQuaternion[levelSystem.enemiesPositionDin.Length];
+        for (int e = 0; e < levelSystem.enemiesPositionDin.Length; e++)
+        {
+            playerData.enemyDPosition[e] = levelSystem.enemiesPositionDin[e];
+            playerData.enemyDRotation[e] = levelSystem.enemiesRotationDin[e];
+        }
+        //Elite>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        playerData.enemyEPosition = new SerializableVector3[levelSystem.enemiesPositionElite.Length];
+        playerData.enemyERotation = new SerializableQuaternion[levelSystem.enemiesPositionElite.Length];
+        for (int e = 0; e < levelSystem.enemiesPositionElite.Length; e++)
+        {
+            playerData.enemyEPosition[e] = levelSystem.enemiesPositionElite[e];
+            playerData.enemyERotation[e] = levelSystem.enemiesRotationElite[e];
+        }
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //STORE WHAT LEVEL ITEMS WERE ALREADY ACTIVATE/OBTAINED/KILLED BY THE PLAYER
+        //-------------------------------------------------------------------------------------------------------------------------------------------
         playerData.ambushesActivated = levelSystem.ambushesActivated;
         playerData.enemiesDeadGrunt = levelSystem.enemiesDeadGrunt;
         playerData.enemiesDeadDin = levelSystem.enemiesDeadDin;
         playerData.enemiesDeadElite = levelSystem.enemiesDeadElite;
+        playerData.switchesActivated = levelSystem.switchesActivated;
         playerData.pickupsObtained = levelSystem.pickupsObtained;
         playerData.spawnersActivated = levelSystem.spawnersActivated;
         playerData.messagesActivated = levelSystem.messagesActivated;
         playerData.cratesExploded = levelSystem.cratesExploded;
         playerData.explodingTriggersActivated = levelSystem.explodingTriggersActivated;
         playerData.doorTriggersActivated = levelSystem.doorTriggersActivated;
-       
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //STORE THE ITEM DROP POOL TOTAL NUMBER OF DROPPED OBJECTS AND THEIR POSITIONS-----------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        playerData.dropPoolChildCount = new int[3]
+        {
+            enemyDropPool[0].childCount,
+            enemyDropPool[1].childCount,
+            enemyDropPool[2].childCount,
+        };
+        playerData.enemyDrop0Positions = new SerializableVector3[enemyDropPool[0].childCount];
+        for (int p = 0; p < enemyDropPool[0].childCount; p++)
+            playerData.enemyDrop0Positions[p] = enemyDropPool[0].GetChild(p).position;
+        playerData.enemyDrop1Positions = new SerializableVector3[enemyDropPool[1].childCount];
+        for (int p = 0; p < enemyDropPool[1].childCount; p++)
+            playerData.enemyDrop1Positions[p] = enemyDropPool[1].GetChild(p).position;
+        playerData.enemyDrop2Positions = new SerializableVector3[enemyDropPool[2].childCount];
+        for (int p = 0; p < enemyDropPool[2].childCount; p++)
+            playerData.enemyDrop2Positions[p] = enemyDropPool[2].GetChild(p).position;
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        //STORE THE ITEM DROP POOL ACTIVE/DEACTIVE DROP OBJECTS
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        dropItem0Activated = new bool[enemyDropPool[0].childCount];
+        dropItem1Activated = new bool[enemyDropPool[1].childCount];
+        dropItem2Activated = new bool[enemyDropPool[2].childCount];
+
+        for (int c = 0; c < enemyDropPool[0].childCount; c++)
+            dropItem0Activated[c] = enemyDropPool[0].GetChild(c).gameObject.activeInHierarchy; 
+        for (int c = 0; c < enemyDropPool[1].childCount; c++)
+            dropItem1Activated[c] = enemyDropPool[1].GetChild(c).gameObject.activeInHierarchy; 
+        for (int c = 0; c < enemyDropPool[2].childCount; c++)
+            dropItem2Activated[c] = enemyDropPool[2].GetChild(c).gameObject.activeInHierarchy;
+
+        playerData.dropItem0Activated = new bool[dropItem0Activated.Length];
+        playerData.dropItem1Activated = new bool[dropItem1Activated.Length];
+        playerData.dropItem2Activated = new bool[dropItem2Activated.Length];
+
+        playerData.dropItem0Activated = dropItem0Activated;
+        playerData.dropItem1Activated = dropItem1Activated;
+        playerData.dropItem2Activated = dropItem2Activated;
         _BinaryFormatter.Serialize(stream, playerData);
         stream.Close();
 
@@ -1002,10 +1098,10 @@ public class GameSystem : MonoBehaviour
                 Stream stream = File.Open(dataPath + gamePath + fileNames[s] + FILE_EXTENSION, FileMode.Open);
                 playerData = (PlayerData)_BinaryFormatter.Deserialize(stream);
                 stream.Close();
-                if(s == 0)
-                    slotLText[s].text = "Auto_Save " + playerData.episodeName + playerData.levelName + playerData.difficultyName;
-                else 
-                    slotLText[s].text = playerData.episodeName + playerData.levelName + playerData.difficultyName;
+                if (s == 0)
+                    slotLText[s].text = "Auto_Save " + playerData.episodeName + playerData.levelName + playerData.difficultyName + optionsSystem.SetTime(playerData.levelTime);
+                else
+                    slotLText[s].text = playerData.episodeName + playerData.levelName + playerData.difficultyName + optionsSystem.SetTime(playerData.levelTime);
             }
             else if (!File.Exists(dataPath + gamePath + fileNames[s] + FILE_EXTENSION))
             {
@@ -1141,6 +1237,19 @@ public struct PlayerData
     public bool[] cratesExploded;
     public bool[] explodingTriggersActivated;
     public bool[] doorTriggersActivated;
+    public bool[] dropItem0Activated;
+    public bool[] dropItem1Activated;
+    public bool[] dropItem2Activated;
+    public int[] dropPoolChildCount;
+    public SerializableVector3[] enemyDrop0Positions;
+    public SerializableVector3[] enemyDrop1Positions;
+    public SerializableVector3[] enemyDrop2Positions;
+    public SerializableVector3[] enemyGPosition;
+    public SerializableQuaternion[] enemyGRotation;
+    public SerializableVector3[] enemyDPosition;
+    public SerializableQuaternion[] enemyDRotation;
+    public SerializableVector3[] enemyEPosition;
+    public SerializableQuaternion[] enemyERotation;
     //----------------------
     //GAME SETTINGS
     //----------------------
@@ -1148,6 +1257,8 @@ public struct PlayerData
     public string episodeName;
     public string levelName;
     public string difficultyName;
+    public string gameTime;
+    public float levelTime;
 }
 
 [Serializable]

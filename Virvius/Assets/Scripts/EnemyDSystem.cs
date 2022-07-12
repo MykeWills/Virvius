@@ -660,8 +660,11 @@ public class EnemyDSystem : MonoBehaviour
         navAgent.Warp(originalPosition);
         transform.position = originalPosition;
     }
-    public void ActivateObjectState()
+    public void ActivateObjectState(Vector3 lastPosition, Quaternion lastRotation)
     {
+        navAgent.Warp(lastPosition);
+        transform.position = lastPosition;
+        transform.rotation = lastRotation;
         gameSystem.totalKills++;
         health = 0;
         isDead = true;
