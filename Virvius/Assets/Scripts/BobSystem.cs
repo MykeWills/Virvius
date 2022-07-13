@@ -28,8 +28,9 @@ public class BobSystem : MonoBehaviour
     public float animatedReturnRate = 3.5f;
     public float animatedZStartPosition;
     public float animatedZEndPosition;
-    private float[] animatedXPosition;
-    private float[] animatedYPosition;
+
+    public float[] animatedXPosition;
+    public float[] animatedYPosition;
     public AudioClip[] weaponAnimatedSounds = new AudioClip[2];
     public Transform[] weaponAnimatedObj = new Transform[1];
     private float heightAmount = .5f;
@@ -530,12 +531,10 @@ public class BobSystem : MonoBehaviour
     {
         isRecoiling = false;
         weaponReloadTime = weaponReloadRate;
-        if (animatedXPosition == null || animatedXPosition == null) Start();
-        switch (WeaponSystem.wType)
+        switch (type)
         {
             case WeaponSystem.WeaponType.Shotgun:
                 {
-                   
                     Vector3 start = new Vector3(animatedXPosition[0], animatedYPosition[0], animatedZStartPosition);
                     weaponAnimatedObj[0].localPosition = start;
                     break;

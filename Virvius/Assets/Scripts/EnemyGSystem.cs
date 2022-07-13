@@ -159,7 +159,17 @@ public class EnemyGSystem : MonoBehaviour
         {
             if (gameSystem.BlockedAttributesActive()) return;
         }
-        if (isDead) return;
+        if (isDead) 
+        {
+            if (enemyState != EnemyState.death)
+            {
+                enemyState = EnemyState.death;
+                if (currentState.Length > 0) currentState.Clear();
+                ActiveState();
+            }
+            return;
+
+        }
         if (ShutdownEnemy()) return;
     
         RebootEnemy();

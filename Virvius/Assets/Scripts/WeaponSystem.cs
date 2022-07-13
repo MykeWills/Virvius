@@ -417,10 +417,6 @@ public class WeaponSystem : MonoBehaviour
             1 << LayerMask.NameToLayer("Elevator"), 
             1 << LayerMask.NameToLayer("Default") 
         };
-        for (int w = 0; w < weapons.Length; w++)
-        {
-            weapons[w].SetActive(false);
-        }
         gunflashTimer = gunflashTime;
         for (int sr = 0; sr < 4; sr++)
             shaftStartRotations[sr] = photonShafts[sr].localRotation;
@@ -441,12 +437,39 @@ public class WeaponSystem : MonoBehaviour
         for (int p = 0; p < holsteredReturnPos.Length; p++)
             weapons[p].transform.localPosition = holsteredReturnPos[p];
         // Set the default weapon for the game
-        weaponObtained = new bool[10] { true, false, false, false, false, false, false, false, false, false };
-        weaponEquipped = new bool[10] { false, false, false, false, false, false, false, false, false, false };
-        defaultWeaponAmmo = new int[10] { 0, 25, 50, 25, 75, 5, 2, 4, 50, 1 };
-        weaponAmmo = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        weaponMaxAmmo = new int[10] { 0, 100, 150, 100, 300, 50, 20, 30, 200, 4 };
-        AutoSelectWeapon(0);
+      
+    }
+    public void AssignWeaponStats(bool loadedFromFile)
+    {
+      
+        if (weaponObtained == null) weaponObtained = new bool[10] { false, false, false, false, false, false, false, false, false, false };
+        if(weaponEquipped == null) weaponEquipped = new bool[10] { false, false, false, false, false, false, false, false, false, false };
+        if(weaponAmmo == null) weaponAmmo = new int[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        if (weaponMaxAmmo == null) weaponMaxAmmo = new int[10] { 0, 100, 150, 100, 300, 50, 20, 30, 200, 4 };
+        if (!loadedFromFile)
+        {
+            if (gameSystem.sceneIndex < 2)
+            {
+                for (int w = 0; w < weapons.Length; w++) weapons[w].SetActive(false);
+                for (int w = 0; w < weaponObtained.Length; w++)
+                    weaponObtained[w] = (w == 0) ? true : false;
+                for (int w = 0; w < weaponEquipped.Length; w++)
+                    weaponEquipped[w] = false;
+                for (int w = 0; w < weaponAmmo.Length; w++)
+                    weaponAmmo[w] = 0;
+                weaponIndex = 0;
+                WeaponSetup(weaponList[weaponIndex]);
+            }
+        }
+        else
+        {
+            for (int w = 0; w < weapons.Length; w++) weapons[w].SetActive(false);
+            weaponObtained = gameSystem.playerData.weaponObtained;
+            weaponEquipped = gameSystem.playerData.weaponEquipped;
+            weaponAmmo = gameSystem.playerData.weaponAmmo;
+            weaponIndex = gameSystem.playerData.weaponIndex;
+            WeaponSetup(weaponList[weaponIndex]);
+        }
     }
     private void Update()
     {
@@ -745,7 +768,7 @@ public class WeaponSystem : MonoBehaviour
     {
         audioSystem.PlayAltAudioSource(0, minigunRevSfx[1], 1, 1f, false, false);
     }
-    public void ResetWeaponSystem(bool newGame)
+    public void ResetWeaponSystem(bool loadFromFile)
     {
         anim.Rebind();
         isShooting = false;
@@ -772,36 +795,33 @@ public class WeaponSystem : MonoBehaviour
         weapons[weaponIndex].transform.localPosition = holsteredReturnPos[weaponIndex];
         weapons[weaponIndex].transform.localRotation = Quaternion.identity;
         aimObjects.Clear();
-        //This is only temporary until save/load state is created
-        if (gameSystem.loadFromFile) return;
-        if (newGame)
+        if (!loadFromFile)
         {
-            for (int w = 0; w < weaponObtained.Length; w++)
-            {
-                //
-                if (w < 10)
-                {
-                    if (w < 1)
-                    {
-                        weaponObtained[w] = true;
-                        weaponAmmo[w] = defaultWeaponAmmo[w];
-                        ApplyAmmo();
-                        WeaponSetup(weaponList[w]);
-                    }
-                    else
-                    {
-                        weaponObtained[w] = false;
-                        weaponAmmo[w] = 0;
-                        ApplyAmmo();
-                    }
-                }
+            //for (int w = 0; w < weaponObtained.Length; w++)
+            //{
+            //    //
+            //    if (w < 10)
+            //    {
+            //        if (w < 1)
+            //        {
+            //            weaponObtained[w] = true;
+            //            weaponAmmo[w] = defaultWeaponAmmo[w];
+            //            ApplyAmmo();
+            //            WeaponSetup(weaponList[w]);
+            //        }
+            //        else
+            //        {
+            //            weaponObtained[w] = false;
+            //            weaponAmmo[w] = 0;
+            //            ApplyAmmo();
+            //        }
+            //    }
 
-            }
+            //}
         }
         else
         {
-            ApplyAmmo();
-            WeaponSetup(weaponList[weaponIndex]);
+            gameSystem.SetPreviousWeaponStats();
         }
     }
     public void GetAmmo(int index, int amt)

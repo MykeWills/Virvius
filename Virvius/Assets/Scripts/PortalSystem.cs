@@ -44,7 +44,7 @@ public class PortalSystem : MonoBehaviour
         {
             gameSystem.ShowResults(false);
             gameSystem.showResults = false;
-            gameSystem.SetNewLevel(sceneIndex);
+            gameSystem.SetupGame(sceneIndex);
         }
     }
     private void OnTriggerEnter(Collider other)
@@ -59,7 +59,7 @@ public class PortalSystem : MonoBehaviour
             }
             else 
             { 
-                if(!showResultsScreen) gameSystem.SetNewLevel(sceneIndex); 
+                if(!showResultsScreen) gameSystem.SetupGame(sceneIndex); 
                 else gameSystem.ShowResults(true);
             }
         }

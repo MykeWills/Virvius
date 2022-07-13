@@ -797,7 +797,8 @@ public class InputSystem : MonoBehaviour
            
 
             // Set the isGrounded collision flags if player has landed 
-            isGrounded = (controller.Move(moveDirection * time) & CollisionFlags.Below) != 0;
+            if(controller.enabled)
+                isGrounded = (controller.Move(moveDirection * time) & CollisionFlags.Below) != 0;
         }
     }
     private bool OverInputThreshold(float axis, float threshold)

@@ -459,13 +459,17 @@ public class GameSystem : MonoBehaviour
     }
     private void StartLevel()
     {
+        isLoading = false;
+        isGameStarted = true;
+        levelActive = true;
         // Shut off Loading Camera
         if (loadingCamera.activeInHierarchy) loadingCamera.SetActive(false);
         // Shut off Loading Screen
         if (loadingMenu.activeInHierarchy) loadingMenu.SetActive(false);
         // Turn on Game UI
         gameUI.SetActive(true);
- 
+        if(!mainCamera.enabled) mainCamera.enabled = true;
+        if(!clipCamera.enabled) clipCamera.enabled = true;
         // Loading is now finished
         if (isPaused)
         {
@@ -473,52 +477,11 @@ public class GameSystem : MonoBehaviour
             GameMouseActive(isPaused, isPaused ? CursorLockMode.Confined : CursorLockMode.Locked);
             Time.timeScale = isPaused ? 0 : 1;
         }
-
-        if (sceneIndex > 1) 
-        { 
-            player.SetActive(true); 
-            playerSystem.SetupPlayer(false); 
-        }
-        else 
-        { 
-            SetMasterStart();
-            player.SetActive(true);
-            playerSystem.SetupPlayer(true);
-        }
-        isLoading = false;
-        isGameStarted = true;
-        levelActive = true;
+        player.SetActive(true);
+        playerSystem.SetupPlayer(loadFromFile);
         mainMenuSystem.FadeBlackScreen(false);
     }
-    public void SetNewGame()
-    {
-        isLoading = true;
-        if(playerSystem.transform.parent != defaultTransform)
-            playerSystem.transform.parent = defaultTransform;
-        // Shut off LoadSelection
-        if (optionsSystem.fileSelectionOpen) optionsSystem.OpenFileSelection(false);
-        // Shut off BootIntro
-        if (bootIntro.activeInHierarchy) bootIntro.SetActive(false);
-        // Shut off GameUI
-        if (gameUI.activeInHierarchy) gameUI.SetActive(false);
-        // Shut off Player object
-        if (player.activeInHierarchy) player.SetActive(false);  
-        // Shut off Player object
-        if (mainSelection.activeInHierarchy) mainSelection.SetActive(false);
-        // Shut off Video UI
-        if (videoUI.enabled) videoUI.enabled = false;
-        // Shut off Video Player
-        if (videoPlayer.isPlaying) videoPlayer.Stop();
-        if(mainmenuOpen) mainmenuOpen = false;
-        // Shut off NavigationUI
-        if (mainNavigation.activeInHierarchy) mainNavigation.SetActive(false);
-        // Load the first Scene
-        curSceneIndex = 0;
-        loadingBar.fillAmount = 0;
-        if (loadSb.Length > 0) loadSb.Clear();
-        LoadGame(1);
-    }
-    public void SetNewLevel(int sceneID)
+    public void SetupGame(int sceneID)
     {
         isLoading = true;
         if (playerSystem.transform.parent != defaultTransform)
@@ -836,7 +799,7 @@ public class GameSystem : MonoBehaviour
         dropItem1Activated = playerData.dropItem1Activated;
         dropItem2Activated = playerData.dropItem2Activated;
 
-        SetNewLevel(sceneIndex);
+        SetupGame(sceneIndex);
     }
     public void SetPreviouslyDroppedItems()
     {
@@ -891,16 +854,11 @@ public class GameSystem : MonoBehaviour
         playerSystem.maxArmor = playerData.maxArmor;
         playerSystem.maxHealth = playerData.maxHealth;
         playerSystem.ApplyPlayerHealthAndArmor();
-        playerSystem.keyCards = new bool[3]
-        {
-                playerData.keyCards[0],
-                playerData.keyCards[1],
-                playerData.keyCards[2]
-        };
+        playerSystem.keyCards = playerData.keyCards;
+       
         for (int k = 0; k < playerSystem.keyCards.Length; k++)
         {
-            if (playerSystem.keyCards[k])
-                playerSystem.SetActiveKey(k, playerSystem.keyCards[k]);
+            playerSystem.SetActiveKey(k, playerSystem.keyCards[k]);
         }
     }
     public void SaveData(int slotID)

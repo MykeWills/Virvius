@@ -325,7 +325,6 @@ public class PlayerSystem : MonoBehaviour
         commandSystem = CommandSystem.commandSystem;
         goreSystem = goreExplode.GetComponent<PlayerGoreSystem>();
         characterController = GetComponent<CharacterController>();
-        gameSystem.SetPlayerScenePosition(gameSystem.sceneIndex);
         versionIndex = 3;
         uISelectIndex = versionIndex;
         UIVersion(versionIndex);
@@ -1211,13 +1210,14 @@ public class PlayerSystem : MonoBehaviour
         if (goreExplode.TryGetComponent(out PlayerGoreSystem goreSystem))
             goreSystem.ActivateGore(true);
     }
-    public void SetupPlayer(bool newGame)
+    public void SetupPlayer(bool loadedFromFile)
     {
         isDead = false;
         messageSystem.EraseMessages();
         inputSystem.ResetInputSystem();
         powerupSystem.ResetPowerupSystem();
-        weaponSystem.ResetWeaponSystem(newGame);
+        weaponSystem.AssignWeaponStats(loadedFromFile);
+        weaponSystem.ResetWeaponSystem(gameSystem.loadFromFile);
         UIVersion(versionIndex);
         HUD.SetActive(true);
         overKill = false;
@@ -1233,7 +1233,7 @@ public class PlayerSystem : MonoBehaviour
         suicideDamage = false;
         SetFlash(false);
         optionsSystem.SetSceneMusic(gameSystem.sceneIndex);
-        if (newGame)
+        if (!loadedFromFile)
         {
             health = 100;
             armor = 0;
@@ -1294,7 +1294,7 @@ public class PlayerSystem : MonoBehaviour
         levelSystem = AccessLevel();
         if (levelSystem != null) 
         {
-            if (!gameSystem.loadFromFile)
+            if (!loadedFromFile)
                 levelSystem.ResetLevel(); 
             else
                 levelSystem.LoadLevel();
@@ -1303,14 +1303,13 @@ public class PlayerSystem : MonoBehaviour
         ApplyPlayerHealthAndArmor();
         messageSystem.SetMessage(levelTitle[gameSystem.sceneIndex], MessageSystem.MessageType.Display);
         for(int e = 0; e < 3; e++) StartFadeEnvironmentUI(false, e, Color.white);
-        Vector3 position = gameSystem.loadFromFile ? gameSystem.loadedPosition : gameSystem.scenePositions[gameSystem.sceneIndex];
-        Quaternion rotation = gameSystem.loadFromFile ? gameSystem.loadedRotation : Quaternion.Euler(gameSystem.sceneRotations[gameSystem.sceneIndex]);
+        Vector3 position = loadedFromFile ? gameSystem.loadedPosition : gameSystem.scenePositions[gameSystem.sceneIndex];
+        Quaternion rotation = loadedFromFile ? gameSystem.loadedRotation : Quaternion.Euler(gameSystem.sceneRotations[gameSystem.sceneIndex]);
         WarpPlayer(position, rotation);
 
-        if (gameSystem.loadFromFile) 
+        if (loadedFromFile) 
         {
             gameSystem.SetPreviouslyDroppedItems();
-            gameSystem.SetPreviousWeaponStats();
             gameSystem.SetPreviousPlayerStats();
             gameSystem.loadFromFile = false; 
         }
@@ -1352,7 +1351,6 @@ public class PlayerSystem : MonoBehaviour
             SetSigmaFlash(false);
             if (flashSigmaUI.enabled) flashSigmaUI.enabled = false;
             transform.SetParent(originParent);
-            //gameSystem.SetPlayerScenePosition(gameSystem.sceneIndex);
             isDamaged = false;
             suicideDamage = false;
             SetFlash(false);
@@ -1443,7 +1441,7 @@ public class PlayerSystem : MonoBehaviour
         fallDamage = false;
         transform.SetParent(originParent);
         transform.position = destination;
-        transform.rotation = rotation;
+        transform.localRotation = rotation;
         environmentSystem.headUnderWater = false;
         environmentSystem.ActivateSwimming(false);
         environmentSystem.SetEnvironment(0, 0);
@@ -1452,8 +1450,6 @@ public class PlayerSystem : MonoBehaviour
         Quaternion rot = Quaternion.Euler(headRot);
         head.localRotation = rot;
         characterController.enabled = true;
-
-
     }
     //========================================================================================//
     //====================================[UTILITY FUNCTIONS]=================================//

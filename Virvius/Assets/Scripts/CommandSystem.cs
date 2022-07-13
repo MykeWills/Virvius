@@ -210,7 +210,7 @@ public class CommandSystem : MonoBehaviour
         "Easy ",
         "Normal",
         "Hard",
-        "Very Hard"
+        "Demonic"
 };
     private void Awake()
     {
@@ -221,7 +221,6 @@ public class CommandSystem : MonoBehaviour
         gameSystem = GameSystem.gameSystem;
         commandWindow = transform.GetChild(0).gameObject;
     }
-
     // Update is called once per frame
     void Update()
     {

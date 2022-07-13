@@ -117,15 +117,17 @@ public class MainMenuSystem : MonoBehaviour
         if (!blackScreenActive) return;
         int val = fadeOut ? 0 : 1;
         int val2 = fadeOut ? 1 : 0;
+        if(!blackScreen.enabled) blackScreen.enabled = true;
         blackScreen.color = new Color(blackScreen.color.r, blackScreen.color.g, blackScreen.color.b, Mathf.Lerp(val2, val, fadeInterval));
         fadeInterval += Time.unscaledDeltaTime;
         fadeInterval = Mathf.Clamp01(fadeInterval);
         if (fadeInterval == 1)
         {
-            blackScreenActive = false;
+            blackScreenActive = false; 
+            blackScreen.enabled = false;
             if (!fadeOut)
             {
-                gameSystem.SetNewGame();
+                gameSystem.SetupGame(1);
             }
         }
     }
