@@ -4,9 +4,9 @@
 > Genocide
  
 ## **|| Introduction ||**
-Virvius Genocide is a first person quake/doom style shooter, based in a horror setting with creatures. The game will have 10 diferent weapons to choose with powerups, health and ammo pickups.
+Virvius is a first person Quake/DOOM style shooter, based in a horror setting with demonic creatures called "THE FALLEN". Explore dark alleys, twixed puzzles with linear, fast paced gun combat. The game has evolved from Prototype/Pre=Alpha to Alpha stage, where it will then process into early Access on Steam. There is hope to complete the first 10 levels consisting of the first episode - [Fallen Foundry] to release a shareware Beta demo which will bring attraction to the Quake/DOOM fan base.
 
-Game is in development with no story background or game modes yet which will be added in later in development.
+Game has no current reliable story or background yet which will be added in later in development.
 
 > _Game is in current development._ 
 
