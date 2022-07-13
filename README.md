@@ -1,18 +1,15 @@
-![image](https://static.wixstatic.com/media/0e8e62_dd0d3c5731934adb9a944292ea230d8e~mv2.png)
-
 # // Virvius
-> Genocide
  
 ## **|| Introduction ||**
 Virvius is a first person Quake/DOOM style shooter, based in a horror setting with demonic creatures called "THE FALLEN". Explore dark alleys, twixed puzzles with linear, fast paced gun combat. The game has evolved from Prototype/Pre=Alpha to Alpha stage, where it will then process into early Access on Steam. There is hope to complete the first 10 levels consisting of the first episode - [Fallen Foundry] to release a shareware Beta demo which will bring attraction to the Quake/DOOM fan base.
 
 Game has no current reliable story or background yet which will be added in later in development.
 
-> _Game is in current development._ 
+> _Game is in current Alpha Stage._ 
 
 #### **|| Game Story ||**
 To be added later.
-## **|| Game Play ||**
+## **|| Game Play - PreAlpha Stage ||**
 * Prototype 1 [(03/08/21) - Level, Weapon and HUD]
 _https://youtu.be/WNvGNDSXJqE_
 * Prototype 2 [(03/010/21) - Weapon Animations, bullet debris and Health + Damage]
@@ -89,22 +86,23 @@ _https://youtu.be/9g1zmb_vUEo_
 _https://youtu.be/dxKdO9J36OE_
 * Prototype 38 [(02/14/22) Complete texture bump map overhaul!]
 _https://youtu.be/ahUsfq8m0fQ_
+* Prototype 39 [(03/09/22) Console Updates & Bug fixes]
+_https://youtu.be/1E9k2iJ9pK4_
+* Prototype 40 [(03/09/22) Official 4K game play + Reflection probes]
+_https://youtu.be/l7Io3MCxiWc_
+* Prototype 41 [(03/23/22) Railgun + Weapon hand + added Bakery asset]
+_https://youtu.be/ILF3mTigiZQ_
+* Prototype 42 [(04/11/22) Official 4K M-Sigma + Super User Cheats Enabled]
+_https://youtu.be/WtF6napd8Dg_
+* Prototype 43 [(05/28/22) Gameplay with new Enemy AI]
+_https://youtu.be/ijkud_ISB2E_
 
-
-![image](https://static.wixstatic.com/media/0e8e62_8eca0717c63c456c9fb3c01ea2a4ef02~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_f31e9de6568f4f7d9424ea3fa0211c46~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_93b798d1a37a453bba86de2bf89a2be4~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_31add200d04a49d89fff1476c532cb32~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_5d7172bda0144e3f84af3ff8392d4018~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_876884e6858d42859ef049affd602995~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_bcc0771043a7416cad3297e5a261f29b~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_8f4070d14d984f24b8c34bcc85789a31~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_2c43d3f42a9644fd88d4eaa49d6d0caf~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_7d760bd84bf944b1bdf9d2c2d49bcb36~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_6626b74cc8424a64a0305bfbcf823230~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_9cd8bace990a45f59d0149daa20bffab~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_74a0f900b3744ccf96c5cb1b1086ba91~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_95d8c8c7748c4782a8dbc34f8621c339~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_3ffe65be688341ee91cea4a594155527~mv2.png)
-![image](https://static.wixstatic.com/media/0e8e62_b62e46246f23450fa4c9a422710c19b4~mv2.png)
-
+## **|| Game Play/Design/Features - Alpha Stage ||**
+* Alpha 1 [(05/30/22) Virvius Title Screen v2 HD 1080P]
+_https://youtu.be/LYrQGe9ilvc_
+* Alpha 2 [(06/19/22) Prologue level [first prototype build] (Secret Very hard (Demonic) Difficulty)]
+_https://youtu.be/e5NnnUArJkY_
+* Alpha 3 [(06/19/22) Virvius at it's best!: [Prologue + Tech Demo] - Difficulty Select & Scene Loading]
+_https://youtu.be/Vt21aGcYNgs_
+* Alpha 4 [(07/05/22) Virvius - Ep1\L1 Virulent Vault Demo (Demonic Difficulty) + Result Screen]
+_https://youtu.be/5M7lYQnLwxs_
