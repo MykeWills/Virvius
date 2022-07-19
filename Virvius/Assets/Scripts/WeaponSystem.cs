@@ -85,6 +85,7 @@ public class WeaponSystem : MonoBehaviour
     private LayerMask[] levelMask;
     private Vector3 holsterRayPoint;
     private Vector3 newTiltPosition;
+    private Vector3 camTiltPosition;
     private Quaternion[] currentFinRotation = new Quaternion[4];
     private Quaternion[] currentSigRotation = new Quaternion[2];
     //[Variables]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
@@ -1593,7 +1594,9 @@ public class WeaponSystem : MonoBehaviour
         float clampX = Mathf.Clamp(0 + tiltX, -1, 1);
         float clampY = Mathf.Clamp(0 + tiltY, -1, 1);
         newTiltPosition = new Vector3(clampX, clampY, 0);
-        transform.localPosition = Vector3.Lerp(transform.localPosition, newTiltPosition, tiltSpeed * Time.deltaTime);
+        camTiltPosition = new Vector3(clampX * 5, clampY * 5, 0);
+        Camera.main.transform.localPosition = Vector3.Lerp(Camera.main.transform.localPosition, camTiltPosition, tiltSpeed * time);
+        transform.localPosition = Vector3.Lerp(transform.localPosition, newTiltPosition, tiltSpeed * time);
     }
     private void CheckAmmo()
     {
