@@ -3,6 +3,7 @@
 public class GoreSystem : MonoBehaviour
 {
     private AudioSystem audioSystem;
+    private AudioSource audioSrc;
     private Rigidbody[] goreBodies;
     private float lifeTime = 5;
     public float explosionMultiplier = 1;
@@ -11,7 +12,8 @@ public class GoreSystem : MonoBehaviour
     private float lifeTimer = 0;
     private bool lifeTimeActive = false;
     private float time = 0;
-    private bool bootFirstTime = true;
+    [SerializeField] private bool bootFirstTime = true;
+    [SerializeField] private bool localAudio = false;
     private void OnEnable()
     {
         if(!bootFirstTime)
@@ -29,7 +31,7 @@ public class GoreSystem : MonoBehaviour
 
     public void ExplodeGore()
     {
-        if(audioSystem == null) audioSystem = AudioSystem.audioSystem;
+        if(audioSystem == null && !localAudio) audioSystem = AudioSystem.audioSystem;
         if (goreBodies == null) 
         { 
             goreBodies = new Rigidbody[transform.childCount];
@@ -45,7 +47,7 @@ public class GoreSystem : MonoBehaviour
             float Z = Random.Range(-5, -15);
             float explosionForce = Random.Range(5, 50);
             goreBodies[g].transform.localPosition = new Vector3(X, Y, Random.Range(0, -4));
-            Vector3 dir = (goreBodies[g].transform.position - PlayerSystem.playerSystem.transform.position).normalized;
+            Vector3 dir = (goreBodies[g].transform.position - (PlayerSystem.playerSystem != null ? PlayerSystem.playerSystem.transform.position : Vector3.zero).normalized);
             goreBodies[g].transform.localRotation = Quaternion.Euler(dir);
             float magnitude = 0;
             if (size.magnitude > 1 && size.magnitude < 1.2f) magnitude = 0.1f;
@@ -54,7 +56,14 @@ public class GoreSystem : MonoBehaviour
             goreBodies[g].AddRelativeForce(new Vector3(X, Y, Z) * (explosionForce * Random.Range(magnitude, magnitude * 1.5f)), ForceMode.Impulse);
             goreBodies[g].useGravity = true;
         }
-        audioSystem.PlayAudioSource(goreSoundFx, 1, 1, 128);
+        if (localAudio) 
+        { 
+            if (audioSrc == null) 
+                audioSrc = GetComponent<AudioSource>(); 
+            audioSrc.clip = goreSoundFx; 
+            audioSrc.Play(); 
+        }
+        else audioSystem.PlayAudioSource(goreSoundFx, 1, 1, 128);
         lifeTimeActive = true;
     }
     public void ResetGore()

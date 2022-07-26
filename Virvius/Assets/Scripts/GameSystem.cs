@@ -44,23 +44,27 @@ public class GameSystem : MonoBehaviour
     private Player inputPlayer;
 
     //[HideInInspector]
-    public Vector3[] scenePositions = new Vector3[4]
+    public Vector3[] scenePositions = new Vector3[5]
     {
         new Vector3(0, 0, 0),
         new Vector3(0, 11, 0),
         new Vector3(0, 18,-245),
+        new Vector3(0, -2, 0),
         new Vector3(0, -2, 0)
     };
-    public Vector3 loadedPosition = Vector3.zero;
-    public Quaternion loadedRotation = Quaternion.identity;
     //[HideInInspector]
-    public Vector3[] sceneRotations = new Vector3[4]
+    public Vector3[] sceneRotations = new Vector3[5]
     {
+        new Vector3(0, 0, 0),
         new Vector3(0, 0, 0),
         new Vector3(0, 0, 0),
         new Vector3(0, 0, 0),
         new Vector3(0, 0, 0)
     };
+    [HideInInspector]
+    public Vector3 loadedPosition = Vector3.zero;
+    [HideInInspector]
+    public Quaternion loadedRotation = Quaternion.identity;
     [HideInInspector]
     public bool loadFromFile = false;
     private AsyncOperation async = new AsyncOperation();
@@ -389,6 +393,7 @@ public class GameSystem : MonoBehaviour
             Application.backgroundLoadingPriority = ThreadPriority.High;
             async = SceneManager.LoadSceneAsync(sceneIndex, LoadSceneMode.Single);
             async.allowSceneActivation = false;
+
             curSceneIndex = sceneIndex;
             ResetPools();
         }
@@ -460,6 +465,10 @@ public class GameSystem : MonoBehaviour
     private void StartLevel()
     {
         isLoading = false;
+        loadingBar.fillAmount = 0;
+        loadSb.Clear();
+        loadSb.Append("0/100");
+        loadingText.text = loadSb.ToString();
         isGameStarted = true;
         levelActive = true;
         // Shut off Loading Camera
@@ -512,11 +521,11 @@ public class GameSystem : MonoBehaviour
     public bool BlockedAttributesActive()
     {
         if (!isGameStarted) return true;
-        else if (isPaused) return true;
-        else if (isLoading) return true;
-        else if (showResults) return true;
-        else if (CommandSystem.commandOpen) return true;
-        else return false;
+        if (isPaused) return true;
+        if (isLoading) return true;
+        if (showResults) return true;
+        if (CommandSystem.commandOpen) return true;
+        return false;
     }
     private float Map(float value, float inMin, float inMax, float outMin, float outMax)
     {
@@ -939,6 +948,7 @@ public class GameSystem : MonoBehaviour
         {
             case 2: playerData.levelName = "- Level ?: Fallen Scourge"; break;
             case 3: playerData.levelName = "- Level 1: Virulent Vault"; break;
+            case 4: playerData.levelName = "- Level 2: Dreaden Mines"; break;
         }
         //-------------------------------------------------------------------------------------------------------------------------------------------
         //STORE THE CURRENT LEVEL TIME FOR SAVEFILE

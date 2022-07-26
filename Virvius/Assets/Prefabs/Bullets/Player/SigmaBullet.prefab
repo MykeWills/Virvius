@@ -5234,7 +5234,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 3
       scalar: 0.1
-      minScalar: 0.01
+      minScalar: 0.05
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -9936,8 +9936,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDetonated: 0
-  blastRadius: 70
-  explosionSpeed: 140
+  blastRadius: 100
+  explosionSpeed: 180
   bulletEffect: {fileID: 1037328976792948428}
   explosionObject: {fileID: 6165856480140768436}
   smokeParticle: {fileID: 3292196753006927057}
@@ -10566,8 +10566,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 5
-      minScalar: 1
+      scalar: 15
+      minScalar: 5
       maxCurve:
         serializedVersion: 2
         m_Curve:

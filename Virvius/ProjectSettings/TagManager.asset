@@ -74,6 +74,8 @@ TagManager:
   - PlasmaHole
   - SigmaHole
   - SpikeHole
+  - Rock
+  - Body
   layers:
   - Default
   - TransparentFX

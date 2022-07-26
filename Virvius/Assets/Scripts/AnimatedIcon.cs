@@ -13,6 +13,7 @@ public class AnimatedIcon : MonoBehaviour
     private Image icon;
     [SerializeField]
     private bool loop = false;
+    [SerializeField] private bool overrideIcon = false;
     void Start()
     {
         icon = GetComponent<Image>();
@@ -28,7 +29,7 @@ public class AnimatedIcon : MonoBehaviour
         if (array == null || !icon.enabled)
             return;
         if (environmentSystem == null) environmentSystem = EnvironmentSystem.environmentSystem;
-        if (environmentSystem.headUnderWater) icon.enabled = false;
+        if (environmentSystem.headUnderWater && !overrideIcon) icon.enabled = false;
         frameTimer -= Time.unscaledDeltaTime;
         if (frameTimer <= 0)
         {

@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class EnvironmentSystem : MonoBehaviour
 {
     public static EnvironmentSystem environmentSystem;
+    private GameSystem gameSystem;
     private OptionsSystem optionsSystem;
     private PlayerSystem playerSystem;
     private InputSystem inputSystem;
@@ -47,6 +48,7 @@ public class EnvironmentSystem : MonoBehaviour
     // Start is called before the first frame update
     public void Start()
     {
+        gameSystem = GameSystem.gameSystem;
         audioSystem = AudioSystem.audioSystem;
         playerSystem = PlayerSystem.playerSystem;
         inputSystem = InputSystem.inputSystem;
@@ -107,7 +109,7 @@ public class EnvironmentSystem : MonoBehaviour
             if (environmentSoundIndex > 1) environmentSoundIndex = 0;
             if (isDrowning)
                 audioSystem.PlayAudioSource(playerDrSound, Random.Range(0.7f, 1), 1, 128);
-            playerSystem.Damage(damageAmt);
+            if (!gameSystem.BlockedAttributesActive() && !playerSystem.isDead) playerSystem.Damage(damageAmt);
             environmentTimer = time;
             environmentDamage = false;
         }
@@ -123,6 +125,7 @@ public class EnvironmentSystem : MonoBehaviour
     }
     private void OnTriggerStay(Collider other)
     {
+        if (gameSystem.BlockedAttributesActive() || playerSystem.isDead) return;
         for (int en = 0; en < environmentTag.Length; en++)
         {
             if (other.gameObject.CompareTag(environmentTag[en]))

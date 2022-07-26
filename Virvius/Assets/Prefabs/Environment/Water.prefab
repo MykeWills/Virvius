@@ -1,5 +1,24 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!119 &2248694949411416093
+Projector:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1695816197805989365}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_NearClipPlane: 13.12
+  m_FarClipPlane: 19.5
+  m_FieldOfView: 99.4
+  m_AspectRatio: 1
+  m_Orthographic: 0
+  m_OrthographicSize: 13.99
+  m_Material: {fileID: 2100000, guid: cc7ec4f188b06a845b225823e09e94ee, type: 2}
+  m_IgnoreLayers:
+    serializedVersion: 2
+    m_Bits: 33554215
 --- !u!1 &2248694948308240752
 GameObject:
   m_ObjectHideFlags: 0
@@ -51,8 +70,8 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 90
   DopplerLevel: 0
-  MinDistance: 1
-  MaxDistance: 50
+  MinDistance: 20
+  MaxDistance: 100
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -117,7 +136,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1.1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -459,25 +478,6 @@ MonoBehaviour:
   SetScrolling: 0
   scrollSpeed: 0.1
   materialIndex: 0
---- !u!119 &2248694949411416093
-Projector:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1695816197805989365}
-  m_Enabled: 1
-  serializedVersion: 2
-  m_NearClipPlane: 13.12
-  m_FarClipPlane: 19.5
-  m_FieldOfView: 99.4
-  m_AspectRatio: 1
-  m_Orthographic: 0
-  m_OrthographicSize: 13.99
-  m_Material: {fileID: 2100000, guid: cc7ec4f188b06a845b225823e09e94ee, type: 2}
-  m_IgnoreLayers:
-    serializedVersion: 2
-    m_Bits: 24359
 --- !u!1001 &2248694947803016976
 PrefabInstance:
   m_ObjectHideFlags: 0

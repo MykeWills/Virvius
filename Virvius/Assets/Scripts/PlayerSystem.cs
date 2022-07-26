@@ -107,12 +107,13 @@ public class PlayerSystem : MonoBehaviour
         "Standard UI Enabled.",
         "Standard Visor Enabled."
     };
-    private string[] levelTitle = new string[4]
+    private string[] levelTitle = new string[5]
     {
         "Welcome",
         "Prologue",
         "Fallen Scourge",
-        "Virulent Vault"
+        "Virulent Vault",
+        "Dreaden Mines"
     };
     //[structs]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++//
     
@@ -165,9 +166,9 @@ public class PlayerSystem : MonoBehaviour
         "MiniGun Selected.",
         "Grenade Launcher Selected",
         "Rocket Launcher Selected",
-        "",
+        "Railgun Selected",
         "Photon Cannon Selected",
-        "",
+        "M_Sigma Selected",
     };
     [HideInInspector]
     public int versionIndex = 3;
@@ -280,7 +281,7 @@ public class PlayerSystem : MonoBehaviour
         "got the Horus Rocket Launcher!",
         "got the Pulsar Railgun !",
         "got the Photon Cannon!",
-        "got the MSigma Tech!"
+        "got the MSigma X1800!"
     };
     private string[] weaponAmmoPickupTags = new string[10]
    {
@@ -306,7 +307,7 @@ public class PlayerSystem : MonoBehaviour
         "found Rockets.",
         "found Rail Slugs.",
         "found Photon Cells.",
-        "found Sigma Energy",
+        "found Sigma Battery",
    };
     //========================================================================================//
     //===================================[UNITY FUNCTIONS]====================================//
@@ -350,8 +351,6 @@ public class PlayerSystem : MonoBehaviour
         ScreenFlash();
         SigmaFlash();
         HitCapping();
-        if (health  < 1)
-            KillPlayer();
         SelectUIVersion();
     }
     public Vector3 playerCollisionPoint()
@@ -1160,6 +1159,7 @@ public class PlayerSystem : MonoBehaviour
     }
     public void Damage(int amount)
     {
+        if (gameSystem.BlockedAttributesActive()) return;
         if (commandSystem.masterCodesActive[0]) return;
         if (!environmentSystem.environmentDamage && isDamaged) return;
         isDamaged = true;
@@ -1190,10 +1190,9 @@ public class PlayerSystem : MonoBehaviour
                 health -= powerupSystem.powerEnabled[2] ? amount / 2 : amount;
             }
         }
-        else
-        {
-            health -= amount;
-        }
+        else health -= amount;
+        if (health < 1)
+            KillPlayer();
         health = Mathf.Clamp(health, 0, maxHealth);
         armor = Mathf.Clamp(armor, 0, maxArmor);
         fallDamage = false;
@@ -1315,7 +1314,7 @@ public class PlayerSystem : MonoBehaviour
         }
         else
         {
-            if (gameSystem.sceneIndex > 1) gameSystem.AutoSave();
+            if (gameSystem.sceneIndex > 0) gameSystem.AutoSave();
         }
        
     }
@@ -1331,7 +1330,6 @@ public class PlayerSystem : MonoBehaviour
         if (!isDead) return;
         if (inputSystem.inputPlayer.GetButtonUp("Start") && isDead || inputSystem.inputPlayer.GetButtonUp("Select") && isDead)
         {
-            gameSystem.LoadData(0);
             gameSystem.ResetPools();
             gameSystem.ResetLevelStats();
             messageSystem.EraseMessages();
@@ -1346,11 +1344,11 @@ public class PlayerSystem : MonoBehaviour
             for (int c = 0; c < gameCameras.Length; c++) gameCameras[c].enabled = true;
             //=======================================================
             characterController.enabled = false;
+            transform.SetParent(originParent);
             fallDamage = false;
             overKill = false;
             SetSigmaFlash(false);
             if (flashSigmaUI.enabled) flashSigmaUI.enabled = false;
-            transform.SetParent(originParent);
             isDamaged = false;
             suicideDamage = false;
             SetFlash(false);
@@ -1400,17 +1398,19 @@ public class PlayerSystem : MonoBehaviour
             environmentSystem.SetEnvironment(0, 0);
             environmentSystem.ActivateEnvironment(0);
             environmentSystem.ActiveEnvironmentUI(false);
-            levelSystem = AccessLevel();
-            if (levelSystem != null) levelSystem.ResetLevel();
-            characterController.enabled = true;
+            //levelSystem = AccessLevel();
+            //if (levelSystem != null) levelSystem.ResetLevel();
             crosshair.enabled = true;
             ApplyPlayerHealthAndArmor();
             messageSystem.SetMessage(levelTitle[gameSystem.sceneIndex], MessageSystem.MessageType.Display);
+            gameSystem.LoadData(0);
+            characterController.enabled = true;
             isDead = false;
         } 
     }
     private void KillPlayer()
     {
+        if (isDead) return;
         if (commandSystem.masterCodesActive[0]) return;
         if (overKill) { MutilatePlayer(); overKill = false; }
         isDead = true;
