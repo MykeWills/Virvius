@@ -2,17 +2,16 @@
 
 public class ExplodeTrigger : MonoBehaviour
 {
-    [SerializeField]
-    private float triggerTime = 0.25f;
+    [SerializeField] private float triggerTime = 0.25f;
     private float triggerTimer = 0f;
     private bool active = false;
     private int triggerInterval = 0;
     private bool isTriggered = false;
-    [SerializeField]
-    private ExplodingCrateSystem[] crateSystems;
-    [SerializeField]
-    private GameObject activateObject;
+    [SerializeField] private ExplodingCrateSystem[] crateSystems;
+    [SerializeField] private bool useActivateSound = false;
+    [SerializeField] private GameObject activateObject;
     public bool explodingTriggerActivated = false;
+    [SerializeField] private AudioClip pressFx;
     void Update()
     {
         TriggerMultiple();
@@ -39,6 +38,8 @@ public class ExplodeTrigger : MonoBehaviour
     }
     private void TriggerExplosions()
     {
+        if (useActivateSound)
+            AudioSystem.audioSystem.PlayAudioSource(pressFx, 1, 1, 128);
         isTriggered = true;
         triggerInterval = crateSystems.Length - 1;
         triggerTimer = triggerTime;

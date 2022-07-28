@@ -1237,7 +1237,7 @@ public class PlayerSystem : MonoBehaviour
             health = 100;
             armor = 0;
             maxArmor = 50;
-            maxHealth = 100;
+            maxHealth = 200;
             for (int mb = 0; mb < 2; mb++)
             {
                 hMaxBar[mb].fillAmount = 0;
