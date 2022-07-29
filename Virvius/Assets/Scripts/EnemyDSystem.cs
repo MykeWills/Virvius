@@ -279,7 +279,7 @@ public class EnemyDSystem : MonoBehaviour
         //when angle is below 60 engage player
         if (angle < LOSAngle && angle > -LOSAngle)
         {
-            //Debug.DrawRay(transform.position, distanceVector - transform.forward, Color.magenta);
+            Debug.DrawRay(transform.position, distanceVector - transform.forward, Color.magenta);
             if (Physics.Raycast(transform.position, distanceVector - transform.forward, out playerHit, LOSDistance))
             {
                 //if the raycast hit the player player is now found, activate shooting if player is within range
@@ -287,7 +287,6 @@ public class EnemyDSystem : MonoBehaviour
                 {
                     if (playerVisible) return;
                     playerVisible = true;
-                    if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]);
                     EngagePlayer();
                 }
                 else playerVisible = false;
@@ -305,9 +304,9 @@ public class EnemyDSystem : MonoBehaviour
     private void CheckPath()
     {
         elapsed += time;
-        if (elapsed > 0.5f)
+        if (elapsed > 1f)
         {
-            elapsed -= 0.5f;
+            elapsed -= 1f;
             updateNextPosition = true;
         }
     }
@@ -319,12 +318,8 @@ public class EnemyDSystem : MonoBehaviour
         if (currentState.Length > 0) currentState.Clear();
         ActiveState();
     }
-    private void CheckDistance()
+    private void PlayerRangeDistance()
     {
-        if (PlayerSystem.playerSystem == null || PlayerDistance() == 0) return;
-        if (!updateNextPosition) return;
-        if (AnimatorIsPlaying("Attack") || AnimatorIsPlaying("Jump") || enemyState == EnemyState.damage || enemyState == EnemyState.death) return;
-
         //ATTACKS IN CLOSE RANGE
         if (PlayerDistance() <= distanceRanges[0])
         {
@@ -363,13 +358,20 @@ public class EnemyDSystem : MonoBehaviour
             enemyState = startState;
             ActiveState();
         }
+    }
+    private void CheckDistance()
+    {
+        if (PlayerSystem.playerSystem == null || PlayerDistance() == 0) return;
+        if (!updateNextPosition) return;
+        if (AnimatorIsPlaying("Attack") || AnimatorIsPlaying("Jump") || enemyState == EnemyState.damage || enemyState == EnemyState.death) return;
+        PlayerRangeDistance();
         updateNextPosition = false;
     }
     public void AnimationFinished()
     {
         if (currentState.Length > 0) currentState.Clear();
-        enemyState = EnemyState.chase;
-        if(!damageResistance) isDamaged = false;
+        PlayerRangeDistance();
+        if (!damageResistance) isDamaged = false;
     }
     private void ActiveState()
     {

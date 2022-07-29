@@ -9911,7 +9911,8 @@ MonoBehaviour:
   explosionSpeed: 400
   explosionPrefab: {fileID: 3180958710745174381}
   ps: {fileID: 6054165378892708104}
-  viewableCrate: {fileID: 0}
+  viewableCrate: {fileID: 6897055964172639984}
+  crateExploded: 0
 --- !u!135 &3288253839321878776
 SphereCollider:
   m_ObjectHideFlags: 0

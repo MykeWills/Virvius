@@ -333,7 +333,6 @@ public class EnemyGSystem : MonoBehaviour
                 {
                     if (playerVisible) return;
                     playerVisible = true;
-                    if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]);
                     EngagePlayer();
                 }
                 else playerVisible = false;

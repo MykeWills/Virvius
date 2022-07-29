@@ -5042,6 +5042,7 @@ MonoBehaviour:
   explosionPrefab: {fileID: 17112072518189924}
   ps: {fileID: 8655202818248534785}
   viewableCrate: {fileID: 4760658707822305524}
+  crateExploded: 0
 --- !u!135 &124969663706661617
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -5064,9 +5065,9 @@ Rigidbody:
   m_GameObject: {fileID: 124969663706661629}
   serializedVersion: 2
   m_Mass: 4
-  m_Drag: 1
-  m_AngularDrag: 1
-  m_UseGravity: 1
+  m_Drag: 0
+  m_AngularDrag: 0
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 126

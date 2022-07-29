@@ -312,7 +312,6 @@ public class EnemyESystem : MonoBehaviour
                 {
                     if (playerVisible) return;
                     playerVisible = true;
-                    if (!playerFound) audioSrc.PlayOneShot(enemySounds[0]);
                     EngagePlayer();
                 }
                 else playerVisible = false;
@@ -363,24 +362,16 @@ public class EnemyESystem : MonoBehaviour
         //SHOOT ONLY IF HARD OR VERYHARD [EASY & NORMAL WILL CHASE]
         if (PlayerDistance() > distanceRanges[1] && PlayerDistance() <= distanceRanges[2])
         {
-            if (optionsSystem.difficultyActive[2] || optionsSystem.difficultyActive[3])
-            {
-                EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
-                enemyState = state;
-            }
-            else enemyState = EnemyState.chase;
+            EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
+            enemyState = state;
             distanceIndex = 1;
             ActiveState();
         }
         //SHOOT ONLY IF VERYHARD [EASY, NORMAL & HARD WILL CHASE]
         if (PlayerDistance() > distanceRanges[2] && PlayerDistance() <= distanceRanges[3])
         {
-            if (optionsSystem.difficultyActive[3])
-            {
-                EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
-                enemyState = state;
-            }
-            else enemyState = EnemyState.chase;
+            EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
+            enemyState = state;
             distanceIndex = 1;
             ActiveState();
         }
