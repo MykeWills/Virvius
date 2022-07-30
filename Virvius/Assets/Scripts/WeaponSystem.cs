@@ -2031,7 +2031,7 @@ public class WeaponSystem : MonoBehaviour
                 }
             case WeaponType.GrenadeLauncher:
                 {
-                    SetupBullet(weaponEmitter[0], 25000);
+                    SetupBullet(weaponEmitter[0], 1000000f);
                     if (grenadeLauncherSmoke[0].gameObject.activeInHierarchy) grenadeLauncherSmoke[0].gameObject.SetActive(false);
                     if (!grenadeLauncherSmoke[0].gameObject.activeInHierarchy) grenadeLauncherSmoke[0].gameObject.SetActive(true);
                     duration = powerupSystem.powerEnabled[0] ? 1.3f : 1f;

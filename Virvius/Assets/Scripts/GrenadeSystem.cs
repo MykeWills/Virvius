@@ -5,7 +5,7 @@ using UnityEngine;
 public class GrenadeSystem : MonoBehaviour
 {
     private float gravity = 1;
-    [Range(0.1f, 50)]
+    [Range(0.01f, 200)]
     [SerializeField]
     private float gravityMultiplier = 1;
     private Rigidbody rb;
@@ -41,9 +41,8 @@ public class GrenadeSystem : MonoBehaviour
         if (gameObject.activeInHierarchy)
         {
             time = Time.deltaTime;
-            gravity = gravity += (time * 2 * gravityMultiplier);
-            rb.AddForce(-transform.up * (rb.mass / 2) * gravity);
-
+            gravity = gravity += (time * gravityMultiplier);
+            rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y - gravity, rb.velocity.z);
             ActiveGrenadeTimer();
             ExplosionRadius();
         }
@@ -117,8 +116,8 @@ public class GrenadeSystem : MonoBehaviour
     {
         if (collision.gameObject)
         {
-            velocityReduction -= 0.25f;
-            velocityReduction = Mathf.Clamp01(velocityReduction);
+            velocityReduction -= 5f;
+            velocityReduction = Mathf.Clamp(velocityReduction, 0, rb.velocity.y);
             rb.velocity = new Vector3(rb.velocity.x - velocityReduction, rb.velocity.y - velocityReduction, rb.velocity.z - velocityReduction);
         }
           

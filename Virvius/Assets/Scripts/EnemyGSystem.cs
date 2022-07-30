@@ -171,7 +171,6 @@ public class EnemyGSystem : MonoBehaviour
 
         }
         if (ShutdownEnemy()) return;
-    
         RebootEnemy();
         IdleDistance();
         WalkDistance();
@@ -198,19 +197,12 @@ public class EnemyGSystem : MonoBehaviour
             wasOnLink = false;
         }
     }
-    public void EngagePlayer()
-    {
-        FoundPlayer();
-        EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
-        enemyState = state;
-        if (currentState.Length > 0) currentState.Clear();
-        ActiveState();
-    }
+ 
     private void IdleDistance()
     {
         if (activeState != EnemyState.idle) return;
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) LineOfSight(); } }
+        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) EngagePlayer(); } }
     }
     private void WalkDistance()
     {
@@ -220,7 +212,7 @@ public class EnemyGSystem : MonoBehaviour
         float dist = Vector3.Distance(WalkDestination(), transform.position);
         if (dist < walkPositionDistance) { ChangeDestination(); ActiveState(); }
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[1]) { if(playerVisible) { if (!playerFound) LineOfSight(); } }
+        if (PlayerDistance() <= distanceRanges[1]) { if(playerVisible) { if (!playerFound) EngagePlayer(); } }
     }
     private void RebootEnemy()
     {
@@ -356,6 +348,13 @@ public class EnemyGSystem : MonoBehaviour
             updateNextPosition = true;
         }
     }
+    public void EngagePlayer()
+    {
+        FoundPlayer();
+        enemyState = EnemyState.chase;
+        if (currentState.Length > 0) currentState.Clear();
+        ActiveState();
+    }
     private void PlayerRangeDistance()
     {
         //SHOOT IN CLOSE RANGE
@@ -441,42 +440,44 @@ public class EnemyGSystem : MonoBehaviour
                 }
             case EnemyState.chase:
                 {
-                    if (!AnimatorIsPlaying("Shoot") && !AnimatorIsPlaying("Damage"))
-                    {
-                        if (animator.GetFloat("Speed") != 2f)
-                            animator.SetFloat("Speed", 2f);
-                        SetAnimation(2);
-                        movementSpeed = movementSpeeds[2];
-                        stoppingDistance = 0;
-                        autoBraking = false;
-                        SetNav(TargetDestination(), true);
-                    }
+                    //if (!AnimatorIsPlaying("Shoot") && !AnimatorIsPlaying("Damage"))
+                    //{
+
+                    //}
+                    if (animator.GetFloat("Speed") != 2f)
+                        animator.SetFloat("Speed", 2f);
+                    SetAnimation(2);
+                    movementSpeed = movementSpeeds[2];
+                    stoppingDistance = 0;
+                    autoBraking = false;
+                    SetNav(TargetDestination(), true);
                     break;
                 }
             case EnemyState.attack:
                 {
-                    if (!AnimatorIsPlaying("Damage"))
-                    {
-                        float difficultyInterval = 1;
-                        //VERYHARD
-                        if (optionsSystem.difficultyActive[3])
-                            difficultyInterval = 2f;
-                        //HARD
-                        else if (optionsSystem.difficultyActive[2])
-                            difficultyInterval = 1.5f;
-                        //NORMAL
-                        else if (optionsSystem.difficultyActive[1])
-                            difficultyInterval = 1.25f;
-                        //EASY
-                        else if (optionsSystem.difficultyActive[0])
-                            difficultyInterval = 1;
+                    //if (!AnimatorIsPlaying("Damage"))
+                    //{
+                      
+                    //}
+                    float difficultyInterval = 1;
+                    //VERYHARD
+                    if (optionsSystem.difficultyActive[3])
+                        difficultyInterval = 2f;
+                    //HARD
+                    else if (optionsSystem.difficultyActive[2])
+                        difficultyInterval = 1.5f;
+                    //NORMAL
+                    else if (optionsSystem.difficultyActive[1])
+                        difficultyInterval = 1.25f;
+                    //EASY
+                    else if (optionsSystem.difficultyActive[0])
+                        difficultyInterval = 1;
 
-                        if (animator.GetFloat("Speed") != difficultyInterval)
-                            animator.SetFloat("Speed", difficultyInterval);
+                    if (animator.GetFloat("Speed") != difficultyInterval)
+                        animator.SetFloat("Speed", difficultyInterval);
 
-                        SetAnimation(3);
-                        HaltMovement();
-                    }
+                    SetAnimation(3);
+                    HaltMovement();
                     break;
                 }
             case EnemyState.damage:
@@ -597,7 +598,7 @@ public class EnemyGSystem : MonoBehaviour
         Vector3 player = (PlayerSystem.playerSystem != null) ? PlayerSystem.playerSystem.transform.position : Vector3.zero;
         if (player == Vector3.zero) { return 0; }
         playerSystem = PlayerSystem.playerSystem;
-        float playerDistance =  Vector3.Magnitude(transform.position - playerSystem.transform.position);
+        float playerDistance = Vector3.Magnitude(transform.position - playerSystem.transform.position);
         return playerDistance;
     }
     private void SetAnimation(int index)

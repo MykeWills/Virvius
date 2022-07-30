@@ -40,7 +40,7 @@ public class EnemyDSystem : MonoBehaviour
     [Header("Enemy Values")]
     [HideInInspector]
     public bool isDead;
-    private float LOSAngle = 160;
+    private float LOSAngle = 90;
     [SerializeField]
     private float LOSDistance = 0;
     [SerializeField]
@@ -54,7 +54,11 @@ public class EnemyDSystem : MonoBehaviour
     [SerializeField]
     private float offMeshLinkSpeed = 20f;
     private float walkPositionDistance = 2;
-
+    [SerializeField]
+    private bool randomizePositions = false;
+    [SerializeField]
+    private bool backtrackPositions = false;
+    private bool backtrack = false;
 
     private RaycastHit playerHit;
     private Vector3 randomPosition;
@@ -99,7 +103,7 @@ public class EnemyDSystem : MonoBehaviour
     {
         0,
         2.5f,
-        50,
+        30,
         70,
         100
     };
@@ -129,8 +133,21 @@ public class EnemyDSystem : MonoBehaviour
     }
     private void Update()
     {
-        if (gameSystem.BlockedAttributesActive()) return;
-        if (isDead) return;
+        if (gameSystem != null)
+        {
+            if (gameSystem.BlockedAttributesActive()) return;
+        }
+        if (isDead)
+        {
+            if (enemyState != EnemyState.death)
+            {
+                enemyState = EnemyState.death;
+                if (currentState.Length > 0) currentState.Clear();
+                ActiveState();
+            }
+            return;
+
+        }
         if (ShutdownEnemy()) return;
         RebootEnemy();
         IdleDistance();
@@ -169,10 +186,7 @@ public class EnemyDSystem : MonoBehaviour
     {
         if (activeState != EnemyState.idle) return;
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[2]) 
-        {
-             if (playerVisible) { if (!playerFound) LineOfSight(); } 
-        }
+        if (PlayerDistance() <= distanceRanges[2]) { if (playerVisible) { if (!playerFound) LineOfSight(); } }
     }
     private void RebootEnemy()
     {
@@ -280,14 +294,19 @@ public class EnemyDSystem : MonoBehaviour
         if (angle < LOSAngle && angle > -LOSAngle)
         {
             Debug.DrawRay(transform.position, distanceVector - transform.forward, Color.magenta);
-            if (Physics.Raycast(transform.position, distanceVector - transform.forward, out playerHit, LOSDistance))
+            int layerMask = 1 << 15;
+            layerMask = ~layerMask;
+            if (Physics.Raycast(transform.position, distanceVector - transform.forward, out playerHit, LOSDistance, layerMask))
             {
                 //if the raycast hit the player player is now found, activate shooting if player is within range
+                Debug.Log(playerHit.collider.tag);
                 if (playerHit.collider.gameObject.CompareTag("Player"))
                 {
+
                     if (playerVisible) return;
                     playerVisible = true;
                     EngagePlayer();
+                    Debug.Log("Working");
                 }
                 else playerVisible = false;
             }
@@ -313,14 +332,13 @@ public class EnemyDSystem : MonoBehaviour
     public void EngagePlayer()
     {
         FoundPlayer();
-        EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
-        enemyState = state;
+        enemyState = EnemyState.chase;
         if (currentState.Length > 0) currentState.Clear();
         ActiveState();
     }
     private void PlayerRangeDistance()
     {
-        //ATTACKS IN CLOSE RANGE
+        //SHOOT IN CLOSE RANGE
         if (PlayerDistance() <= distanceRanges[0])
         {
             EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
@@ -328,30 +346,40 @@ public class EnemyDSystem : MonoBehaviour
             distanceIndex = state == EnemyState.attack ? 0 : 2;
             ActiveState();
         }
-        //ATTACKS FROM DISTANCE
-        else if (PlayerDistance() > distanceRanges[0] && PlayerDistance() <= distanceRanges[1])
+        //SHOOT IN LONG RANGE
+        if (PlayerDistance() > distanceRanges[0] && PlayerDistance() <= distanceRanges[1])
         {
             EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
             enemyState = state;
             distanceIndex = state == EnemyState.attack ? 1 : 3;
             ActiveState();
         }
-        //MOVES TO PLAYER POSITION
-        else if (PlayerDistance() > distanceRanges[1] && PlayerDistance() <= distanceRanges[2])
+        //SHOOT ONLY IF HARD OR VERYHARD [EASY & NORMAL WILL CHASE]
+        if (PlayerDistance() > distanceRanges[1] && PlayerDistance() <= distanceRanges[2])
         {
-            enemyState = EnemyState.chase;
-            distanceIndex = 2;
+            if (optionsSystem.difficultyActive[2] || optionsSystem.difficultyActive[3])
+            {
+                EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
+                distanceIndex = 2;
+                enemyState = state;
+            }
+            else enemyState = EnemyState.chase;
             ActiveState();
         }
-        //MOVES TO STAGGERED PLAYER POSITION
-        else if (PlayerDistance() > distanceRanges[2] && PlayerDistance() <= distanceRanges[3])
+        //SHOOT ONLY IF VERYHARD [EASY, NORMAL & HARD WILL CHASE]
+        if (PlayerDistance() > distanceRanges[2] && PlayerDistance() <= distanceRanges[3])
         {
-            enemyState = EnemyState.chase;
-            distanceIndex = 3;
+            if (optionsSystem.difficultyActive[3])
+            {
+                EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
+                distanceIndex = 3;
+                enemyState = state;
+            }
+            else enemyState = EnemyState.chase;
             ActiveState();
         }
         //HAS LOST THE PLAYER - ANIMATION SET TO BACK DEFAULT [WALK OR IDLE]
-        else if (PlayerDistance() > distanceRanges[3])
+        if (PlayerDistance() > distanceRanges[3])
         {
             playerFound = false;
             playerVisible = false;
@@ -455,16 +483,25 @@ public class EnemyDSystem : MonoBehaviour
     private void ChangeDestination()
     {
         if (walkPositions[0] == null) return;
-        walkPositionIndex++;
-        if (walkPositionIndex > walkPositions.Length - 1) walkPositionIndex = 0;
-        else if (walkPositionIndex < 0) walkPositionIndex = walkPositions.Length - 1;
+        int index = randomizePositions ? Random.Range(0, walkPositions.Length) : backtrack ? (walkPositionIndex - 1) : (walkPositionIndex + 1);
+        if (index > walkPositions.Length - 1)
+        {
+            if (backtrackPositions) backtrack = true;
+            index = backtrackPositions ? walkPositions.Length - 1 : 0;
+        }
+        else if (index < 0)
+        {
+            if (backtrackPositions) backtrack = false;
+            index = backtrackPositions ? 0 : walkPositions.Length - 1;
+        }
+        walkPositionIndex = index;
     }
     private void HaltMovement()
     {
         movementSpeed = movementSpeeds[0];
         stoppingDistance = 0;
         autoBraking = false;
-        SetNav(transform.position, false);
+        SetNav(transform.localPosition, false);
     }
     private Vector3 PlayerPosition()
     {
@@ -473,6 +510,7 @@ public class EnemyDSystem : MonoBehaviour
     }
     private void SetNav(Vector3 nextPosition, bool active)
     {
+        if (!navAgent.enabled) return;
         if (!enemyBody.activeInHierarchy) return;
         Vector3 newPos = active ? nextPosition : transform.position;
         if (isDead) { navAgent.destination = transform.position; return; }

@@ -182,8 +182,7 @@ public class EnemyESystem : MonoBehaviour
     public void EngagePlayer()
     {
         FoundPlayer();
-        EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
-        enemyState = state;
+        enemyState = EnemyState.chase; ;
         if (currentState.Length > 0) currentState.Clear();
         ActiveState();
     }
@@ -191,7 +190,7 @@ public class EnemyESystem : MonoBehaviour
     {
         if (activeState != EnemyState.idle) return;
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) LineOfSight(); } }
+        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) EngagePlayer(); } }
     }
     private void WalkDistance()
     {
@@ -199,7 +198,7 @@ public class EnemyESystem : MonoBehaviour
         float dist = Vector3.Distance(WalkDestination(), transform.position);
         if (dist < walkPositionDistance) { ChangeDestination(); ActiveState(); }
         //HAS FOUND THE PLAYER - PLAYER GOT TOO CLOSE, ACTIVE IF ENEMY IS NOT BEHIND A WALL
-        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) LineOfSight(); } }
+        if (PlayerDistance() <= distanceRanges[1]) { if (playerVisible) { if (!playerFound) EngagePlayer(); } }
     }
     private void RebootEnemy()
     {
@@ -344,11 +343,11 @@ public class EnemyESystem : MonoBehaviour
         if (PlayerSystem.playerSystem == null || PlayerDistance() == 0) return;
         if (!updateNextPosition) return;
         if (enemyState == EnemyState.attack || enemyState == EnemyState.death || enemyState == EnemyState.damage) return;
-
+        EnemyState state;
         //SHOOT IN CLOSE RANGE
         if (PlayerDistance() <= distanceRanges[0])
         {
-            EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
+            state = playerVisible ? EnemyState.attack : EnemyState.chase;
             enemyState = state;
             distanceIndex = 0;
             ActiveState();
@@ -362,7 +361,13 @@ public class EnemyESystem : MonoBehaviour
         //SHOOT ONLY IF HARD OR VERYHARD [EASY & NORMAL WILL CHASE]
         if (PlayerDistance() > distanceRanges[1] && PlayerDistance() <= distanceRanges[2])
         {
-            EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
+            if (optionsSystem.difficultyIndex == 3) state = playerVisible ? EnemyState.attack : EnemyState.chase;
+            else
+            {
+                int generatedNum = Random.Range(1, (3 * DifficultyAttackRange()) + 1);
+                if (generatedNum == 0) enemyState = EnemyState.chase;
+                state = playerVisible ? (generatedNum == 1) ? EnemyState.attack: EnemyState.chase : EnemyState.chase;
+            }
             enemyState = state;
             distanceIndex = 1;
             ActiveState();
@@ -370,7 +375,13 @@ public class EnemyESystem : MonoBehaviour
         //SHOOT ONLY IF VERYHARD [EASY, NORMAL & HARD WILL CHASE]
         if (PlayerDistance() > distanceRanges[2] && PlayerDistance() <= distanceRanges[3])
         {
-            EnemyState state = playerVisible ? EnemyState.attack : EnemyState.chase;
+            if (optionsSystem.difficultyIndex == 3) state = playerVisible ? EnemyState.attack : EnemyState.chase;
+            else
+            {
+                int generatedNum = Random.Range(1, (6 * DifficultyAttackRange()) + 1);
+                if (generatedNum == 0) enemyState = EnemyState.chase;
+                state = playerVisible ? (generatedNum == 1) ? EnemyState.attack : EnemyState.chase : EnemyState.chase;
+            }
             enemyState = state;
             distanceIndex = 1;
             ActiveState();
@@ -384,6 +395,13 @@ public class EnemyESystem : MonoBehaviour
             ActiveState();
         }
         updateNextPosition = false;
+    }
+    private int DifficultyAttackRange()
+    {
+        if(optionsSystem.difficultyIndex == 0) return 3;
+        if(optionsSystem.difficultyIndex == 1) return 2;
+        if(optionsSystem.difficultyIndex == 2) return 1;
+        return 0;
     }
     public void AnimationFinished()
     {
@@ -591,7 +609,7 @@ public class EnemyESystem : MonoBehaviour
         bullet.transform.position = emitter.position;
         //bullet.transform.localRotation = emitter.localRotation;
         bullet.SetActive(true);
-        rb.AddForce(emitter.transform.forward * 15000f);
+        rb.AddForce(emitter.transform.forward * 750000f);
     }
     private void LookAtPlayerShooting()
     {
